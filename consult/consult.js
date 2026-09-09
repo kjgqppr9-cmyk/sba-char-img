@@ -159,7 +159,7 @@ window.__sbaConsultRun = function(bm){
     cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); gl.viewport(0,0,cv.width,cv.height);
     mobile = W<768;
     /* 레이더 크기: 화면 높이 기준. 모바일은 글 아래에 두고 조금 작게 */
-    scale = mobile ? Math.min(0.40, 300/H) : 0.68;        /* 반지름 = scale*H/2 → PC 높이의 34%, 모바일 ≈150px */
+    scale = mobile ? Math.min(0.33, 240/H) : 0.68;        /* 반지름 = scale*H/2 → PC 높이의 34%, 모바일 ≈150px */
     shift = mobile ? 0.0 : 0.70;
     offY = mobile ? -0.40 : 0.02;   /* 모바일: 글 아래로 내린다 */
   }
