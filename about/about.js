@@ -130,7 +130,7 @@ window.__sbaAboutRun = function(bm){
     '    float irr=0.6+0.4*sin(ang*2.0+vSeed*40.0)+0.25*sin(ang*5.0-vSeed*17.0);',
     '    float rays=(r1+r2)*irr*exp(-rr*1.7)*1.6;',
     '    float core=exp(-rr*rr*34.0); float halo=exp(-rr*rr*4.0)*0.16;',
-    '    float a2=(core*1.2+rays+halo)*vA; vec3 c2=mix(gold,white,clamp(core*1.1,0.0,1.0));',
+    '    float a2=(core*1.2+rays+halo)*vA*smoothstep(0.5,0.30,d); vec3 c2=mix(gold,white,clamp(core*1.1,0.0,1.0));',   /* 스프라이트 네모 경계가 안 비치게 가장자리에서 0 으로 */
     '    gl_FragColor=vec4(c2*a2,a2); return;',
     '  }',
     '  float h = clamp(vHit*1.3,0.0,1.0); float lum = dot(c, vec3(0.33));',
