@@ -269,7 +269,7 @@
   background:linear-gradient(90deg,rgba(7,20,15,.9) 0%,rgba(7,20,15,.62) 30%,rgba(7,20,15,0) 56%),linear-gradient(180deg,rgba(7,20,15,.35),rgba(7,20,15,0) 22%,rgba(7,20,15,0) 78%,rgba(7,20,15,.35))}
 .abx .ah::after{content:"";position:absolute;left:0;right:0;bottom:0;height:clamp(140px,22%,240px);z-index:1;pointer-events:none;
   background:linear-gradient(180deg,rgba(242,240,235,0) 0%,rgba(242,240,235,.08) 30%,rgba(242,240,235,.3) 55%,rgba(242,240,235,.66) 78%,#F2F0EB 100%)}
-.abx .ah-in{position:relative;z-index:3;width:100%;max-width:1160px;margin:0 auto;padding:60px 52px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.abx .ah-in{position:relative;z-index:3;width:100%;max-width:1160px;margin:0 auto;padding:40px 52px 120px;display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
 .abx .ah-eye{display:inline-flex;align-items:center;gap:10px;font:600 12.5px/1 "IBM Plex Mono",Consolas,"D2Coding",monospace;letter-spacing:.14em;color:#7FE0BE;
   border:1px solid rgba(127,224,190,.35);border-radius:999px;padding:9px 14px 9px 10px;background:rgba(7,20,15,.45)}
 .abx .ah-eye i{width:8px;height:8px;border-radius:50%;background:#E0A23F;box-shadow:0 0 0 4px rgba(224,162,63,.22);animation:csxPulse 2.2s ease-in-out infinite}
@@ -291,7 +291,7 @@
 .abx .ah-more{font-size:14.5px;font-weight:700;color:#BFD9CC;text-decoration:none;border-bottom:1px solid rgba(191,217,204,.35);padding-bottom:2px}
 .abx .ah-more:hover{color:#fff;border-color:#fff}
 /* 인물: 은하 한가운데, 금색 육각 테 */
-.abx .ah-fig{position:relative;justify-self:center;width:min(100%,400px);aspect-ratio:4/5}
+.abx .ah-fig{position:relative;justify-self:end;width:min(100%,calc(clamp(420px,56vh,560px)*.8));aspect-ratio:4/5}   /* 화면 높이의 56% 높이(420~560px), 오른쪽 여백선에 붙임; 열 폭을 넘지 않아 글이 밀리지 않는다 */
 .abx .ah-fig img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:28px;display:block;box-shadow:0 30px 80px rgba(0,0,0,.55)}
 /* 사진 프레임: 도면 기준선처럼 네 모서리에 ㄱ자 금선 */
 .abx .ah-fig::before{content:"";position:absolute;inset:-18px;pointer-events:none;--c:rgba(242,201,121,.85);
@@ -448,7 +448,7 @@
   .abx .ah-sub{font-size:14.5px;line-height:1.75;margin-bottom:18px}
   .abx .ah-act{flex-direction:column;justify-content:center;gap:14px;margin-bottom:30px}
   .abx .ah-cta{min-width:220px;justify-content:center;padding:15px 36px;font-size:15.5px}
-  .abx .ah-fig{width:min(100%,300px)}
+  .abx .ah-fig{justify-self:center;width:min(100%,300px)}
   .abx .ah-hint{left:0;right:0;text-align:center;bottom:10px}
   .abx-num{padding:56px 0 64px}
   .abx .stats{grid-template-columns:1fr 1fr;gap:12px}
