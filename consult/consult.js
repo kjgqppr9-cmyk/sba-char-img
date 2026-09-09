@@ -248,7 +248,14 @@ window.__sbaConsultRun = function(bm){
       targets.forEach(function(el){ var par = el.parentElement; var k = seen.get(par)||0; el.style.setProperty('--i', k); seen.set(par, k+1); });
       function countUp(b){ var to = parseInt(b.getAttribute('data-n'),10); if(isNaN(to) || b.__done) return; b.__done = true; if(reduced || to<=1){ b.textContent = to; return; }
         var t0 = performance.now(), dur = 900; (function step(now){ var p = Math.min(1,(now-t0)/dur); p = 1-Math.pow(1-p,3); b.textContent = Math.round(to*p); if(p<1) requestAnimationFrame(step); })(t0); }
-      function show(el){ el.classList.add('in'); el.querySelectorAll('[data-n]').forEach(countUp); if(el.hasAttribute('data-n')) countUp(el); }
+      /* 금빛 순회: 켜질 때 한 번, 그 뒤 7~10초마다 반복(카드마다 어긋나게), 마우스를 올리면 즉시 */
+      function sweep(el){ el.classList.remove('sweep'); void el.offsetWidth; el.classList.add('sweep'); }
+      function armSweep(el){ if(el.__sweepArmed || reduced) return; el.__sweepArmed = true;
+        var i = parseFloat(el.style.getPropertyValue('--i'))||0;
+        setTimeout(function(){ sweep(el); }, 350 + i*180);
+        setTimeout(function(){ sweep(el); setInterval(function(){ if(!el.matches(':hover')) sweep(el); }, 7000 + (i%4)*900); }, 7000 + i*900 + Math.random()*1200);
+        el.addEventListener('pointerenter', function(){ sweep(el); }); }
+      function show(el){ el.classList.add('in'); el.querySelectorAll('[data-n]').forEach(countUp); if(el.hasAttribute('data-n')) countUp(el); if(el.classList.contains('gl')) armSweep(el); }
       if(reduced || !('IntersectionObserver' in window)){ targets.forEach(show); }
       else { var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target); } }); }, {threshold:0.18, rootMargin:'0px 0px -6% 0px'}); targets.forEach(function(el){ io.observe(el); }); }
       bound = root;

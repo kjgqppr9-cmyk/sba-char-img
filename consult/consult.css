@@ -202,6 +202,54 @@
   .csx .tl::before{transform:none!important;transition:none}.csx .tl li{opacity:1!important;transform:none!important}
 }
 
+/* ══ 모션 2 (v6) ═══════════════════════════════════════════════════
+   ① 금빛 순회는 JS 가 .sweep 을 주기적으로 다시 붙여 반복하고, 마우스를 올리면 즉시 재생
+   ② 타임라인: 선 위를 금빛 혜성이 달리고, 지나갈 때 숫자가 금빛으로 번쩍, 호버 시 항목이 떠오른다
+   ③ 사례 카드: 사진이 천천히 숨 쉬듯 확대·축소, 호버 시 확대 + 태그 금빛 전환
+   ④ 상담 신청 버튼: 심장박동 + 금빛 파문, 화살표는 아래(폼으로 내려간다) */
+.csx .gl.in::before,.csx .gl.in::after{animation:none}
+.csx .gl.sweep::before{animation:csxSweep 1.9s cubic-bezier(.45,.02,.3,1) both}
+.csx .gl.sweep::after{animation:csxOrbit 1.9s cubic-bezier(.45,.02,.3,1) both}
+/* 타임라인 혜성 */
+.csx .tl::after{content:"";position:absolute;top:28px;left:8%;width:30px;height:30px;margin:-15px 0 0 -15px;opacity:0;pointer-events:none;z-index:2;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='50%25' cy='50%25' r='50%25'%3E%3Cstop offset='0' stop-color='%23FFF6DC'/%3E%3Cstop offset='.4' stop-color='%23F2C979' stop-opacity='.9'/%3E%3Cstop offset='1' stop-color='%23E0A23F' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='24' fill='url(%23g)'/%3E%3Cg stroke='%23FFE9B8' stroke-linecap='round' stroke-width='3'%3E%3Cpath d='M50 50L50 4'/%3E%3Cpath d='M50 50L88 28' stroke-width='2.2'/%3E%3Cpath d='M50 50L84 82'/%3E%3Cpath d='M50 50L52 96' stroke-width='2'/%3E%3Cpath d='M50 50L14 78' stroke-width='2.4'/%3E%3Cpath d='M50 50L10 36' stroke-width='2'/%3E%3C/g%3E%3Ccircle cx='50' cy='50' r='6' fill='%23FFFDF6'/%3E%3C/svg%3E") center/contain no-repeat;filter:drop-shadow(0 0 8px rgba(242,201,121,.9))}
+@keyframes csxComet{0%{left:8%;opacity:0;transform:scale(.5) rotate(0)}6%{opacity:1;transform:scale(1) rotate(40deg)}94%{opacity:1;transform:scale(1) rotate(320deg)}100%{left:92%;opacity:0;transform:scale(.5) rotate(360deg)}}
+.csx .tl.in::after{animation:csxComet 3.2s cubic-bezier(.4,0,.2,1) 1.8s infinite}
+@keyframes csxNumFlash{0%,100%{color:var(--house);text-shadow:none}50%{color:var(--goldd);text-shadow:0 0 18px rgba(242,201,121,.7)}}
+.csx .tl.in li:nth-child(1) .big b{animation:csxNumFlash 3.2s ease 1.9s infinite}
+.csx .tl.in li:nth-child(2) .big b{animation:csxNumFlash 3.2s ease 3.1s infinite}
+.csx .tl.in li:nth-child(3) .big b{animation:csxNumFlash 3.2s ease 4.3s infinite}
+.csx .tl li{transition:transform .35s cubic-bezier(.34,1.4,.64,1),opacity .6s ease}
+.csx .tl.in li:hover{transform:translateY(-6px)}
+.csx .tl li:hover .big{color:var(--goldd)}
+.csx .tl li:hover::before{box-shadow:0 0 0 10px rgba(224,162,63,.18),0 0 24px rgba(242,201,121,.7)}
+/* 사례 카드 */
+.csx .three figure{overflow:hidden}
+.csx .three .im{overflow:hidden;position:relative}
+.csx .three img{transition:transform .7s cubic-bezier(.22,.61,.36,1);will-change:transform}
+@keyframes csxBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+.csx .three figure.in img{animation:csxBreathe 11s ease-in-out infinite}
+.csx .three figure:nth-child(2).in img{animation-delay:-3.7s}.csx .three figure:nth-child(3).in img{animation-delay:-7.4s}
+.csx .three figure:hover img{animation-play-state:paused;transform:scale(1.07)}
+.csx .three .arrow i{transition:background .35s,color .35s,box-shadow .35s,transform .35s}
+.csx .three figure:hover .arrow i{background:var(--goldd);color:#1a1409;box-shadow:0 8px 20px rgba(224,162,63,.4);transform:translateY(-2px)}
+.csx .three .who{position:relative;display:inline-block}
+.csx .three .who::after{content:"";position:absolute;left:0;right:100%;bottom:-4px;height:2px;background:var(--goldd);transition:right .45s cubic-bezier(.22,.61,.36,1)}
+.csx .three figure:hover .who::after{right:0}
+/* 상담 신청 버튼: 심장박동 */
+@keyframes csxBeat{0%,100%{transform:scale(1)}12%{transform:scale(1.07)}24%{transform:scale(1)}36%{transform:scale(1.045)}52%{transform:scale(1)}}
+@keyframes csxRipple{0%{transform:scale(1);opacity:.55}100%{transform:scale(1.55);opacity:0}}
+.csx .beat{position:relative;animation:csxBeat 2.1s ease-in-out infinite;transform-origin:center}
+.csx .beat::before{content:"";position:absolute;inset:-3px;border-radius:inherit;border:2px solid rgba(224,162,63,.75);pointer-events:none;animation:csxRipple 2.1s ease-out infinite}
+.csx .btn.beat::before{border-color:rgba(0,117,74,.55)}
+.csx .beat svg{animation:csxArrowDown 2.1s ease-in-out infinite}
+@keyframes csxArrowDown{0%,100%{transform:translateY(0)}12%{transform:translateY(3px)}24%{transform:translateY(0)}}
+.csx .beat:hover{animation-play-state:paused}
+.csx .hf-cta.beat{box-shadow:0 16px 44px rgba(224,162,63,.38)}
+@media (prefers-reduced-motion:reduce){
+  .csx .beat,.csx .beat::before,.csx .beat svg,.csx .tl.in::after,.csx .tl.in li .big b,.csx .three figure.in img{animation:none!important}
+}
+
 /* ══ 히어로 「진단 필드」 — hexa_field 4판 이식 ══ */
 .hf{position:relative;overflow:hidden;min-height:calc(100vh - var(--csx-hdr,75px));min-height:max(620px,calc(100svh - var(--csx-hdr,75px)));display:flex;align-items:center;
   background:radial-gradient(1100px 760px at 70% 52%,#123329 0%,#0B1F17 42%,#07140F 74%)}
