@@ -344,9 +344,10 @@
 .abx-way h2 .warm::before{content:"";position:absolute;left:-16%;right:-16%;top:-22%;bottom:-16%;z-index:-1;border-radius:50%;background:radial-gradient(closest-side,rgba(255,214,140,.8),rgba(255,190,90,.38) 55%,rgba(255,170,60,0) 100%);filter:blur(7px);animation:abxWarm 4.2s ease-in-out infinite;transform-origin:center}
 .abx-way h2 .warm:nth-of-type(2)::before{animation-delay:-2.1s}
 @keyframes abxWarm{0%,100%{transform:scale(.9) rotate(-4deg);opacity:.65}50%{transform:scale(1.15) rotate(4deg);opacity:1}}
-.abx-way h2 .warm::after{content:"";position:absolute;left:-2%;right:-2%;bottom:.06em;height:.34em;z-index:-1;border-radius:6px;background:linear-gradient(90deg,rgba(242,201,121,0) 0%,rgba(242,201,121,.85) 50%,rgba(242,201,121,0) 100%);background-size:60% 100%;background-repeat:no-repeat;animation:abxWarmSweep 3.6s ease-in-out infinite}
-.abx-way h2 .warm:nth-of-type(2)::after{animation-delay:-1.8s}
-@keyframes abxWarmSweep{0%{background-position:-60% 0}60%,100%{background-position:170% 0}}
+.abx-way h2 .warm{overflow:visible}
+.abx-way h2 .warm::after{content:"";position:absolute;left:-60%;width:60%;bottom:.06em;height:.34em;z-index:-1;border-radius:6px;background:linear-gradient(90deg,rgba(242,201,121,0) 0%,rgba(242,201,121,.85) 50%,rgba(242,201,121,0) 100%);animation:abxWarmSweep 7.2s linear infinite;will-change:transform}
+.abx-way h2 .warm:nth-of-type(2)::after{animation-delay:-3.6s}
+@keyframes abxWarmSweep{0%{transform:translateX(0)}100%{transform:translateX(266.7%)}}
 .abx .vows{display:grid;gap:12px;margin:26px 0 0;padding:0;list-style:none}
 .abx .vows li{position:relative;overflow:hidden;display:grid;grid-template-columns:60px 1fr;gap:18px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 24px 20px;min-height:128px;color:#1a1a17;box-shadow:0 10px 30px rgba(30,57,50,.06)}
 /* 약속 카드: 실사 사진이 바닥에 깔리고(오른쪽이 살아남게 왼쪽은 어둡게), 14초 주기로 천천히 줌인·아웃 */
@@ -364,7 +365,7 @@
 .abx .vows p b{color:var(--house);font-weight:800}
 .abx .hexcard{position:relative;background:#fff;border:1px solid var(--line);border-radius:24px;padding:28px 26px 24px;text-align:center;box-shadow:var(--sh);display:flex;flex-direction:column;justify-content:center;align-items:center;align-self:stretch}
 .abx .hexcard>*{width:100%}.abx .hexcard .hexlink{width:auto}
-.abx .hexcard .hx-ex{position:absolute;top:14px;right:14px;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ink2);background:#F2F0EB;border-radius:999px;padding:5px 10px}
+.abx .hexcard .hx-ex{position:absolute;top:14px;right:14px;width:auto;max-width:60%;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ink2);background:#F2F0EB;border-radius:999px;padding:5px 10px}
 .abx .hexcard .hx-eye{display:block;font-style:normal;font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--goldd);margin-bottom:8px}
 .abx .hexcard svg{display:block;width:100%;max-width:300px;height:auto;margin:0 auto 12px;overflow:visible}
 .abx .hexcard b{display:block;font-family:var(--font-family-heading);font-weight:var(--font-weight-heading);font-size:21px;line-height:1.3;color:var(--house);letter-spacing:-.03em;word-break:keep-all}
