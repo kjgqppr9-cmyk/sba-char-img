@@ -344,9 +344,11 @@
 .abx .vows strong{display:block;font-size:19px;color:var(--house);font-family:var(--font-family-heading);font-weight:var(--font-weight-heading);margin-bottom:6px}
 .abx .vows p{margin:0;font-size:15.5px;line-height:1.65;color:#2a2f2b}
 .abx .vows p b{color:var(--house);font-weight:800}
-.abx .hexcard{background:#fff;border:1px solid var(--line);border-radius:24px;padding:28px 26px 24px;text-align:center;box-shadow:var(--sh)}
+.abx .hexcard{position:relative;background:#fff;border:1px solid var(--line);border-radius:24px;padding:28px 26px 24px;text-align:center;box-shadow:var(--sh)}
+.abx .hexcard .hx-ex{position:absolute;top:14px;right:14px;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ink2);background:#F2F0EB;border-radius:999px;padding:5px 10px}
+.abx .hexcard .hx-eye{display:block;font-style:normal;font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--goldd);margin-bottom:8px}
 .abx .hexcard svg{display:block;width:100%;max-width:300px;height:auto;margin:0 auto 12px;overflow:visible}
-.abx .hexcard b{display:block;font-family:var(--font-family-heading);font-weight:var(--font-weight-heading);font-size:22px;color:var(--house);letter-spacing:-.03em}
+.abx .hexcard b{display:block;font-family:var(--font-family-heading);font-weight:var(--font-weight-heading);font-size:21px;line-height:1.3;color:var(--house);letter-spacing:-.03em;word-break:keep-all}
 .abx .hexcard span{display:block;margin-top:8px;font-size:14px;line-height:1.6;color:var(--ink2)}
 .abx .hexcard .axes{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:14px}
 .abx .hexcard .axes i{font-style:normal;font-size:12.5px;font-weight:700;color:var(--accent);background:#EEF6F1;border-radius:999px;padding:6px 11px}
