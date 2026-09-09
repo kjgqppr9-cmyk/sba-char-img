@@ -276,6 +276,11 @@
 @keyframes csxPulse{0%,100%{box-shadow:0 0 0 3px rgba(224,162,63,.25)}50%{box-shadow:0 0 0 8px rgba(224,162,63,0)}}
 .abx .ah-title{font-family:var(--font-family-heading);font-weight:var(--font-weight-heading);margin:24px 0 18px;font-size:58px;line-height:1.14;letter-spacing:-.045em;color:#fff}
 .abx .ah-title em{font-style:normal;color:#F2C979}
+/* 헤드카피의 설계: 도면처럼 금빛 밑줄이 그어졌다가(캔버스 17초 주기에 맞춤) 옅어진다 */
+.abx .ah-title .nw{white-space:nowrap}
+.abx .ah-title em.dl{color:#fff;position:relative;display:inline-block}
+.abx .ah-title em.dl::after{content:"";position:absolute;left:0;right:0;bottom:.04em;height:.08em;border-radius:2px;background:linear-gradient(90deg,#E0A23F,#F2C979);box-shadow:0 0 12px rgba(242,201,121,.7);transform-origin:left center;transform:scaleX(0);animation:abxDraw 17s linear infinite}
+@keyframes abxDraw{0%,18%{transform:scaleX(0);opacity:1}26%{transform:scaleX(1);opacity:1}88%{transform:scaleX(1);opacity:1}94%,100%{transform:scaleX(1);opacity:0}}
 .abx .ah-sub{margin:0 0 28px;font-size:17.5px;line-height:1.85;color:rgba(234,243,238,.76);word-break:keep-all}
 .abx .ah-sub b{color:#7FE0BE;font-weight:700;white-space:nowrap}
 .abx .ah-act{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
@@ -288,7 +293,12 @@
 /* 인물: 은하 한가운데, 금색 육각 테 */
 .abx .ah-fig{position:relative;justify-self:center;width:min(100%,400px);aspect-ratio:4/5}
 .abx .ah-fig img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:28px;display:block;box-shadow:0 30px 80px rgba(0,0,0,.55)}
-.abx .ah-fig::before{content:"";position:absolute;inset:-14px;border-radius:38px;border:1px solid rgba(242,201,121,.35);pointer-events:none}
+/* 사진 프레임: 도면 기준선처럼 네 모서리에 ㄱ자 금선 */
+.abx .ah-fig::before{content:"";position:absolute;inset:-18px;pointer-events:none;--c:rgba(242,201,121,.85);
+  background:linear-gradient(var(--c),var(--c)) left top/28px 1px no-repeat,linear-gradient(var(--c),var(--c)) left top/1px 28px no-repeat,
+             linear-gradient(var(--c),var(--c)) right top/28px 1px no-repeat,linear-gradient(var(--c),var(--c)) right top/1px 28px no-repeat,
+             linear-gradient(var(--c),var(--c)) left bottom/28px 1px no-repeat,linear-gradient(var(--c),var(--c)) left bottom/1px 28px no-repeat,
+             linear-gradient(var(--c),var(--c)) right bottom/28px 1px no-repeat,linear-gradient(var(--c),var(--c)) right bottom/1px 28px no-repeat}
 .abx .ah-fig::after{content:"";position:absolute;left:-26px;top:-26px;width:74px;height:74px;pointer-events:none;
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,6 88,28 88,72 50,94 12,72 12,28' fill='none' stroke='%23F2C979' stroke-width='3'/%3E%3Cpolygon points='50,22 74,36 74,64 50,78 26,64 26,36' fill='rgba(242,201,121,.18)' stroke='%23E0A23F' stroke-width='2'/%3E%3C/svg%3E") center/contain no-repeat;filter:drop-shadow(0 0 12px rgba(242,201,121,.6));animation:abxSpin 28s linear infinite}
 @keyframes abxSpin{to{transform:rotate(360deg)}}
@@ -439,7 +449,6 @@
   .abx .ah-act{flex-direction:column;justify-content:center;gap:14px;margin-bottom:30px}
   .abx .ah-cta{min-width:220px;justify-content:center;padding:15px 36px;font-size:15.5px}
   .abx .ah-fig{width:min(100%,300px)}
-  .abx .ah-gl{height:136%}   /* 모바일: 은하 중심을 아래 인물 뒤로 내린다 */
   .abx .ah-hint{left:0;right:0;text-align:center;bottom:10px}
   .abx-num{padding:56px 0 64px}
   .abx .stats{grid-template-columns:1fr 1fr;gap:12px}
