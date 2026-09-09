@@ -455,7 +455,7 @@
   .abx .vows li .ph img{object-position:80% 50%}
   .abx .vows li .ph::after{background:linear-gradient(90deg,rgba(255,255,255,.97) 0%,rgba(255,255,255,.93) 58%,rgba(255,255,255,.55) 100%)}
   .abx-way .wrap>div:first-child .vows{margin-top:0}
-  .abx .hexcard .hx-ex{position:static;display:inline-block;width:auto;margin:0 auto 8px}
+  .abx .hexcard .hx-ex{position:static;order:-1;display:inline-flex;width:max-content;max-width:100%;align-self:center;margin:0 0 12px;padding:5px 12px}
   .abx-cta h2{font-size:28px}
   .abx-cta .act{flex-direction:column;align-items:stretch}
 }
