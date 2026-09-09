@@ -368,7 +368,7 @@
 /* AI 와 사람 — 진초록 */
 .abx-dark{background:linear-gradient(135deg,#1E3932,#0E1F19);color:#fff;padding:104px 0;position:relative;overflow:hidden}
 /* 실사 배경: 세 장면(진단→AI→사람)이 한 그림으로 이어진 밴드. 양옆과 위아래는 섹션 색으로 녹아든다 */
-.abx-dark::before{content:"";position:absolute;inset:0;background:url("https://cdn.jsdelivr.net/gh/kjgqppr9-cmyk/sba-char-img@95b370d/about/aiband.jpg") center/cover no-repeat;opacity:.78}
+.abx-dark::before{content:"";position:absolute;inset:0;background:url("aiband.jpg") center/cover no-repeat;opacity:.78}
 .abx-dark::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#0E1F19 0%,rgba(14,31,25,.55) 12%,rgba(14,31,25,0) 30%,rgba(14,31,25,0) 70%,rgba(14,31,25,.55) 88%,#0E1F19 100%),linear-gradient(180deg,rgba(19,42,34,.85) 0%,rgba(14,31,25,.25) 22%,rgba(14,31,25,.35) 60%,rgba(14,31,25,.9) 100%)}
 .abx-dark .wrap,.abx-dark .spk{position:relative;z-index:1}
 .abx-dark .wrap{display:block;max-width:1000px}
