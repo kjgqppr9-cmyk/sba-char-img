@@ -14,7 +14,7 @@ window.__sbaAboutRun = function(bm){
     var gl = cv.getContext('webgl', {antialias:false, alpha:true, premultipliedAlpha:true});
     if(!gl) return false;
 
-    var RINGS=28, N1=5544, N2=0, DUST=1800, CORE=1100, SPARK=130, TOTAL=N1+N2+DUST+CORE+SPARK, i, r, t, k, f, base, ax, ay, bx, by, x, y, z, jit;
+    var RINGS=28, N1=5544, N2=0, DUST=1800, CORE=1100, SPARK=170, TOTAL=N1+N2+DUST+CORE+SPARK, i, r, t, k, f, base, ax, ay, bx, by, x, y, z, jit;
     var pos=new Float32Array(TOTAL*3), seed=new Float32Array(TOTAL), ring=new Float32Array(TOTAL), kind=new Float32Array(TOTAL), layer=new Float32Array(TOTAL);
     var step=0.055, per=[], tot=0, n=0;
     for(r=0;r<RINGS;r++){ per.push(r+1); tot+=r+1; }
@@ -64,7 +64,7 @@ window.__sbaAboutRun = function(bm){
     var VS=[
     'attribute vec3 aPos; attribute float aSeed; attribute float aRing; attribute float aKind; attribute float aLayer;',
     'uniform float uT; uniform vec2 uRes; uniform vec2 uTilt; uniform vec2 uMouse; uniform float uPulse; uniform vec2 uPulseXY; uniform float uDpr; uniform float uShift; uniform float uScale; uniform float uPt;',
-    'varying float vA; varying float vSeed; varying float vRing; varying float vKind; varying float vHit;',
+    'varying float vA; varying float vSeed; varying float vRing; varying float vKind; varying float vHit; varying float vRot;',
     'mat2 rot(float a){ float c=cos(a), s=sin(a); return mat2(c,-s,s,c); }',
     'void main(){',
     '  vec3 p=aPos; float fall=1.0; float grow=1.0; float on=1.0;',
@@ -103,16 +103,16 @@ window.__sbaAboutRun = function(bm){
     '  if(aKind>1.5&&aKind<2.5) sz *= 1.5; if(aKind>2.5&&aKind<3.5) sz *= 3.3;',
     '  sz *= grow; if(aKind>4.5) sz = (aSeed>0.9 ? 6.5+4.0*aSeed : 1.8+3.0*pow(aSeed,1.5));',
     /* 금빛 스파크: 저마다 다른 주기로 켜졌다 꺼지며 자리를 옮겨 다니는 느낌 */
-    '  if(aKind>5.5){ float ph2=fract(uT*(0.035+0.03*aSeed)+aSeed*7.0); on=smoothstep(0.0,0.3,ph2)*smoothstep(1.0,0.55,ph2); sz=(26.0+30.0*aSeed)*(0.5+0.5*on); }',
+    '  if(aKind>5.5){ float ph2=fract(uT*(0.035+0.03*aSeed)+aSeed*7.0); on=smoothstep(0.0,0.22,ph2)*smoothstep(1.0,0.62,ph2); sz=(22.0+50.0*aSeed)*(0.55+0.45*on); }',
     '  gl_PointSize = sz*sc*uDpr*uPt*(1.0+push*1.6+hit*2.2)*tw;',
     '  float baseA = (aKind>0.5&&aKind<1.5) ? 0.30 : 0.75+0.45*aSeed; if(aKind>1.5&&aKind<2.5) baseA*=1.35; if(aKind>2.5&&aKind<3.5) baseA=1.6;',
-    '  baseA *= fall; if(aKind>4.5) baseA = 1.1+0.5*aSeed; if(aKind>5.5) baseA = 1.6*on;',
-    '  vA = baseA * sc * tw; vSeed=aSeed; vRing=aRing; vKind=aKind; vHit=hit+push;',
+    '  baseA *= fall; if(aKind>4.5) baseA = 1.1+0.5*aSeed; if(aKind>5.5) baseA = 2.4*on;',
+    '  vA = baseA * sc * tw; vSeed=aSeed; vRing=aRing; vKind=aKind; vHit=hit+push; vRot=aSeed*6.2832+uT*0.22*(aSeed-0.5);',
     '}'].join('\n');
 
     var FS=[
     'precision mediump float;',
-    'varying float vA; varying float vSeed; varying float vRing; varying float vKind; varying float vHit;',
+    'varying float vA; varying float vSeed; varying float vRing; varying float vKind; varying float vHit; varying float vRot;',
     'void main(){',
     '  vec2 q=gl_PointCoord-0.5; float d=length(q);',
     '  float a = smoothstep(0.5,0.05,d); a *= a; a *= vA;',
@@ -125,12 +125,22 @@ window.__sbaAboutRun = function(bm){
     /* 6갈래 불규칙 빛갈라짐: 주 갈래 + 살짝 어긋난 보조 갈래, 각도에 따라 길이가 들쭉날쭉 */
     '  if(vKind>5.5){',
     '    float ang=atan(q.y,q.x); float rr=d*2.0;',
-    '    float r1=pow(max(0.0,cos(3.0*(ang+vSeed*3.14))),16.0);',
-    '    float r2=pow(max(0.0,cos(3.0*(ang+vSeed*3.14+0.52))),60.0)*0.55;',
-    '    float irr=0.6+0.4*sin(ang*2.0+vSeed*40.0)+0.25*sin(ang*5.0-vSeed*17.0);',
-    '    float rays=(r1+r2)*irr*exp(-rr*1.7)*1.6;',
-    '    float core=exp(-rr*rr*34.0); float halo=exp(-rr*rr*4.0)*0.16;',
-    '    float a2=(core*1.2+rays+halo)*vA*smoothstep(0.5,0.30,d); vec3 c2=mix(gold,white,clamp(core*1.1,0.0,1.0));',   /* 스프라이트 네모 경계가 안 비치게 가장자리에서 0 으로 */
+    '    float ty=floor(fract(vSeed*7.31)*5.0); float rays=0.0;',
+    '    for(int k=0;k<6;k++){ float fk=float(k);',
+    '      float h1=fract(sin(vSeed*91.7+fk*13.1)*43758.5); float h2=fract(sin(vSeed*17.3+fk*7.7)*12345.6);',
+    '      float a0=fk*1.0472+vRot+(h2-0.5)*0.4;',
+    '      float da=abs(mod(ang-a0+3.14159,6.28318)-3.14159);',
+    '      float Lk=0.38+0.62*h1; if(ty>2.5&&ty<3.5&&h1<0.45) Lk*=0.22; if(ty>0.5&&ty<1.5) Lk*=0.6;',
+    '      float wk=(ty>0.5&&ty<1.5)?0.09+0.08*h2:0.03+0.05*h2;',
+    '      rays+=exp(-da*da/(wk*wk))*pow(max(0.0001,1.0-rr/Lk),1.25);',
+    '    }',
+    '    if(ty>3.5){ for(int k=0;k<6;k++){ float fk=float(k); float a0=fk*1.0472+vRot+0.5236; float da=abs(mod(ang-a0+3.14159,6.28318)-3.14159); rays+=exp(-da*da/0.0014)*pow(max(0.0001,1.0-rr/0.34),1.7)*0.75; } }',
+    '    float ck=(ty<0.5)?70.0:((ty<1.5)?26.0:44.0); float core=exp(-rr*rr*ck);',
+    '    float bok=0.0; if(ty>1.5&&ty<2.5){ bok=smoothstep(0.66,0.56,rr)*(0.3+0.7*smoothstep(0.28,0.62,rr))*0.5; rays*=0.3; }',
+    '    float halo=exp(-rr*rr*3.5)*0.13; float mask=smoothstep(0.5,0.30,d);',
+    '    float a2=(core*1.2+rays*1.25+bok+halo)*vA*mask;',
+    '    vec3 warm=vec3(1.0,0.64,0.32); vec3 gc=mix(gold,warm,step(0.75,fract(vSeed*3.3))*0.6); gc=mix(gc,white,step(0.88,fract(vSeed*5.1))*0.5);',
+    '    vec3 c2=mix(gc,white,clamp(core*1.1,0.0,1.0));',
     '    gl_FragColor=vec4(c2*a2,a2); return;',
     '  }',
     '  float h = clamp(vHit*1.3,0.0,1.0); float lum = dot(c, vec3(0.33));',

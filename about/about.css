@@ -336,23 +336,34 @@
 
 /* 일하는 방식 — 약속 세 장 + 여섯 축 */
 .abx-way{background:var(--cream);padding:96px 0}
-.abx-way .wrap{display:grid;grid-template-columns:1fr .8fr;gap:64px;align-items:center}
-.abx .vows{display:grid;gap:12px;margin-top:26px;padding:0;list-style:none}
-.abx .vows li{position:relative;overflow:hidden;display:grid;grid-template-columns:60px 1fr;gap:18px;align-items:center;background:#0B1B15;border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:22px 24px 20px;min-height:128px;color:#fff}
+.abx-way .wrap{display:grid;grid-template-columns:1fr .8fr;gap:64px;align-items:stretch}
+.abx-way .wrap>div:first-child{display:flex;flex-direction:column}
+.abx-way .wrap>div:first-child .vows{margin-top:auto;padding-top:26px}
+/* 제목의 약속·함께: 금빛 글자 뒤에서 따뜻한 빛무리가 숨 쉬고, 밑줄처럼 금빛이 스치고 지나간다 */
+.abx-way h2 .warm{position:relative;display:inline-block;font-style:normal;color:#C98A1E;z-index:0}
+.abx-way h2 .warm::before{content:"";position:absolute;left:-16%;right:-16%;top:-22%;bottom:-16%;z-index:-1;border-radius:50%;background:radial-gradient(closest-side,rgba(255,214,140,.8),rgba(255,190,90,.38) 55%,rgba(255,170,60,0) 100%);filter:blur(7px);animation:abxWarm 4.2s ease-in-out infinite;transform-origin:center}
+.abx-way h2 .warm:nth-of-type(2)::before{animation-delay:-2.1s}
+@keyframes abxWarm{0%,100%{transform:scale(.9) rotate(-4deg);opacity:.65}50%{transform:scale(1.15) rotate(4deg);opacity:1}}
+.abx-way h2 .warm::after{content:"";position:absolute;left:-2%;right:-2%;bottom:.06em;height:.34em;z-index:-1;border-radius:6px;background:linear-gradient(90deg,rgba(242,201,121,0) 0%,rgba(242,201,121,.85) 50%,rgba(242,201,121,0) 100%);background-size:60% 100%;background-repeat:no-repeat;animation:abxWarmSweep 3.6s ease-in-out infinite}
+.abx-way h2 .warm:nth-of-type(2)::after{animation-delay:-1.8s}
+@keyframes abxWarmSweep{0%{background-position:-60% 0}60%,100%{background-position:170% 0}}
+.abx .vows{display:grid;gap:12px;margin:26px 0 0;padding:0;list-style:none}
+.abx .vows li{position:relative;overflow:hidden;display:grid;grid-template-columns:60px 1fr;gap:18px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 24px 20px;min-height:128px;color:#1a1a17;box-shadow:0 10px 30px rgba(30,57,50,.06)}
 /* 약속 카드: 실사 사진이 바닥에 깔리고(오른쪽이 살아남게 왼쪽은 어둡게), 14초 주기로 천천히 줌인·아웃 */
 .abx .vows li .ph{position:absolute;inset:0;z-index:0;overflow:hidden}
 .abx .vows li .ph img{width:100%;height:100%;object-fit:cover;object-position:72% 50%;display:block;transform-origin:70% 50%;animation:abxKen 14s ease-in-out infinite alternate}
 .abx .vows li:nth-child(2) .ph img{animation-delay:-5s}.abx .vows li:nth-child(3) .ph img{animation-delay:-9.5s}
 @keyframes abxKen{from{transform:scale(1)}to{transform:scale(1.09)}}
 .abx .vows li:hover .ph img{animation-play-state:paused;transform:scale(1.1);transition:transform 1.2s ease}
-.abx .vows li .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,20,15,.94) 0%,rgba(7,20,15,.86) 42%,rgba(7,20,15,.42) 72%,rgba(7,20,15,.18) 100%)}
+.abx .vows li .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.97) 0%,rgba(255,255,255,.92) 44%,rgba(255,255,255,.6) 70%,rgba(255,255,255,.22) 100%)}
 .abx .vows li>*{position:relative;z-index:1}
-.abx .vows .ic{width:60px;height:60px;border-radius:16px;background:#0B1B15;border:1px solid rgba(242,201,121,.28);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 8px 22px rgba(0,0,0,.35)}
+.abx .vows .ic{width:60px;height:60px;border-radius:16px;background:#F2F0EB;border:1px solid rgba(224,162,63,.35);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 6px 16px rgba(30,57,50,.12)}
 .abx .vows .ic img{width:100%;height:100%;object-fit:cover;display:block}
-.abx .vows strong{display:block;font-size:19px;color:#fff;font-family:var(--font-family-heading);font-weight:var(--font-weight-heading);margin-bottom:6px;text-shadow:0 1px 8px rgba(0,0,0,.35)}
-.abx .vows p{margin:0;font-size:15.5px;line-height:1.65;color:rgba(234,243,238,.86)}
-.abx .vows p b{color:#F2C979;font-weight:800}
-.abx .hexcard{position:relative;background:#fff;border:1px solid var(--line);border-radius:24px;padding:28px 26px 24px;text-align:center;box-shadow:var(--sh)}
+.abx .vows strong{display:block;font-size:19px;color:var(--house);font-family:var(--font-family-heading);font-weight:var(--font-weight-heading);margin-bottom:6px}
+.abx .vows p{margin:0;font-size:15.5px;line-height:1.65;color:#2a2f2b}
+.abx .vows p b{color:var(--house);font-weight:800}
+.abx .hexcard{position:relative;background:#fff;border:1px solid var(--line);border-radius:24px;padding:28px 26px 24px;text-align:center;box-shadow:var(--sh);display:flex;flex-direction:column;justify-content:center;align-items:center;align-self:stretch}
+.abx .hexcard>*{width:100%}.abx .hexcard .hexlink{width:auto}
 .abx .hexcard .hx-ex{position:absolute;top:14px;right:14px;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ink2);background:#F2F0EB;border-radius:999px;padding:5px 10px}
 .abx .hexcard .hx-eye{display:block;font-style:normal;font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--goldd);margin-bottom:8px}
 .abx .hexcard svg{display:block;width:100%;max-width:300px;height:auto;margin:0 auto 12px;overflow:visible}
@@ -442,7 +453,9 @@
   .abx .vows li{grid-template-columns:50px 1fr;gap:12px;padding:16px;min-height:0}
   .abx .vows .ic{width:50px;height:50px}
   .abx .vows li .ph img{object-position:80% 50%}
-  .abx .vows li .ph::after{background:linear-gradient(90deg,rgba(7,20,15,.94) 0%,rgba(7,20,15,.88) 55%,rgba(7,20,15,.5) 100%)}
+  .abx .vows li .ph::after{background:linear-gradient(90deg,rgba(255,255,255,.97) 0%,rgba(255,255,255,.93) 58%,rgba(255,255,255,.55) 100%)}
+  .abx-way .wrap>div:first-child .vows{margin-top:0}
+  .abx .hexcard .hx-ex{position:static;display:inline-block;width:auto;margin:0 auto 8px}
   .abx-cta h2{font-size:28px}
   .abx-cta .act{flex-direction:column;align-items:stretch}
 }
