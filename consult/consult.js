@@ -241,6 +241,16 @@ window.__sbaConsultRun = function(bm){
       }
       addEventListener('scroll', tick, {passive:true}); addEventListener('resize', tick); setTimeout(tick, 300);
       fitHdr(root); addEventListener('resize', function(){ fitHdr(root); }); setTimeout(function(){ fitHdr(root); }, 900);
+      /* 스크롤 등장: 같은 부모 안에서는 순번(--i)만큼 시간차. 숫자는 켜질 때 0 부터 센다 */
+      var reduced=false; try{ reduced=matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+      var targets = root.querySelectorAll('[data-rv]');
+      var seen = new Map();
+      targets.forEach(function(el){ var par = el.parentElement; var k = seen.get(par)||0; el.style.setProperty('--i', k); seen.set(par, k+1); });
+      function countUp(b){ var to = parseInt(b.getAttribute('data-n'),10); if(isNaN(to) || b.__done) return; b.__done = true; if(reduced || to<=1){ b.textContent = to; return; }
+        var t0 = performance.now(), dur = 900; (function step(now){ var p = Math.min(1,(now-t0)/dur); p = 1-Math.pow(1-p,3); b.textContent = Math.round(to*p); if(p<1) requestAnimationFrame(step); })(t0); }
+      function show(el){ el.classList.add('in'); el.querySelectorAll('[data-n]').forEach(countUp); if(el.hasAttribute('data-n')) countUp(el); }
+      if(reduced || !('IntersectionObserver' in window)){ targets.forEach(show); }
+      else { var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target); } }); }, {threshold:0.18, rootMargin:'0px 0px -6% 0px'}); targets.forEach(function(el){ io.observe(el); }); }
       bound = root;
     }
     var host = root.querySelector('.hf');
