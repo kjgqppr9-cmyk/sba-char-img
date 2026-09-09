@@ -14,7 +14,7 @@ window.__sbaAboutRun = function(bm){
     var gl = cv.getContext('webgl', {antialias:false, alpha:true, premultipliedAlpha:true});
     if(!gl) return false;
 
-    var RINGS=28, N1=5544, N2=2772, DUST=1800, CORE=1100, TOTAL=N1+N2+DUST+CORE, i, r, t, k, f, base, ax, ay, bx, by, x, y, z, jit;
+    var RINGS=28, N1=5544, N2=0, DUST=1800, CORE=1100, SPARK=130, TOTAL=N1+N2+DUST+CORE+SPARK, i, r, t, k, f, base, ax, ay, bx, by, x, y, z, jit;
     var pos=new Float32Array(TOTAL*3), seed=new Float32Array(TOTAL), ring=new Float32Array(TOTAL), kind=new Float32Array(TOTAL), layer=new Float32Array(TOTAL);
     var step=0.055, per=[], tot=0, n=0;
     for(r=0;r<RINGS;r++){ per.push(r+1); tot+=r+1; }
@@ -38,7 +38,7 @@ window.__sbaAboutRun = function(bm){
         }
       }
     }
-    rings(N1, 0); rings(N2, 1);
+    rings(N1, 0);
     for(i=n;i<n+DUST;i++){
       var R=2.6*Math.pow(Math.random(),.5)+0.2, th=Math.random()*Math.PI*2, ph=(Math.random()-.5)*1.2;
       pos[i*3]=Math.cos(th)*R; pos[i*3+1]=Math.sin(th)*R; pos[i*3+2]=Math.sin(ph)*0.9;
@@ -52,7 +52,14 @@ window.__sbaAboutRun = function(bm){
       pos[i*3]=Math.cos(thc)*Rc*1.18; pos[i*3+1]=Math.sin(thc)*Rc*1.18; pos[i*3+2]=(Math.random()-.5)*0.05;
       seed[i]=Math.random(); ring[i]=0; kind[i]=5; layer[i]=0;
     }
-    n+=CORE; TOTAL=n;
+    n+=CORE;
+    /* 금빛 스파크 — 육각 궤도 위(65%)와 먼지 원반(35%)에 흩어 두고, 셰이더가 6갈래 불규칙 빛갈라짐으로 그린다 */
+    for(i=n;i<n+SPARK;i++){
+      if(Math.random()<0.65){ var j=Math.floor(Math.random()*N1); pos[i*3]=pos[j*3]; pos[i*3+1]=pos[j*3+1]; pos[i*3+2]=pos[j*3+2]-0.01; }
+      else { var Rs=0.5+2.0*Math.random(), ths=Math.random()*Math.PI*2; pos[i*3]=Math.cos(ths)*Rs; pos[i*3+1]=Math.sin(ths)*Rs; pos[i*3+2]=(Math.random()-.5)*0.3; }
+      seed[i]=Math.random(); ring[i]=Math.random(); kind[i]=6; layer[i]=0;
+    }
+    n+=SPARK; TOTAL=n;
 
     var VS=[
     'attribute vec3 aPos; attribute float aSeed; attribute float aRing; attribute float aKind; attribute float aLayer;',
@@ -60,7 +67,7 @@ window.__sbaAboutRun = function(bm){
     'varying float vA; varying float vSeed; varying float vRing; varying float vKind; varying float vHit;',
     'mat2 rot(float a){ float c=cos(a), s=sin(a); return mat2(c,-s,s,c); }',
     'void main(){',
-    '  vec3 p=aPos; float fall=1.0; float grow=1.0;',
+    '  vec3 p=aPos; float fall=1.0; float grow=1.0; float on=1.0;',
     /* 2층(aLayer=1)은 1층의 사본. 한 몸으로 약 60초에 걸쳐 중심으로 끌려 들어가며 그만큼 더 돌고, 양 끝에서 옅어진다 */
     '  if(aLayer>0.5){',
     '    float ph = fract(uT*0.0165);',
@@ -95,9 +102,11 @@ window.__sbaAboutRun = function(bm){
     '  float sz = aKind>0.5&&aKind<1.5 ? (0.7+1.6*aSeed) : (1.4 + 3.4*pow(aSeed,2.2));',
     '  if(aKind>1.5&&aKind<2.5) sz *= 1.5; if(aKind>2.5&&aKind<3.5) sz *= 3.3;',
     '  sz *= grow; if(aKind>4.5) sz = (aSeed>0.9 ? 6.5+4.0*aSeed : 1.8+3.0*pow(aSeed,1.5));',
+    /* 금빛 스파크: 저마다 다른 주기로 켜졌다 꺼지며 자리를 옮겨 다니는 느낌 */
+    '  if(aKind>5.5){ float ph2=fract(uT*(0.035+0.03*aSeed)+aSeed*7.0); on=smoothstep(0.0,0.3,ph2)*smoothstep(1.0,0.55,ph2); sz=(26.0+30.0*aSeed)*(0.5+0.5*on); }',
     '  gl_PointSize = sz*sc*uDpr*uPt*(1.0+push*1.6+hit*2.2)*tw;',
     '  float baseA = (aKind>0.5&&aKind<1.5) ? 0.30 : 0.75+0.45*aSeed; if(aKind>1.5&&aKind<2.5) baseA*=1.35; if(aKind>2.5&&aKind<3.5) baseA=1.6;',
-    '  baseA *= fall; if(aKind>4.5) baseA = 1.1+0.5*aSeed;',
+    '  baseA *= fall; if(aKind>4.5) baseA = 1.1+0.5*aSeed; if(aKind>5.5) baseA = 1.6*on;',
     '  vA = baseA * sc * tw; vSeed=aSeed; vRing=aRing; vKind=aKind; vHit=hit+push;',
     '}'].join('\n');
 
@@ -113,6 +122,17 @@ window.__sbaAboutRun = function(bm){
     '  if(vKind>0.5&&vKind<1.5) c=mix(mint,white,0.5)*0.8;',
     '  if(vKind>1.5&&vKind<2.5) c=mix(mint,white,0.35); if(vKind>2.5&&vKind<3.5) c=mix(gold,white,0.25);',
     '  if(vKind>4.5) c = vSeed>0.9 ? mix(gold,white,0.35) : mix(white,mint,0.35);',
+    /* 6갈래 불규칙 빛갈라짐: 주 갈래 + 살짝 어긋난 보조 갈래, 각도에 따라 길이가 들쭉날쭉 */
+    '  if(vKind>5.5){',
+    '    float ang=atan(q.y,q.x); float rr=d*2.0;',
+    '    float r1=pow(max(0.0,cos(3.0*(ang+vSeed*3.14))),16.0);',
+    '    float r2=pow(max(0.0,cos(3.0*(ang+vSeed*3.14+0.52))),60.0)*0.55;',
+    '    float irr=0.6+0.4*sin(ang*2.0+vSeed*40.0)+0.25*sin(ang*5.0-vSeed*17.0);',
+    '    float rays=(r1+r2)*irr*exp(-rr*1.7)*1.6;',
+    '    float core=exp(-rr*rr*34.0); float halo=exp(-rr*rr*4.0)*0.16;',
+    '    float a2=(core*1.2+rays+halo)*vA; vec3 c2=mix(gold,white,clamp(core*1.1,0.0,1.0));',
+    '    gl_FragColor=vec4(c2*a2,a2); return;',
+    '  }',
     '  float h = clamp(vHit*1.3,0.0,1.0); float lum = dot(c, vec3(0.33));',
     '  c = clamp(mix(vec3(lum), c, 1.0 + 1.6*h) * (1.0 + 0.25*h), 0.0, 1.0);',
     '  gl_FragColor = vec4(c*a, a);',
@@ -165,6 +185,43 @@ window.__sbaAboutRun = function(bm){
     return true;
   }
 
+
+  /* 첫걸음 섹션 — 금빛 육각형 모션 (2D 캔버스). 세 겹 육각형이 서로 다른 속도로 천천히 돌고,
+     꼭짓점이 차례로 6갈래 빛갈라짐으로 반짝이며, 바깥 테두리를 금빛 불씨가 한 바퀴 돈다. 금가루가 천천히 떠오른다. */
+  function startHexGold(sec, cv){
+    var ctx = cv.getContext('2d'); if(!ctx) return false;
+    var W=0,H=0,dpr=1,raf=null,alive=false,t0=performance.now(), still=reduced();
+    function size(){ dpr=Math.min(2,window.devicePixelRatio||1); W=sec.clientWidth; H=sec.clientHeight; cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); cv.style.width=W+'px'; cv.style.height=H+'px'; }
+    size(); addEventListener('resize', function(){ size(); if(still) draw(3.3); });
+    var motes=[]; for(var i=0;i<44;i++) motes.push({x:Math.random(), y:Math.random(), r:.7+Math.random()*1.7, s:.018+Math.random()*.03, ph:Math.random()*6.28});
+    function hex(cx,cy,R,rot){ ctx.beginPath(); for(var k=0;k<6;k++){ var a=rot+k*Math.PI/3, x=cx+Math.cos(a)*R, y=cy+Math.sin(a)*R; if(k) ctx.lineTo(x,y); else ctx.moveTo(x,y); } ctx.closePath(); }
+    function flare(x,y,r,rot,al){ if(al<=0.02) return; ctx.save(); ctx.translate(x,y); ctx.rotate(rot); ctx.globalAlpha=Math.min(1,al);
+      for(var k=0;k<6;k++){ var L=r*(0.5+0.5*Math.abs(Math.sin(k*2.1+rot*2.0+x*0.01))); var g=ctx.createLinearGradient(0,0,L,0); g.addColorStop(0,'rgba(255,242,205,.95)'); g.addColorStop(1,'rgba(242,201,121,0)');
+        ctx.strokeStyle=g; ctx.lineWidth=(k%2?0.9:1.7); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(L,0); ctx.stroke(); ctx.rotate(Math.PI/3); }
+      var rg=ctx.createRadialGradient(0,0,0,0,0,r*.34); rg.addColorStop(0,'rgba(255,250,236,1)'); rg.addColorStop(.5,'rgba(242,201,121,.55)'); rg.addColorStop(1,'rgba(242,201,121,0)');
+      ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(0,0,r*.34,0,6.2832); ctx.fill(); ctx.restore(); }
+    function draw(t){
+      ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
+      var cx=W/2, cy=H*0.5, R=Math.min(W*0.42, H*0.46); ctx.lineJoin='round';
+      for(var j=0;j<3;j++){
+        var Rj=R*(1-j*0.21), rot=t*(0.045+j*0.025)*(j%2?-1:1)+j*0.35, al=0.14+0.09*j;
+        ctx.save(); ctx.shadowColor='rgba(242,201,121,.85)'; ctx.shadowBlur=16; ctx.strokeStyle='rgba(224,162,63,'+al.toFixed(3)+')'; ctx.lineWidth=(j===2?2.2:1.4); hex(cx,cy,Rj,rot); ctx.stroke(); ctx.restore();
+        var vi=Math.floor((t*0.55+j*2)%6), pulse=0.5+0.5*Math.sin(t*2.6+j*1.7);
+        for(var k=0;k<6;k++){ var a=rot+k*Math.PI/3, vx=cx+Math.cos(a)*Rj, vy=cy+Math.sin(a)*Rj; var on=(k===vi)?(0.35+0.65*pulse):0.14; flare(vx,vy,(k===vi?24+12*pulse:9),t*0.4+k,on*(0.9-0.15*j)); }
+      }
+      var u=(t*0.075)%1, seg=Math.floor(u*6), f=u*6-seg, rot0=t*0.045, a0=rot0+seg*Math.PI/3, a1=rot0+(seg+1)*Math.PI/3;
+      var px=cx+(Math.cos(a0)+(Math.cos(a1)-Math.cos(a0))*f)*R, py=cy+(Math.sin(a0)+(Math.sin(a1)-Math.sin(a0))*f)*R;
+      flare(px,py,36,t*1.1,0.95);
+      for(var m=0;m<motes.length;m++){ var o=motes[m]; var my=((o.y - t*o.s)%1+1)%1, mx=o.x*W+Math.sin(t*0.6+o.ph)*9; var al2=0.18+0.28*(0.5+0.5*Math.sin(t*1.4+o.ph));
+        ctx.fillStyle='rgba(224,162,63,'+al2.toFixed(3)+')'; ctx.beginPath(); ctx.arc(mx,my*H,o.r,0,6.2832); ctx.fill(); }
+    }
+    function frame(now){ raf=null; if(!alive) return; draw((now-t0)/1000); raf=requestAnimationFrame(frame); }
+    if(still){ draw(3.3); return true; }
+    if(window.IntersectionObserver){ new IntersectionObserver(function(es){ alive=!!(es[0]&&es[0].isIntersecting); if(alive&&!raf) raf=requestAnimationFrame(frame); },{threshold:0}).observe(sec); }
+    else { alive=true; raf=requestAnimationFrame(frame); }
+    document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible'&&alive&&!raf) raf=requestAnimationFrame(frame); });
+    return true;
+  }
   var bound=null;
   function fitHdr(root){ var h=document.querySelector('header.global-header'); if(!h) return; var hh=Math.round(h.getBoundingClientRect().height); if(hh>0&&hh<200) root.style.setProperty('--abx-hdr', hh+'px'); }
   function boot(){
@@ -193,8 +250,8 @@ window.__sbaAboutRun = function(bm){
       var targets = root.querySelectorAll('[data-rv]');
       var seen = new Map();
       targets.forEach(function(el){ var par = el.parentElement; var k = seen.get(par)||0; el.style.setProperty('--i', k); seen.set(par, k+1); });
-      function countUp(b){ var to = parseInt(b.getAttribute('data-n'),10); if(isNaN(to) || b.__done) return; b.__done = true; if(reduced || to<=1){ b.textContent = to; return; }
-        var t0 = performance.now(), dur = 900; (function step(now){ var p = Math.min(1,(now-t0)/dur); p = 1-Math.pow(1-p,3); b.textContent = Math.round(to*p); if(p<1) requestAnimationFrame(step); })(t0); }
+      function countUp(b){ var to = parseInt(b.getAttribute('data-n'),10); if(isNaN(to) || b.__done || b.__run) return; b.__done = true; if(reduced || to<=1){ b.textContent = to; return; }
+        b.__run = true; var t0 = performance.now(), dur = 1500; (function step(now){ var p = Math.min(1,(now-t0)/dur); p = 1-Math.pow(1-p,2.6); b.textContent = Math.max(1, Math.round(to*p)); if(p<1) requestAnimationFrame(step); else b.__run = false; })(t0); }
       /* 금빛 순회: 켜질 때 한 번, 그 뒤 7~10초마다 반복(카드마다 어긋나게), 마우스를 올리면 즉시 */
       function sweep(el){ el.classList.remove('sweep'); void el.offsetWidth; el.classList.add('sweep'); }
       function armSweep(el){ if(el.__sweepArmed || reduced) return; el.__sweepArmed = true;
@@ -210,6 +267,7 @@ window.__sbaAboutRun = function(bm){
       function armRoles(ul){ if(ul.__roles) return; ul.__roles = true; var lis = ul.querySelectorAll('li'); if(reduced){ lis.forEach(function(l){ l.classList.add('lit'); }); return; }
         var k = 0; function step(){ if(k>0) lis[k-1].classList.remove('gold'); if(k < lis.length){ lis[k].classList.add('lit'); if(!lis[k].classList.contains('now')) lis[k].classList.add('gold'); k++; setTimeout(step, 420); } else { setTimeout(function(){ lis.forEach(function(l){ l.classList.remove('lit','gold'); }); k = 0; setTimeout(step, 900); }, 5200); } }
         setTimeout(step, 500); }
+      window.__abxCount = countUp;
       function show(el){ el.classList.add('in'); if(el.classList.contains('roles')) armRoles(el); el.querySelectorAll('[data-n]').forEach(countUp); if(el.hasAttribute('data-n')) countUp(el); if(el.classList.contains('gl')) armSweep(el); el.querySelectorAll('[data-cycle]').forEach(armCycle); }
       if(reduced || !('IntersectionObserver' in window)){ targets.forEach(show); }
       else { var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target); } }); }, {threshold:0.18, rootMargin:'0px 0px -6% 0px'}); targets.forEach(function(el){ io.observe(el); }); }
@@ -217,6 +275,10 @@ window.__sbaAboutRun = function(bm){
     }
     var host = root.querySelector('.ah'), cv = host && host.querySelector('.ah-gl');
     if(host && cv && !cv.__sbaGl){ cv.__sbaGl = true; if(!startGL(host, cv)) cv.style.display='none'; }
+    var cta = root.querySelector('.abx-cta'), ch = cta && cta.querySelector('.cta-hex');
+    if(cta && ch && !ch.__on){ ch.__on = true; startHexGold(cta, ch); }
+    var stats = root.querySelector('.abx-num .stats');
+    if(stats && !stats.__re && window.IntersectionObserver){ stats.__re = true; new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ stats.querySelectorAll('[data-n]').forEach(function(b){ if(!b.__run){ b.__done = false; if(window.__abxCount) window.__abxCount(b); } }); } }); }, {threshold:0.5}).observe(stats); }
     return true;
   }
   if(!boot()){ var tries=0; var timer=setInterval(function(){ if(boot() || ++tries>200) clearInterval(timer); }, 50); }
