@@ -215,7 +215,7 @@ window.__sbaAboutRun = function(bm){
       for(var m=0;m<motes.length;m++){ var o=motes[m]; var my=((o.y - t*o.s)%1+1)%1, mx=o.x*W+Math.sin(t*0.6+o.ph)*9; var al2=0.18+0.28*(0.5+0.5*Math.sin(t*1.4+o.ph));
         ctx.fillStyle='rgba(224,162,63,'+al2.toFixed(3)+')'; ctx.beginPath(); ctx.arc(mx,my*H,o.r,0,6.2832); ctx.fill(); }
     }
-    function frame(now){ raf=null; if(!alive) return; draw((now-t0)/1000); raf=requestAnimationFrame(frame); }
+    function frame(now){ raf=null; if(!alive) return; if(W!==sec.clientWidth||H!==sec.clientHeight) size(); draw((now-t0)/1000); raf=requestAnimationFrame(frame); }
     if(still){ draw(3.3); return true; }
     if(window.IntersectionObserver){ new IntersectionObserver(function(es){ alive=!!(es[0]&&es[0].isIntersecting); if(alive&&!raf) raf=requestAnimationFrame(frame); },{threshold:0}).observe(sec); }
     else { alive=true; raf=requestAnimationFrame(frame); }
