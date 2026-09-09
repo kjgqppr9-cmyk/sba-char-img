@@ -255,7 +255,12 @@ window.__sbaConsultRun = function(bm){
         setTimeout(function(){ sweep(el); }, 350 + i*180);
         setTimeout(function(){ sweep(el); setInterval(function(){ if(!el.matches(':hover')) sweep(el); }, 7000 + (i%4)*900); }, 7000 + i*900 + Math.random()*1200);
         el.addEventListener('pointerenter', function(){ sweep(el); }); }
-      function show(el){ el.classList.add('in'); el.querySelectorAll('[data-n]').forEach(countUp); if(el.hasAttribute('data-n')) countUp(el); if(el.classList.contains('gl')) armSweep(el); }
+      /* 실행 계획 체크리스트: 켜지면 2초마다 하나씩 체크, 다 차면 잠깐 쉬고 비운 뒤 반복 */
+      function armCycle(ul){ if(ul.__cyc) return; ul.__cyc = true; var lis = ul.querySelectorAll('li'), k = 0;
+        if(reduced){ lis.forEach(function(li){ li.classList.add('on'); }); return; }
+        function step(){ if(k < lis.length){ lis[k].classList.add('on'); k++; setTimeout(step, 2000); } else { setTimeout(function(){ lis.forEach(function(li){ li.classList.remove('on'); }); k = 0; setTimeout(step, 1200); }, 2600); } }
+        setTimeout(step, 900); }
+      function show(el){ el.classList.add('in'); el.querySelectorAll('[data-n]').forEach(countUp); if(el.hasAttribute('data-n')) countUp(el); if(el.classList.contains('gl')) armSweep(el); el.querySelectorAll('[data-cycle]').forEach(armCycle); }
       if(reduced || !('IntersectionObserver' in window)){ targets.forEach(show); }
       else { var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target); } }); }, {threshold:0.18, rootMargin:'0px 0px -6% 0px'}); targets.forEach(function(el){ io.observe(el); }); }
       bound = root;
