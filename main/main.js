@@ -33,7 +33,7 @@ window.__sbaMainRun = function(bm){
       ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
       var mobile=W<768;
       var R=mobile? Math.min(W*0.34, 160) : Math.min(H*0.36, W*0.205);
-      var cx=(mobile? W*0.5 : W*0.745)+pT*16, cy=(mobile? H-R-90 : H*0.50)+pS*12;
+      var cx=(mobile? W*0.5 : W*0.745)+pT*16, cy=(mobile? H-R-124 : H*0.50)+pS*12;
       var rot=-Math.PI/2+loop*0.36+(t/PERIOD)*0.05;
       /* 격자 */
       var g=Math.max(26, Math.round(Math.min(W,H)/18)); ctx.lineWidth=1;
