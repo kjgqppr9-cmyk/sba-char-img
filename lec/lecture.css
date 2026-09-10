@@ -513,3 +513,8 @@
   .slp .rv{opacity:1!important;transform:none!important}
   .slp .netfx{display:none}
 }
+/* 클로드 코드 — 로고색 글자, 피치 헤드라인 앞엔 클로드 마크 */
+.slp .cc{color:#D97757;white-space:nowrap}
+.slp .cc .ccm{display:inline-block;width:.84em;height:.84em;vertical-align:-.06em;margin-right:.14em;fill:#D97757;filter:drop-shadow(0 0 8px rgba(217,119,87,.45));animation:slpMark 4.6s ease-in-out infinite;transform-origin:50% 50%}
+@keyframes slpMark{0%,100%{transform:rotate(-8deg) scale(1)}50%{transform:rotate(8deg) scale(1.07)}}
+@media (prefers-reduced-motion:reduce){.slp .cc .ccm{animation:none}}
