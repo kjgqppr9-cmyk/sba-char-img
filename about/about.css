@@ -424,8 +424,8 @@
 .abx-cta{background:var(--cream);padding:96px 0 110px;text-align:center;position:relative;overflow:hidden}
 .abx-cta .cta-hex{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:block}
 /* 인라인 style 로 40px 를 준 섹션 제목 — 태블릿·모바일에선 CSS 크기를 강제한다(실기기 줄바꿈 정리, 2026-09-10) */
-@media (max-width:1024px){.abx-sec h2[style]{font-size:33px!important;line-height:1.24!important}}
-@media (max-width:767px){.abx-sec h2[style]{font-size:27px!important;line-height:1.24!important}}
+@media (max-width:1024px){.abx h2[style]{font-size:33px!important;line-height:1.24!important}}
+@media (max-width:767px){.abx h2[style]{font-size:27px!important;line-height:1.24!important}}
 .abx-cta .wrap{display:block;max-width:760px;position:relative;z-index:1}
 .abx-cta h2{font-size:40px;line-height:1.22;letter-spacing:-.035em;color:var(--house)}
 .abx-cta h2 em{font-style:normal;color:var(--accent)}
