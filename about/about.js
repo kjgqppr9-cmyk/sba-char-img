@@ -31,10 +31,15 @@ window.__sbaAboutRun = function(bm){
     function hexPt(cx,cy,R,rot,i){ var a=rot+i*Math.PI/3; return [cx+Math.cos(a)*R, cy+Math.sin(a)*R]; }
     function glow(col,w,a){ if(a<=0.01) return; ctx.save(); ctx.lineCap='round'; ctx.lineJoin='round'; ctx.lineWidth=w+14; ctx.strokeStyle='rgba('+col+','+(a*0.07).toFixed(3)+')'; ctx.stroke(); ctx.lineWidth=w+6; ctx.strokeStyle='rgba('+col+','+(a*0.18).toFixed(3)+')'; ctx.stroke(); ctx.restore(); }
     function flare(x,y,r,rot,al){ if(al<=0.02) return; ctx.save(); ctx.translate(x,y); ctx.rotate(rot); ctx.shadowColor='rgba(0,0,0,0)'; ctx.shadowBlur=0; ctx.shadowColor='rgba(0,0,0,0)'; ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=Math.min(1,al*ctx.globalAlpha);
-      for(var k=0;k<6;k++){ var L=r*(0.5+0.5*Math.abs(Math.sin(k*2.1+rot*2.0+x*0.01))); var g=ctx.createLinearGradient(0,0,L,0); g.addColorStop(0,'rgba(255,242,205,.95)'); g.addColorStop(1,'rgba(242,201,121,0)');
-        ctx.strokeStyle=g; ctx.lineWidth=(k%2?0.9:1.7); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(L,0); ctx.stroke(); ctx.rotate(Math.PI/3); }
-      var rg=ctx.createRadialGradient(0,0,0,0,0,r*.34); rg.addColorStop(0,'rgba(255,250,236,1)'); rg.addColorStop(.5,'rgba(242,201,121,.55)'); rg.addColorStop(1,'rgba(242,201,121,0)');
-      ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(0,0,r*.34,0,6.2832); ctx.fill(); ctx.restore(); }
+      /* 그라데이션 없이: 갈래는 안쪽→바깥쪽 7조각을 점점 옅은 단색으로, 핵은 동심원 5겹 (웨일 GPU 캔버스 호환) */
+      ctx.lineCap='round';
+      for(var k=0;k<6;k++){ var L=r*(0.5+0.5*Math.abs(Math.sin(k*2.1+rot*2.0+x*0.01))), w=(k%2?0.9:1.7), N=7;
+        for(var q=0;q<N;q++){ var f0=q/N, f1=(q+1)/N, a=0.95*Math.pow(1-f0,1.5), c=(q<2)?'255,242,205':'242,201,121';
+          ctx.strokeStyle='rgba('+c+','+a.toFixed(3)+')'; ctx.lineWidth=w; ctx.beginPath(); ctx.moveTo(L*f0,0); ctx.lineTo(L*f1,0); ctx.stroke(); }
+        ctx.rotate(Math.PI/3); }
+      var cr=r*.34, ring=[[1,'242,201,121',.10],[.72,'242,201,121',.18],[.48,'242,201,121',.32],[.26,'255,250,236',.6],[.12,'255,250,236',1]];
+      for(var m=0;m<ring.length;m++){ ctx.fillStyle='rgba('+ring[m][1]+','+ring[m][2]+')'; ctx.beginPath(); ctx.arc(0,0,cr*ring[m][0],0,6.2832); ctx.fill(); }
+      ctx.restore(); }
     function draw(tt){
       var loop=Math.floor(tt/PERIOD), t=tt-loop*PERIOD, i, x, y;
       pT+=(mT-pT)*0.06; pS+=(mS-pS)*0.06;
@@ -104,10 +109,15 @@ window.__sbaAboutRun = function(bm){
     function hex(cx,cy,R,rot){ ctx.beginPath(); for(var k=0;k<6;k++){ var a=rot+k*Math.PI/3, x=cx+Math.cos(a)*R, y=cy+Math.sin(a)*R; if(k) ctx.lineTo(x,y); else ctx.moveTo(x,y); } ctx.closePath(); }
     function glow(col,w,a){ if(a<=0.01) return; ctx.save(); ctx.lineCap='round'; ctx.lineJoin='round'; ctx.lineWidth=w+14; ctx.strokeStyle='rgba('+col+','+(a*0.07).toFixed(3)+')'; ctx.stroke(); ctx.lineWidth=w+6; ctx.strokeStyle='rgba('+col+','+(a*0.18).toFixed(3)+')'; ctx.stroke(); ctx.restore(); }
     function flare(x,y,r,rot,al){ if(al<=0.02) return; ctx.save(); ctx.translate(x,y); ctx.rotate(rot); ctx.shadowColor='rgba(0,0,0,0)'; ctx.shadowBlur=0; ctx.shadowColor='rgba(0,0,0,0)'; ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=Math.min(1,al);
-      for(var k=0;k<6;k++){ var L=r*(0.5+0.5*Math.abs(Math.sin(k*2.1+rot*2.0+x*0.01))); var g=ctx.createLinearGradient(0,0,L,0); g.addColorStop(0,'rgba(255,242,205,.95)'); g.addColorStop(1,'rgba(242,201,121,0)');
-        ctx.strokeStyle=g; ctx.lineWidth=(k%2?0.9:1.7); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(L,0); ctx.stroke(); ctx.rotate(Math.PI/3); }
-      var rg=ctx.createRadialGradient(0,0,0,0,0,r*.34); rg.addColorStop(0,'rgba(255,250,236,1)'); rg.addColorStop(.5,'rgba(242,201,121,.55)'); rg.addColorStop(1,'rgba(242,201,121,0)');
-      ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(0,0,r*.34,0,6.2832); ctx.fill(); ctx.restore(); }
+      /* 그라데이션 없이: 갈래는 안쪽→바깥쪽 7조각을 점점 옅은 단색으로, 핵은 동심원 5겹 (웨일 GPU 캔버스 호환) */
+      ctx.lineCap='round';
+      for(var k=0;k<6;k++){ var L=r*(0.5+0.5*Math.abs(Math.sin(k*2.1+rot*2.0+x*0.01))), w=(k%2?0.9:1.7), N=7;
+        for(var q=0;q<N;q++){ var f0=q/N, f1=(q+1)/N, a=0.95*Math.pow(1-f0,1.5), c=(q<2)?'255,242,205':'242,201,121';
+          ctx.strokeStyle='rgba('+c+','+a.toFixed(3)+')'; ctx.lineWidth=w; ctx.beginPath(); ctx.moveTo(L*f0,0); ctx.lineTo(L*f1,0); ctx.stroke(); }
+        ctx.rotate(Math.PI/3); }
+      var cr=r*.34, ring=[[1,'242,201,121',.10],[.72,'242,201,121',.18],[.48,'242,201,121',.32],[.26,'255,250,236',.6],[.12,'255,250,236',1]];
+      for(var m=0;m<ring.length;m++){ ctx.fillStyle='rgba('+ring[m][1]+','+ring[m][2]+')'; ctx.beginPath(); ctx.arc(0,0,cr*ring[m][0],0,6.2832); ctx.fill(); }
+      ctx.restore(); }
     function draw(t){
       ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
       var cx=W/2, cy=H*0.5, R=Math.min(W*0.42, H*0.46); ctx.lineJoin='round';
