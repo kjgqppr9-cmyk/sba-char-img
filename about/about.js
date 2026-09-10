@@ -182,11 +182,8 @@ window.__sbaAboutRun = function(bm){
         if(reduced){ lis.forEach(function(li){ li.classList.add('on'); }); return; }
         function step(){ if(k < lis.length){ lis[k].classList.add('on'); k++; setTimeout(step, 2000); } else { setTimeout(function(){ lis.forEach(function(li){ li.classList.remove('on'); }); k = 0; setTimeout(step, 1200); }, 2600); } }
         setTimeout(step, 900); }
-      function armRoles(ul){ if(ul.__roles) return; ul.__roles = true; var lis = ul.querySelectorAll('li'); if(reduced){ lis.forEach(function(l){ l.classList.add('lit'); }); return; }
-        var k = 0; function step(){ if(k>0) lis[k-1].classList.remove('gold'); if(k < lis.length){ lis[k].classList.add('lit'); if(!lis[k].classList.contains('now')) lis[k].classList.add('gold'); k++; setTimeout(step, 420); } else { setTimeout(function(){ lis.forEach(function(l){ l.classList.remove('lit','gold'); }); k = 0; setTimeout(step, 900); }, 5200); } }
-        setTimeout(step, 500); }
       window.__abxCount = countUp;
-      function show(el){ el.classList.add('in'); if(el.classList.contains('roles')) armRoles(el); if(el.classList.contains('fc')){ var fi = parseFloat(el.style.getPropertyValue('--i'))||0; setTimeout(function(){ el.classList.add('flip'); setTimeout(function(){ el.classList.add('flat'); }, 1150); var f = el.querySelector('.front.gl'); if(f) setTimeout(function(){ armSweep(f); }, 900); }, reduced ? 0 : fi*180); } el.querySelectorAll('[data-n]').forEach(countUp); if(el.hasAttribute('data-n')) countUp(el); if(el.classList.contains('gl')) armSweep(el); el.querySelectorAll('[data-cycle]').forEach(armCycle); }
+      function show(el){ el.classList.add('in'); if(el.classList.contains('fc')){ var fi = parseFloat(el.style.getPropertyValue('--i'))||0; setTimeout(function(){ el.classList.add('flip'); setTimeout(function(){ el.classList.add('flat'); }, 1150); var f = el.querySelector('.front.gl'); if(f) setTimeout(function(){ armSweep(f); }, 900); }, reduced ? 0 : fi*180); } el.querySelectorAll('[data-n]').forEach(countUp); if(el.hasAttribute('data-n')) countUp(el); if(el.classList.contains('gl')) armSweep(el); el.querySelectorAll('[data-cycle]').forEach(armCycle); }
       if(reduced || !('IntersectionObserver' in window)){ targets.forEach(show); }
       else { var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ show(e.target); io.unobserve(e.target); } }); }, {threshold:0.18, rootMargin:'0px 0px -6% 0px'}); targets.forEach(function(el){ io.observe(el); }); }
       bound = root;
