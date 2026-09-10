@@ -423,7 +423,7 @@
 .mx-trust .rv-h{text-align:center;margin-top:64px}
 .mx-trust .rvs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px}
 .mx-trust .rv{position:relative;background:var(--cream);border:1px solid var(--line);border-radius:20px;padding:28px 28px 24px}
-.mx-trust .rv p::before{content:"\201C";position:absolute;top:10px;right:22px;font:900 64px/1 Georgia,serif;color:rgba(224,162,63,.35)}
+.mx-trust .rv p::before{content:"\201C";position:absolute;top:-18px;right:-6px;font:900 64px/1 Georgia,serif;color:rgba(224,162,63,.35)}
 .mx-trust .rv p{margin:0 0 12px;font-size:15.5px;line-height:1.8;color:#2a2f2b;word-break:keep-all;position:relative}
 .mx-trust .rv small{font-size:13px;color:#8a9089;font-weight:600}
 /* ── 채널 ── */
