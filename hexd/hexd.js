@@ -1060,20 +1060,167 @@ function mountResultRadar(root, scores, lowestIdx){
   window.__sbaHexdBlueprint=_bp;
 }
 
-/* ── 결과 화면 v3 ─────────────────────────────────── */
-var DETAIL_OVR={
-  MASTER:{g:"이미 여섯 영역 모두 고르게 높은, 더 채울 곳이 없는 완성형입니다. 이제 과제는 '유지'와 '확장'입니다. 첫째, 지금의 높은 수준을 습관과 시스템으로 굳혀 그날의 컨디션에 흔들리지 않게 하세요. 둘째, 모든 걸 직접 하려 하지 말고 믿을 사람에게 나눠 맡겨 당신의 시간을 미래를 그리는 데 쓰세요. 셋째, 완성된 역량을 강의·멘토링·새로운 사업으로 확장해 더 큰 판을 만들어 보세요. 유지에 안주하지 않고 새 목표를 세우는 순간, 마스터는 한 번 더 성장합니다."}
+/* ── 성장 방향 v3.1: 조합 생성 (전문가 6인 검토 반영 2026-09-11) ─────────────────────
+   재료 = 여섯 축 점수(모양) · 1위 축 · 가장 낮은 축 · 낮게 답한 문항의 주제 · 사전 맥락 · 결과 코드(문장 변주 고정).
+   원칙 = 잰 것만 말한다 / 점수와 축 이름은 본인 것만 / 한 번에 한 가지 움직임 / 사장님께 말하는 문장 / 숙제 목록이 아니라 순서와 이유.
+   검토 반영 = ① "방식을 옮긴다"·"숫자를 나란히" 같은 추상 표현 → 조합마다 손으로 하는 행동(act)과 적을 것(unit)을 명시
+             ② 불안 자극·성품 단정·결함 묘사 문장 삭제(통제권을 주는 문장으로) ③ "따라온다"류 근거 없는 인과 삭제
+             ④ 맥락 문장은 가장 낮은 축과 이어질 때만 ⑤ 닫는 문장 풀 확대(반복 인상 완화) ⑥ 성공/실패 틀 대신 "그걸로 충분합니다".
+   표기 = 축 이름은 받침이 없어(…관리) 가/는/를/와, 점수는 "N점"으로 써서 점 뒤에 이/은/을/과 를 붙인다. */
+function gPick(arr, seed){ if(!arr||!arr.length) return ''; return arr[Math.abs(seed)%arr.length]; }
+function gSeed(code){ let h=7; String(code||'').split('').forEach((c,i)=>{ h=(h*31+c.charCodeAt(0)*(i+1))>>>0; }); return h; }
+function gFill(t, v){ return t.replace(/\{(\w+)\}/g, (m,k)=>(v[k]!=null?v[k]:m)); }
+/* 받침 유무로 조사 고르기: gJosa('숫자','이','가') → '가' */
+function gJosa(w, a, b){ const s=String(w||'').replace(/[^가-힣]+$/,''); const c=s.charCodeAt(s.length-1); if(!(c>=0xAC00&&c<=0xD7A3)) return b; return ((c-0xAC00)%28)?a:b; }
+/* ① 관찰: 점수 모양별 */
+const G_SHAPE = {
+  master:["여섯 축이 모두 높고, 가장 높은 {top} {topS}점과 가장 낮은 {low} {lowS}점의 차이가 {gap}점뿐입니다. 어느 한 곳에 기대지 않고 굴러가는 사업입니다.",
+          "가장 낮은 축인 {low}가 {lowS}점입니다. 빈 곳을 찾는 결과가 아니라, 이 수준을 어떻게 유지하고 어디로 넓힐지를 보는 결과입니다."],
+  balanced:["여섯 축이 {lowS}점에서 {topS}점 사이에 고르게 있습니다. 어느 한 곳이 무너지지 않는 대신, 어디를 밀어야 성장이 보이는지가 덜 선명한 모양입니다.",
+            "가장 높은 {top} {topS}점과 가장 낮은 {low} {lowS}점의 차이가 {gap}점입니다. 고른 실천이 이 결과의 특징이고, 다음 질문은 \"어디에 힘을 모을까\"입니다."],
+  spike:["{top}가 {topS}점으로 다른 다섯 축보다 뚜렷하게 앞서 있습니다. 사업이 이 한 축의 힘으로 굴러가고 있고, 가장 낮은 {low} {lowS}점과의 간격 {gap}점이 그만큼 눈에 띕니다.",
+         "여섯 축 중 {top}가 {topS}점으로 혼자 앞서 있습니다. 강한 축 하나가 있다는 건 좋은 소식이고, 그 힘을 어디에 빌려줄지가 이번 결과의 핵심입니다."],
+  twin:["{top} {topS}점과 {top2} {top2S}점이 나란히 높고, 그 뒤로 간격이 벌어집니다. 두 축이 사업을 끌고 가는 모양이며, 가장 뒤처진 {low} {lowS}점이 그 속도를 따라오지 못하고 있습니다.",
+        "앞서는 두 축 {top}·{top2}와 가장 낮은 {low} {lowS}점 사이가 {gap}점입니다. 끌고 가는 힘은 충분하니, 끌려오지 못하는 한 곳을 먼저 봅니다."],
+  sink:["다른 다섯 축은 제 몫을 하고 있는데 {low} 하나가 {lowS}점으로 내려앉아 있습니다. 두 번째로 낮은 {low2}보다도 {sinkGap}점 아래라, 이 한 축이 전체 모양을 정합니다.",
+        "{low}가 {lowS}점으로 혼자 낮습니다. 나머지 다섯 축이 받쳐 주고 있어서 지금은 티가 덜 나지만, 사업이 커질수록 이 축이 먼저 신호를 보냅니다."],
+  low:["여섯 축이 모두 {topS}점 아래에 있습니다. 어느 한 곳이 문제라기보다, 아직 습관이 자리 잡는 중이라고 읽는 편이 맞습니다. 그래서 순서가 중요합니다.",
+       "가장 높은 {top}도 {topS}점으로 아직 여유가 있고, {low}는 {lowS}점으로 더 그렇습니다. 모든 걸 한꺼번에 올리려 하면 아무것도 안 올라갑니다. 한 축부터 갑니다."],
+  mixed:["{top}가 {topS}점으로 앞서고 {low}가 {lowS}점으로 가장 뒤에 있습니다. 두 축의 차이 {gap}점이 지금 사업의 모양이고, 성장 방향은 이 간격을 어떻게 쓰느냐에 달려 있습니다.",
+         "높은 축과 낮은 축이 분명하게 갈립니다. {top} {topS}점은 이미 습관이 되어 있고, {low} {lowS}점은 아직 손이 덜 간 상태입니다."],
 };
+/* 1위 축이 이미 적고 있는 것 (지렛대의 '옆자리') */
+const G_TOPREC = {self:"쉬는 시간을 적어 둔 달력",production:"작업 순서표",goal:"이번 달 목표 칸",relation:"함께 일하는 사람과 확인하기로 한 날짜 메모",marketing:"고객이 들어온 수를 적는 칸",finance:"월말 정산표"};
+/* ② 지렛대: 1위 축의 습관 → 가장 낮은 축 (30조합). t=문장, act=손으로 하는 한 가지, unit=2주 뒤 적혀 있어야 할 것 */
+const G_PAIR = {
+  "self>production":{t:"자기 리듬을 지키는 힘을 만드는 일에도 쓰세요. 잠자는 시간을 정해 두듯, 주력 상품이 지켜야 할 기준 세 줄을 종이에 적어 두면 품질도 리듬이 됩니다.",act:"주력 상품의 기준 세 줄을 적어 두는 것",unit:"기준 세 줄과 그 기준으로 점검한 횟수"},
+  "self>goal":{t:"컨디션을 관리하듯 목표도 관리할 수 있습니다. 에너지가 높은 시간대에 '이번 달 가장 중요한 변화 한 가지'를 적는 것부터 시작하면 됩니다.",act:"이번 달 가장 중요한 변화 한 가지를 적어 두는 것",unit:"그 한 줄과 이번 주 할 일 세 개"},
+  "self>relation":{t:"과부하가 오면 줄이고 도움을 요청하는 힘이 이미 있습니다. 그 요청을 조금 더 일찍, 상대가 맡을 범위를 한 줄로 적어서 하면 그것이 곧 협업의 시작입니다.",act:"함께 일하는 사람에게 맡길 범위를 한 줄로 적어 보내는 것",unit:"보낸 한 줄과 확인하기로 한 날짜"},
+  "self>marketing":{t:"꾸준함이 몸에 붙은 사장님입니다. 고객 앞에 서는 일도 같은 방식으로 됩니다. 매주 같은 요일에 고객이 들어오는 경로 하나의 숫자를 적는 것부터입니다.",act:"매주 같은 요일에 고객이 들어온 수를 적는 것",unit:"경로 하나의 주간 숫자"},
+  "self>finance":{t:"몸의 신호를 미루지 않는 힘을 돈에도 쓰면 됩니다. 잠을 지키듯 월말 30분을 지켜 지난달 이익 숫자를 확인하는 것, 그 한 번이 재무관리의 시작입니다.",act:"월말 30분에 지난달 이익 숫자를 확인하는 것",unit:"지난달 이익 숫자 하나"},
+  "production>self":{t:"결과물을 지키는 기준이 있는 분입니다. 그 기준을 사장님 자신에게도 하나 두면 됩니다. 품질을 점검하듯 한 주에 '반드시 쉬는 시간' 하나를 정해 두는 것이 이 축을 올리는 가장 빠른 길입니다.",act:"한 주에 반드시 쉬는 시간 하나를 정해 두는 것",unit:"쉬기로 한 시간과 지킨 횟수"},
+  "production>goal":{t:"만드는 순서는 정리돼 있으니, 그 앞에 '무엇을 위해 만드는지'를 한 줄 붙이면 됩니다. 이번 달 결과물 하나를 고르고, 그것이 어떤 변화로 이어질지 적어 보세요.",act:"이번 달 결과물 하나가 이어질 변화를 한 줄로 적는 것",unit:"그 한 줄과 마감일"},
+  "production>relation":{t:"작업 순서를 문서로 남기는 손이 있습니다. 같은 손으로 함께 일하는 상대와 '언제 진행을 확인할지' 한 줄을 적어 두면 관계가 작업처럼 굴러갑니다.",act:"함께 일하는 사람과 확인할 날짜를 한 줄로 정해 두는 것",unit:"확인하기로 한 날짜"},
+  "production>marketing":{t:"좋은 것을 만드는 손이 이미 있습니다. 고객이 결정할 때 보여 줄 자료 한 장을 만드는 일도 '제작'이라고 생각하고, 만들 때 쓰는 기준 그대로 만들어 보세요.",act:"고객이 결정할 때 보여 줄 자료 한 장을 만드는 것",unit:"자료 한 장과 그것을 보여 준 횟수"},
+  "production>finance":{t:"원가와 과정을 다듬는 눈으로 통장을 보면 됩니다. 이번 달 주력 상품 하나의 원가와 판매가를 나란히 적는 것이 재무관리의 첫 장입니다.",act:"주력 상품 하나의 원가와 판매가를 나란히 적는 것",unit:"원가·판매가 두 숫자"},
+  "goal>self":{t:"목표에 마감을 붙이는 사장님입니다. 이번 달 목표 옆에 '내가 쉬는 날'을 같은 무게로 적어 두세요. 목표를 지키는 힘이 몸도 지킵니다.",act:"이번 달 목표 옆에 쉬는 날을 적어 두는 것",unit:"쉬기로 한 날짜와 지킨 횟수"},
+  "goal>production":{t:"목표를 작업으로 쪼개는 힘이 있으니, 그 작업 하나하나에 '어느 수준이면 끝'이라는 기준을 붙이면 됩니다. 기준이 붙는 순간 생산이 목표를 따라옵니다.",act:"이번 주 작업 세 개에 '어느 수준이면 끝'을 한 줄씩 붙이는 것",unit:"기준이 붙은 작업 세 개"},
+  "goal>relation":{t:"방향은 분명한데 함께 가는 사람이 그 방향을 아직 못 들었을 수 있습니다. 이번 주 할 일을 정할 때 상대가 맡을 범위를 한 줄로 함께 적어 보내 보세요.",act:"이번 주 할 일과 함께 상대가 맡을 범위를 한 줄로 보내는 것",unit:"보낸 한 줄과 확인하기로 한 날짜"},
+  "goal>marketing":{t:"목표를 숫자로 추적하는 습관을 고객 쪽으로 돌리면 됩니다. 이번 달 목표 하나를 '고객이 들어온 수'로 잡고 매주 그 숫자만 적어 보세요.",act:"이번 달 목표 하나를 고객이 들어온 수로 잡고 매주 적는 것",unit:"주간 고객 유입 수"},
+  "goal>finance":{t:"목표는 숫자로 관리하고 계십니다. 같은 방식으로 돈도 보면 됩니다. 이번 달 목표 옆에 '들어올 돈·나갈 돈' 두 칸만 더 그리면 재무가 목표 안으로 들어옵니다.",act:"이번 달 목표 옆에 '들어올 돈·나갈 돈' 두 칸을 그리는 것",unit:"두 칸의 숫자"},
+  "relation>self":{t:"함께 일하는 사람의 상태를 잘 읽으시는 분입니다. 그 눈을 사장님 자신에게도 한 번 돌려 보세요. 상대와 확인 시점을 정하듯, 내 컨디션을 확인하는 요일 하나를 정해 두면 됩니다.",act:"내 컨디션을 확인하는 요일 하나를 정해 두는 것",unit:"그 요일에 적은 컨디션 한 줄"},
+  "relation>production":{t:"손발을 맞추는 힘이 있으니, 반복 작업의 순서를 함께 일하는 사람과 같이 적어 보세요. 혼자 만들면 미루게 되는 순서표가 둘이면 한 시간에 나옵니다.",act:"반복 작업 하나의 순서를 함께 일하는 사람과 열 줄로 적는 것",unit:"열 줄짜리 순서표"},
+  "relation>goal":{t:"사람을 챙기는 데 쓰는 정성의 일부를 '어디로 가는지'에 쓰면 됩니다. 함께 일하는 사람에게 다음 달 가장 중요한 한 가지를 말로 정해 주는 것이 시작입니다.",act:"다음 달 가장 중요한 한 가지를 함께 일하는 사람에게 말로 정해 주는 것",unit:"그 한 가지와 마감일"},
+  "relation>marketing":{t:"관계에서 나오는 신뢰가 이미 있습니다. 거래를 마친 고객 한 명에게 후기나 소개를 부탁하는 것, 그것이 사장님께 가장 자연스러운 판매입니다.",act:"거래를 마친 고객 한 명에게 후기나 소개를 부탁하는 것",unit:"부탁한 횟수와 받은 후기 수"},
+  "relation>finance":{t:"사람을 믿고 맡기는 힘은 장점입니다. 다만 돈의 흐름만큼은 사장님 눈으로 직접 보셔야 합니다. 세무사가 있더라도 '통장 잔고와 나갈 돈' 한 장은 매달 직접 확인하고, 모르는 것이 나오면 그때 물어볼 상대를 정해 두면 됩니다.",act:"'통장 잔고와 나갈 돈' 한 장을 직접 적어 보는 것",unit:"잔고와 나갈 돈 두 숫자"},
+  "marketing>self":{t:"고객의 반응을 매주 확인하는 눈이 있습니다. 그 눈을 한 줄만 사장님께 쓰세요. 고객 숫자를 적는 날에 내 에너지 상태도 한 줄 같이 적어 두면 됩니다.",act:"고객 숫자를 적는 날에 내 에너지 상태를 한 줄 적는 것",unit:"에너지 상태 한 줄"},
+  "marketing>production":{t:"팔리는 것을 아는 눈이 있습니다. 그 눈으로 '고객이 실망하는 지점' 하나를 골라 품질 기준으로 바꾸면, 판매의 힘이 생산을 끌어올립니다.",act:"고객이 실망하는 지점 하나를 품질 기준 한 줄로 바꾸는 것",unit:"새 기준 한 줄과 그 기준으로 점검한 횟수"},
+  "marketing>goal":{t:"고객을 읽는 눈이 있으니 방향을 정하는 일도 어렵지 않습니다. 가장 많이 들어오는 경로 하나를 정해 '이번 달 이 숫자를 얼마로'라고 적으면 그것이 목표입니다.",act:"가장 많이 들어오는 경로 하나에 이번 달 숫자 목표를 적는 것",unit:"그 목표 숫자와 매주 실제 숫자"},
+  "marketing>relation":{t:"고객에게는 다음 단계를 잘 안내하시는 분입니다. 같은 안내를 함께 일하는 사람에게도 하면 됩니다. '다음에 언제 확인할지'를 먼저 말해 주는 것부터입니다.",act:"함께 일하는 사람에게 다음 확인 날짜를 먼저 말해 주는 것",unit:"확인하기로 한 날짜"},
+  "marketing>finance":{t:"고객 한 명을 모시는 비용을 아시니, 그 옆에 '한 명이 남기는 이익'을 적으면 됩니다. 두 숫자가 나란히 놓이는 순간 재무가 보이기 시작합니다.",act:"고객 한 명당 비용 옆에 한 명이 남기는 이익을 적는 것",unit:"비용·이익 두 숫자"},
+  "finance>self":{t:"들어오고 나가는 돈을 미리 보는 습관이 있습니다. 같은 습관을 몸에도 쓰면 됩니다. 월말 정산하듯 주말에 한 주의 피로를 한 줄로 정산해 보세요.",act:"주말에 한 주의 피로를 한 줄로 적는 것",unit:"주간 피로 한 줄"},
+  "finance>production":{t:"원가를 아는 눈으로 작업을 보면 됩니다. 시간이 가장 많이 새는 작업 하나를 골라 순서를 열 줄로 적으면, 그것이 순서표이자 원가 절감입니다.",act:"시간이 가장 많이 새는 작업의 순서를 열 줄로 적는 것",unit:"열 줄짜리 순서표"},
+  "finance>goal":{t:"숫자를 미리 보는 습관이 있으니, 그 숫자 중 하나를 '목표'라고 부르기만 하면 됩니다. 앞으로 세 달의 예상 매출 중 한 달을 골라 이유를 적어 보세요.",act:"세 달 예상 매출 중 한 달을 골라 목표로 적는 것",unit:"목표 숫자와 그 이유 한 줄"},
+  "finance>relation":{t:"지급 일정을 적어 두는 꼼꼼함이 있습니다. 같은 방식으로 사람과의 약속도 적어 두면 됩니다. 함께 일하는 사람과 확인할 날짜를 정산표 옆에 적어 두면 관계도 관리가 됩니다.",act:"함께 일하는 사람과 확인할 날짜를 정산표 옆에 적어 두는 것",unit:"확인하기로 한 날짜"},
+  "finance>marketing":{t:"이익은 정확히 보고 계십니다. 그 장부에 '이 고객이 어떤 경로로 왔는지' 한 칸만 더하면 판매관리가 재무 안에서 시작됩니다.",act:"장부에 고객이 들어온 경로 칸 하나를 더하는 것",unit:"경로별 고객 수"},
+};
+/* ② 낮은 문항 주제: 왜 중요한지. 위협·결함 묘사 대신 "지금 상태 + 무엇이 생기는지"로 말한다 */
+const G_LOW = {
+  self:[{ids:[5,7,8],why:"낮게 답하신 문항이 '일의 경계'와 '쉬는 시간'에 몰려 있습니다. 체력의 문제가 아니라 일정에 자리가 없었던 것뿐이라, 자리 하나를 만들면 바로 달라지는 축입니다."},
+        {ids:[1,2,3,4],why:"잠·운동·스트레스처럼 몸의 기본을 묻는 문항에 낮게 답하셨어요. 이 축은 의지가 아니라 회복의 문제라서, 지키는 시간 하나를 정하는 것으로 시작합니다."},
+        {ids:[6,9,10],why:"지치는 신호를 알아채고 대응하는 문항이 낮았습니다. 신호를 적어 두기 시작하면 무너지기 전에 줄일 수 있는 힘이 생깁니다."}],
+  production:[{ids:[6,7,8],why:"작업이 머릿속에 있고 문서로는 아직 남아 있지 않다고 답하셨어요. 순서 하나를 적어 두는 순간, 사장님이 자리를 비워도 이어지는 부분이 생깁니다."},
+        {ids:[1,2,3,4,5,9],why:"품질 기준을 정하고 그 기준으로 점검하는 문항이 낮았습니다. 기준 세 줄이 생기면 좋은 날의 품질을 매일의 품질로 만들 수 있습니다."},
+        {ids:[10],why:"약속한 완료 시점과 실제 시점의 차이를 아직 적어 보지 않으셨어요. 그 차이를 적기 시작하면 고객이 가장 먼저 느끼는 부분이 사장님 손에 들어옵니다."}],
+  goal:[{ids:[1,2,5,6,10],why:"어디로 가는지를 적어 두고 숫자로 보는 문항이 낮았습니다. 바쁘게 일하는데 나아가는 느낌이 없었다면, 방향을 한 줄 적는 것만으로 그 느낌이 달라집니다."},
+        {ids:[3,7,8,9],why:"목표를 이번 주 할 일로 바꾸는 문항이 낮았습니다. 방향은 있으니, 책상 위로 내려오게 하는 작업 세 개만 있으면 됩니다."},
+        {ids:[4],why:"월말에 돌아보는 시간이 아직 없다고 답하셨어요. 10분의 회고가 생기면 같은 실수가 반복되는 고리를 끊을 수 있습니다."}],
+  relation:[{ids:[1,2,9,10],why:"함께 일하는 사람과 언제 확인하고 어떻게 고마움을 전하는지 묻는 문항이 낮았습니다. 관계가 없는 게 아니라 리듬이 아직 없는 것이라, 날짜 하나를 정하면 생깁니다."},
+        {ids:[3,4,5],why:"맡을 범위를 합의하고 필요한 정보를 주는 문항이 낮았습니다. 시작 전에 한 줄만 적어 두면 갈등이 생기는 자리가 대부분 사라집니다."},
+        {ids:[6,7,8],why:"급할 때 손 내밀 곳과 의논할 상대를 묻는 문항이 낮았습니다. 상대 한 명을 미리 정해 두면 혼자 판단하는 시간이 짧아지고 결정이 빨라집니다."}],
+  marketing:[{ids:[3,4,5,6,8],why:"고객이 어디서 오고 다시 오는지를 숫자로 보는 문항이 낮았습니다. 이미 팔리고 있으니, 어디서 팔리는지 한 칸만 적으면 다음 수가 보입니다."},
+        {ids:[1,2,7,9],why:"무엇을 누구에게 왜 파는지 설명하는 문항이 낮았습니다. 좋은 상품은 이미 있으니, 설명 한 장이 붙는 순간 고객이 결정하기 쉬워집니다."},
+        {ids:[10],why:"관심을 보인 고객에게 다음 단계를 안내하는 절차가 아직 없다고 답하셨어요. 안내 문장 하나가 생기면 들어온 고객을 사장님이 붙잡을 수 있습니다."}],
+  finance:[{ids:[4,5,8],why:"앞으로 들어오고 나갈 돈을 미리 보는 문항이 낮았습니다. 세 달치를 한 장에 적어 두면 돈에 대한 막연함이 통제할 수 있는 날짜로 바뀝니다."},
+        {ids:[1,2,3,9,10],why:"지난달 이익과 가격의 근거를 확인하는 문항이 낮았습니다. 이익 숫자 하나를 찾아보는 순간, 열심히 판 것이 얼마나 남았는지가 사장님 손에 들어옵니다."},
+        {ids:[6,7],why:"증빙과 수금처럼 돈이 지나가는 자리를 확인하는 문항이 낮았습니다. 받을 돈의 예정일 하나만 적어도 새는 자리가 보이기 시작합니다."}],
+};
+/* ③ 맥락 한 줄 — 가장 낮은 축과 이어질 때만 붙인다 (axes 비어 있으면 어느 축이든) */
+const G_CTX = [
+  {when:a=>a.yearsInBiz==='pre-launch',text:"아직 첫 판매 전이라 이 점수는 '해 본 것'보다 '준비해 둔 것'을 잰 값입니다. 첫 고객이 생기면 다시 한 번 재 보세요. 그때의 차이가 진짜 결과입니다."},
+  {when:a=>a.debt==='yes',axes:['finance'],text:"대출이 있는 사업이라 '나갈 돈의 날짜'가 먼저 보여야 마음이 흔들리지 않습니다. 이번 달 상환일을 그 한 장의 첫 줄에 적어 두세요."},
+  {when:a=>a.hirePlan==='hiring-soon'||a.hirePlan==='hiring-active',axes:['relation','production'],text:"채용을 앞두고 계시니 지금이 정리할 때입니다. 새 사람이 오기 전에 사장님 머릿속에 있는 순서를 문서로 꺼내 두면 채용의 절반은 끝납니다."},
+  {when:a=>a.hirePlan==='downsize',axes:['relation','finance','goal'],text:"인원을 줄일 계획이라면 감정보다 숫자가 먼저 정리돼야 합니다. 어떤 일이 남고 어떤 일이 없어지는지 한 장에 적어 두세요."},
+  {when:a=>a.yearsInBiz==='year-0-1',text:"첫 판매 후 1년이 안 된 시기라 모든 축이 함께 흔들리는 게 자연스럽습니다. 지금은 한 축만 고르는 것이 여섯 축을 다 챙기는 것보다 빠릅니다."},
+  {when:a=>a.headcount==='solo'&&a.hasOutsourcing!=='yes',text:"혼자 하는 사업이라 사장님의 시간이 곧 사업의 전부입니다. 위의 한 가지도 '30분 안에 끝나는 크기'로 줄여서 시작하세요."},
+  {when:a=>a.headcount==='solo'&&a.hasOutsourcing==='yes',axes:['relation','production','marketing'],text:"외주·협력자와 함께 일하고 계시니, 위의 한 가지를 혼자 하지 말고 그분과 나눠 보세요. 범위를 한 줄로 적어 주는 것부터입니다."},
+  {when:a=>a.headcount==='medium'||a.headcount==='large',text:"함께 일하는 사람이 여럿이라 사장님이 바뀌는 것만으로는 부족합니다. 위의 한 가지를 팀의 규칙 한 줄로 바꿔 적어 두세요."},
+  {when:a=>a.primaryCustomer==='b2b',axes:['marketing'],text:"기업 고객을 상대하시니 판매는 '경로'보다 '제안 뒤 후속'에서 갈립니다. 제안 후 연락하는 날짜를 정해 두는 것이 이 축의 절반입니다."},
+  {when:a=>a.primaryCustomer==='b2g',axes:['marketing','goal'],text:"공공기관이 주 고객이라 공고와 제안서의 리듬이 곧 판매의 리듬입니다. 공고 확인 요일을 하나 정해 두세요."},
+  {when:a=>a.revenueModel==='subscription',axes:['marketing','finance'],text:"정기 결제 모델이라 새 고객보다 '떠난 고객 수'가 먼저 보여야 합니다. 이번 달 이탈 수 하나만 적어도 방향이 잡힙니다."},
+  {when:a=>a.revenueModel==='project',axes:['marketing','finance'],text:"프로젝트 단위로 돈이 들어오는 사업이라 다음 일이 언제 들어올지가 재무의 전부입니다. 끝난 고객에게 다음 일을 제안하는 절차가 곧 매출 관리입니다."},
+  {when:a=>a.revenueModel==='licensing',axes:['finance'],text:"라이선스·로열티 매출은 정산이 예정대로 오는지가 핵심입니다. 정산 예정일과 실제 입금일을 한 장에 적어 두세요."},
+  {when:a=>a.yearsInBiz==='year-8-plus',text:"8년 넘게 이어 온 사업이라 습관은 이미 굳어 있습니다. 새 습관을 더하기보다 오래된 습관 하나를 바꾸는 쪽이 효과가 큽니다."},
+  {when:a=>anyOf(a.channels,'offline-store'),axes:['marketing'],text:"매장이 있는 사업이라 '다시 오는 손님'이 숫자로 보여야 합니다. 이번 주 재방문 고객 수를 세어 보는 것부터입니다."},
+];
+/* ③ 다음 한 달의 순서 — 조합별 행동(act)·적을 것(unit)·1위 축의 옆자리(topRec)를 넣어 손에 잡히게 */
+const G_ORDER = [
+  "순서는 이렇습니다. 첫 두 주는 {act}, 이것 하나만 합니다. {top}는 이미 몸에 익어 있으니 당분간 지금 수준만 유지합니다. 셋째 주부터 {unit}{u_eul} {topRec} 옆에 같이 적어 보세요. 그때부터 두 축이 한 장에서 관리됩니다.",
+  "한 달만 이렇게 해 보세요. 새로운 일을 더하지 않습니다. {act}, 이것뿐입니다. 2주 뒤에 {unit}{u_ig} 하나라도 적혀 있으면 그걸로 충분합니다. 눈금이 움직인 겁니다.",
+  "우선순위는 분명합니다. {low2}({low2S}점)도 낮지만 지금은 건드리지 않습니다. 한 번에 한 축입니다. {unit}{u_ig} 적히기 시작하면 그때 {low2}를 봅니다. 한 달 뒤에 다시 재 보세요.",
+];
+const G_ORDER_HIGH = [
+  "이제 과제는 올리는 것이 아니라 굳히는 것입니다. 여섯 축 중 사장님이 자리를 비워도 이어지는 축이 몇 개인지 세어 보세요. 사장님이 빠지면 멈추는 축이 다음 달의 목표입니다.",
+  "한 달 동안 새로 시작할 일은 없습니다. 대신 {low}에서 지금 하고 있는 방식이 정말 작동하는지 {unit}{u_eul} 기록으로 한 번 확인해 보세요. 높은 점수는 습관의 증거이지 결과의 증거는 아니니까요.",
+];
+/* ④ 닫는 한 줄 — 연차·모양 풀 + 가장 낮은 축 풀 + 한 걸음 더 풀을 섞어 반복 인상을 줄인다 */
+const G_CLOSE = {
+  master:["지금의 여섯 축을 시스템으로 굳히고, 그다음은 사장님 없이도 굴러가는 판을 그릴 차례입니다.","이 결과는 유지가 과제인 드문 경우입니다. 다음 목표를 세우는 순간 한 번 더 자랍니다.","여섯 축이 모두 높다는 건 다음 사람을 키울 준비가 됐다는 뜻이기도 합니다. 사장님의 방식을 글로 남기는 것이 다음 단계입니다."],
+  balanced:["고른 사업은 오래 갑니다. 이제 한 축을 골라 뾰족하게 만들 차례입니다.","여섯 축이 고르다는 건 어디를 밀어도 움직인다는 뜻입니다. 하나만 고르세요.","균형은 지키는 것이 아니라 쓰는 것입니다. {low}부터 밀어 보세요."],
+  early:["지금은 잘하는 것보다 '재 보는 것'이 먼저입니다. 한 달 뒤 같은 진단을 다시 하면 그때 성장 방향이 선명해집니다.","첫해의 점수는 성적이 아니라 출발선입니다. 한 축만 움직여 보고 다시 재 보세요.","첫해에 여섯 축이 다 높은 사장님은 없습니다. {act}, 이것 하나가 첫해의 성장 방향입니다."],
+  mid:["작은 사업의 성장은 여섯 축을 다 올리는 게 아니라, 가장 낮은 축 하나가 사업을 끌어내리지 않게 하는 것에서 시작합니다.","{top}가 만든 지금까지의 성과에 {low} 하나가 더해지면, 같은 노력으로 다른 결과가 납니다.","{topS}점짜리 습관을 이미 갖고 계십니다. 그 습관이 {low}에도 붙는 데 필요한 건 재능이 아니라 한 장의 종이입니다."],
+  late:["오래 한 사업일수록 바꾸는 건 하나면 됩니다. {low} 하나가 바뀌면 나머지 다섯 축이 쓰이는 방식도 달라집니다.","지금까지의 방식이 사업을 여기까지 데려왔습니다. 다음 구간은 {low} 하나를 더한 방식이 데려갑니다.","오래된 사업의 성장은 새로운 것을 배우는 데서가 아니라, {topS}점짜리 습관을 {low}에 옮기는 데서 옵니다."],
+  step:["오늘 이 글에서 떠오른 한 가지를 함께 일하는 사람이나 가까운 사람에게 '이번 주 안에 한다'고 말해 두세요. 말해 둔 일은 대개 됩니다.","오늘 밤 {act}부터 시작해 보세요. 첫 줄만 적어 두고 주무셔도 됩니다. 나머지는 내일의 사장님이 이어서 합니다."],
+};
+function buildGrowth(scores, type, gap, pre, code){
+  const seed=gSeed(code);
+  const ranked=(type&&type._rank)||scores.slice().sort((a,b)=>b.score-a.score);
+  const top=ranked[0], top2=ranked[1], low=ranked[5], low2=ranked[4];
+  const mx=top.score, mn=low.score, range=mx-mn;
+  const pair=G_PAIR[top.axisId+'>'+low.axisId]||{t:'',act:'위의 한 가지',unit:'그 숫자'};
+  const v={top:labelOf(top.axisId),topS:top.score,top2:labelOf(top2.axisId),top2S:top2.score,low:labelOf(low.axisId),lowS:low.score,low2:labelOf(low2.axisId),low2S:low2.score,gap:range,sinkGap:low2.score-low.score,act:pair.act,unit:pair.unit,topRec:G_TOPREC[top.axisId]||'늘 적는 표'};
+  v.u_ig=gJosa(pair.unit,'이','가'); v.u_eul=gJosa(pair.unit,'을','를'); v.u_eun=gJosa(pair.unit,'은','는');
+  let shape='mixed';
+  if(type&&type.code==='MASTER') shape='master';
+  else if(type&&type.code==='BALANCED') shape='balanced';
+  else if(mx<70) shape='low';
+  else if(low2.score-low.score>=12 && mn<=60) shape='sink';
+  else if(top.score-top2.score>=12) shape='spike';
+  else if(top.score>=80 && top2.score>=80 && top2.score-ranked[2].score>=10) shape='twin';
+  const high=(shape==='master'||shape==='balanced');
+  const p1=gFill(gPick(G_SHAPE[shape], seed), v);
+  const lowN=(gap&&gap.items&&gap.items.length)?gap.items[0].n:1;
+  const theme=(G_LOW[low.axisId]||[]).find(t=>t.ids.includes(lowN))||(G_LOW[low.axisId]||[])[0];
+  const allHigh=!!(gap&&gap.allHigh);
+  let p2=pair.t;
+  if(allHigh) p2+=' 다만 이 축도 대체로 높게 답하셔서, 빈 곳을 메우기보다 지금 방식이 실제로 작동하는지 기록으로 확인하는 것이 과제입니다.';
+  else if(theme) p2+=' '+theme.why;
+  const ctx=G_CTX.filter(c=>{ try{ return !!c.when(pre||{}) && (!c.axes || c.axes.includes(low.axisId)); }catch(e){ return false; } }).slice(0,1).map(c=>c.text);
+  const recKey=(v.topRec||'').slice(-3); const orderPool=high?G_ORDER_HIGH:(pair.act.indexOf(recKey)>=0?G_ORDER.slice(1):G_ORDER);
+  const p3=[gFill(gPick(orderPool, seed>>3), v)].concat(ctx).join(' ');
+  let closeKey='mid';
+  if(shape==='master') closeKey='master'; else if(shape==='balanced') closeKey='balanced';
+  else if(pre&&(pre.yearsInBiz==='pre-launch'||pre.yearsInBiz==='year-0-1')) closeKey='early';
+  else if(pre&&pre.yearsInBiz==='year-8-plus') closeKey='late';
+  const closePool=(high?[]:G_CLOSE.step).concat(G_CLOSE[closeKey]);
+  const p4=gFill(gPick(closePool, seed>>5), v);
+  return {shape, paras:[p1,p2,p3,p4].filter(Boolean), pairKey:top.axisId+'>'+low.axisId, closeKey};
+}
+
+/* ── 결과 화면 v3 ─────────────────────────────────── */
 const AXIS_EN={self:"SELF",production:"PRODUCTION",goal:"GOAL",relation:"RELATION",marketing:"MARKETING",finance:"FINANCE"};
 function eyebrow(t, r){ return '<h3 class="hexd-eyebrow">'+t+(r?'<span class="r">'+r+'</span>':'')+'</h3>'; }
 function fmtDate(t){ const d=new Date(t||Date.now()); const p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'.'+p(d.getMonth()+1)+'.'+p(d.getDate()); }
-/* 성장 방향 글만 외부 자료에서 가져온다 (강점·빈 곳은 이 화면에서 직접 계산) */
-function applyDetail(root,type){
-  const d=(DETAIL_OVR[type.code])||(_detail&&_detail[type.code]);
-  const gw=root.querySelector('#growthWrap'); if(!gw) return;
-  if(d&&d.g){ gw.innerHTML=eyebrow('성장 방향')+'<div class="hexd-growth-body">'+d.g+'</div>'; gw.style.display='block'; }
-  else { gw.style.display='none'; }
-}
 function likertWord(v){ const L=LIKERT_LABELS.find(x=>x.value===v); return L?L.short:String(v); }
 /* 빈 곳 블록: 가장 낮은 축 + 낮게 답한 문항 2개(실제 보여 준 문장) + 과제 + 고민 영역 메모 */
 function buildGap(scores){
@@ -1189,8 +1336,13 @@ function showResult(root, opts){
     } else { simWrap.style.display='none'; }
   }
 
-  if(_detail){ applyDetail(root,type); }
-  else { fetch(_CB+'type-detail.json').then(function(r){return r.json();}).then(function(j){ _detail=j; applyDetail(root,type); }).catch(function(){ applyDetail(root,type); }); }
+  /* 성장 방향: 점수 모양·1위 축·가장 낮은 축·낮은 문항·사전 맥락으로 조합 (growth.js) */
+  const gw=root.querySelector('#growthWrap');
+  if(gw){
+    const g=buildGrowth(scores, type, gap, _pre, _rcode);
+    gw.innerHTML=eyebrow('성장 방향')+'<div class="hexd-growth-body" data-enh="1">'+g.paras.map(p=>'<p>'+p+'</p>').join('')+'</div>';
+    gw.style.display='block';
+  }
 
   /* 다음 단계 */
   const cs=root.querySelector('#ctaSub'); if(cs) cs.innerHTML='결과 코드 <b>'+_rcode+'</b> 가 신청서에 함께 들어갑니다';
@@ -1555,7 +1707,7 @@ window.__sbaHexdRun = function(bm){ mount(); if(bm) bm.onContextChange = mount; 
     window.__sbaAutoResult=1;
     btn.click();
   }
-  function runAll(){ enhanceGrowth(); enhanceQ(); enhanceReviewBoard(); enhanceAutoResult(); }
+  function runAll(){ enhanceQ(); enhanceReviewBoard(); enhanceAutoResult(); }
   var mo=new MutationObserver(runAll);
   try{ mo.observe(document.body,{childList:true,subtree:true}); }catch(e){}
   setTimeout(runAll,600);
