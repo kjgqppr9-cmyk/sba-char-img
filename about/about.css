@@ -308,7 +308,8 @@
 .abx .ah-hint{position:absolute;right:52px;bottom:20px;z-index:3;font:500 11.5px/1 "IBM Plex Mono",Consolas,monospace;letter-spacing:.12em;color:rgba(7,20,15,.5)}
 
 /* 숫자 — 크림, 히어로에서 이어지는 이음새 */
-.abx-num{background:var(--cream);position:relative;padding:72px 0 88px}
+.abx-num{background:var(--cream);position:relative;padding:144px 0 176px}
+@media (max-width:1024px){.abx-num{padding:96px 0 112px}}
 .abx-num::before{content:"";position:absolute;left:0;right:0;top:0;height:clamp(140px,22vh,260px);z-index:0;pointer-events:none;background:linear-gradient(180deg,#F2F0EB 0%,rgba(242,240,235,.9) 40%,rgba(242,240,235,0) 100%)}
 .abx-num .wrap{display:block}
 .abx .stat-h{text-align:center;font-size:12.5px;letter-spacing:.14em;font-weight:800;color:var(--ink2);margin-bottom:22px}
