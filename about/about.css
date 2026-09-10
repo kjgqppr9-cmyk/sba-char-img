@@ -467,7 +467,7 @@
   .abx-path,.abx-way,.abx-here{padding:64px 0}.abx-dark{padding:72px 0}
   .abx-dark::before{opacity:.6;background-position:48% 50%}
   .abx-dark::after{background:linear-gradient(180deg,rgba(14,31,25,.9) 0%,rgba(14,31,25,.35) 20%,rgba(14,31,25,.45) 70%,rgba(14,31,25,.95) 100%)}
-  .abx .why{gap:14px;margin-top:28px}.abx .why li{padding:24px 20px 22px}.abx .why b{font-size:19px}.abx .why p{font-size:14.5px}.abx .why li.plain p{font-size:15.5px}
+  .abx .why{gap:14px;margin-top:28px}.abx .why li{padding:24px 18px 22px}.abx .why b{font-size:19px}.abx .why p{font-size:14.5px}.abx .why li.plain p{font-size:15px}
   .abx .path-say p{font-size:23px}
   .abx-way .wrap,.abx-here .wrap{grid-template-columns:1fr;gap:30px}
   .abx .vows li{grid-template-columns:50px 1fr;gap:12px;padding:16px;min-height:0}
