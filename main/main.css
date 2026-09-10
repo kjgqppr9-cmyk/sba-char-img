@@ -318,21 +318,43 @@
 /* ── 육각형 모델 ── */
 .mx-hex{background:#fff;padding:84px 0 96px}
 .mx-hex .grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;margin-top:44px}
-.mx-hex .radar-wrap{position:relative}
-.mx-hex .radar{display:block;width:100%;max-width:460px;height:auto;margin:0 auto;overflow:visible}
-.mx-hex .radar text{font-family:var(--font-family-body);font-weight:800;font-size:9.5px;fill:#1E3932}
+/* 레이더 패널: 히어로·CTA 와 같은 진초록 도면 위에 금빛 진단 다각형 */
+.mx-hex .radar-wrap{position:relative;border-radius:24px;padding:20px 22px 16px;background:radial-gradient(120% 90% at 50% 42%,#11382B 0%,#0B1F18 52%,#07140F 100%);border:1px solid rgba(242,201,121,.16);box-shadow:0 26px 60px rgba(7,20,15,.26);overflow:hidden}
+.mx-hex .radar-wrap::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(rgba(242,201,121,.075) 1px,transparent 1px) 0 0/24px 24px,linear-gradient(90deg,rgba(242,201,121,.075) 1px,transparent 1px) 0 0/24px 24px;-webkit-mask-image:radial-gradient(75% 75% at 50% 50%,#000 25%,transparent 100%);mask-image:radial-gradient(75% 75% at 50% 50%,#000 25%,transparent 100%)}
+.mx-hex .radar-wrap::after{content:"";position:absolute;left:50%;top:52%;width:70%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;background:radial-gradient(closest-side,rgba(242,201,121,.16),rgba(242,201,121,0) 70%);animation:mxRdGlow 6s ease-in-out infinite}
+@keyframes mxRdGlow{0%,100%{opacity:.7;transform:translate(-50%,-50%) scale(.96)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}}
+.mx-hex .rd-h{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:10px;font:700 10.5px/1 "IBM Plex Mono",Consolas,monospace;letter-spacing:.12em;color:rgba(242,201,121,.78)}
+.mx-hex .rd-h i{font-style:normal;display:inline-flex;align-items:center;gap:7px;font-family:var(--font-family-body);font-weight:700;letter-spacing:.06em}
+.mx-hex .rd-h i::before{content:"";width:6px;height:6px;border-radius:50%;background:#F2C979;box-shadow:0 0 10px #F2C979}
+.mx-hex .rd-h em{font-style:normal;color:rgba(127,224,190,.7)}
+.mx-hex .radar{position:relative;z-index:1;display:block;width:100%;max-width:400px;height:auto;margin:6px auto 0;overflow:visible}
+.mx-hex .radar text{font-family:var(--font-family-body);font-weight:800;font-size:9.6px;fill:rgba(234,243,238,.9)}
+.mx-hex .radar .rp{filter:drop-shadow(0 0 5px rgba(242,201,121,.55))}
+.mx-hex .radar .rg{animation:mxRdBreath 4.4s ease-in-out infinite}
+@keyframes mxRdBreath{0%,100%{opacity:.12}50%{opacity:.26}}
 .mx-hex .radar .nd{transition:r .3s cubic-bezier(.34,1.5,.64,1),stroke-width .3s}
-.mx-hex .radar .lb{transition:font-size .3s,fill .3s}
+.mx-hex .radar .lb{transition:none}
 .mx-hex .radar[data-hi="0"] .nd0,.mx-hex .radar[data-hi="1"] .nd1,.mx-hex .radar[data-hi="2"] .nd2,.mx-hex .radar[data-hi="3"] .nd3,.mx-hex .radar[data-hi="4"] .nd4,.mx-hex .radar[data-hi="5"] .nd5{r:7.5;stroke-width:3}
-.mx-hex .radar[data-hi="0"] .lb0,.mx-hex .radar[data-hi="1"] .lb1,.mx-hex .radar[data-hi="2"] .lb2,.mx-hex .radar[data-hi="3"] .lb3,.mx-hex .radar[data-hi="4"] .lb4,.mx-hex .radar[data-hi="5"] .lb5{font-size:11.5px;fill:#00543A}
+.mx-hex .radar[data-hi="0"] .lb0,.mx-hex .radar[data-hi="1"] .lb1,.mx-hex .radar[data-hi="2"] .lb2,.mx-hex .radar[data-hi="3"] .lb3,.mx-hex .radar[data-hi="4"] .lb4,.mx-hex .radar[data-hi="5"] .lb5{font-size:11.5px;fill:#F2C979}
 .mx-hex .axes{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.mx-hex .axes li{display:grid;grid-template-columns:34px 4px 1fr;gap:14px;align-items:center;padding:14px 16px;border-radius:14px;background:var(--cream);border:1px solid var(--line);cursor:default;transition:transform .3s cubic-bezier(.34,1.4,.64,1),box-shadow .3s,background .3s}
+.mx-hex .axes li{position:relative;display:grid;grid-template-columns:34px 4px 1fr;gap:14px;align-items:center;padding:14px 38% 14px 16px;min-height:78px;border-radius:14px;background:var(--cream);border:1px solid var(--line);cursor:default;transition:transform .3s cubic-bezier(.34,1.4,.64,1),box-shadow .3s,background .3s,border-color .3s}
+.mx-hex .axes li>*{position:relative;z-index:1}
+/* 오른쪽 사진: 왼쪽으로 갈수록 투명, 평소엔 아주 천천히 떠다닌다 */
+.mx-hex .axes li .ph{position:absolute;z-index:0!important;top:0;right:0;bottom:0;width:50%;border-radius:0 14px 14px 0;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.55) 45%,#000 78%);mask-image:linear-gradient(90deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.55) 45%,#000 78%)}
+.mx-hex .axes li .ph img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;opacity:.9;animation:mxPhDrift 16s ease-in-out infinite alternate;animation-delay:calc(var(--i,0)*-2.7s);transition:opacity .4s}
+@keyframes mxPhDrift{0%{transform:scale(1.04) translateX(0)}100%{transform:scale(1.12) translateX(-3%)}}
+.mx-hex .axes li.in{animation:mxRowFloat 6.5s ease-in-out infinite;animation-delay:calc(var(--i,0)*-1.15s)}
+@keyframes mxRowFloat{0%,100%{translate:0 0}50%{translate:0 -3px}}
 .mx-hex .axes li .no{font:700 12px/1 "IBM Plex Mono",Consolas,monospace;letter-spacing:.06em;color:#9aa39d}
-.mx-hex .axes li .bar{width:4px;height:36px;border-radius:2px;background:var(--c)}
+.mx-hex .axes li .bar{width:4px;height:36px;border-radius:2px;background:var(--c);animation:mxBarPulse 3.6s ease-in-out infinite;animation-delay:calc(var(--i,0)*-.6s);transition:height .3s}
+@keyframes mxBarPulse{0%,100%{opacity:.7}50%{opacity:1}}
 .mx-hex .axes li strong{display:block;font-size:17px;color:var(--house);font-family:var(--font-family-heading);font-weight:var(--font-weight-heading);letter-spacing:-.02em}
 .mx-hex .axes li small{display:block;margin-top:3px;font-size:13.5px;color:var(--ink2)}
-.mx-hex .axes li:hover{transform:translateX(6px);background:#fff;box-shadow:0 12px 30px rgba(30,57,50,.1)}
+.mx-hex .axes li:hover{transform:translateX(6px);background:#fff;box-shadow:0 14px 34px rgba(30,57,50,.12);border-color:rgba(224,162,63,.45)}
 .mx-hex .axes li:hover .no{color:var(--c)}
+.mx-hex .axes li:hover .bar{height:44px}
+.mx-hex .axes li:hover .ph img{opacity:1}
+.mx-hex .axes li:hover strong{color:#00543A}
 .mx-hex .note{text-align:center;margin-top:44px;font-size:17px;line-height:1.8;color:var(--ink2)}
 .mx-hex .note b{color:var(--house);font-weight:800}
 .mx-hex .act{display:flex;justify-content:center;margin-top:26px}
@@ -458,8 +480,11 @@
   .mx-hex,.mx-svc,.mx-trust,.mx-ch{padding:64px 0}
   .mx-ai{padding:72px 0}
   .mx-hex .grid{grid-template-columns:1fr;gap:26px;margin-top:30px}
-  .mx-hex .axes li{grid-template-columns:28px 4px 1fr;gap:12px;padding:12px 14px}
+  .mx-hex .axes li{grid-template-columns:28px 4px 1fr;gap:12px;padding:12px 30% 12px 14px;min-height:72px}
+  .mx-hex .axes li .ph{width:46%}
   .mx-hex .axes li:hover{transform:none}
+  .mx-hex .radar-wrap{padding:16px 14px 12px;border-radius:20px}
+  .mx-hex .rd-h{font-size:9.5px;letter-spacing:.08em}
   .mx-ai::before{opacity:.45;background-position:48% 50%}
   .mx-ai .cards{grid-template-columns:1fr;gap:12px;margin-top:30px}
   .mx-ai .card{min-height:0}
