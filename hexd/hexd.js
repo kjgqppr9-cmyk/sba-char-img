@@ -489,6 +489,45 @@ function pickTask(axisId, lowestN){
   const list=TASKS[axisId]||[]; const hit=list.find(t=>t.ids.includes(lowestN)); return (hit||list[0]||{}).text||"";
 }
 
+/* ── 강점 풀어 쓰기 (유형별 2개, 순서 = strengths 순서 = 1위 축 → 2위 축). 잰 문항 안에서만 말한다 ── */
+const STRENGTH_NOTES = {
+  "E-B":["운동이나 활동을 정해 둔 대로 지키고, 일이 넘치면 맡을 일을 줄인다고 답하셨어요. 바쁠수록 자기 리듬부터 지키는 사장님입니다.","품질 기준을 정해 두고 결과물을 그 기준으로 다시 본다고 답하셨어요. 손이 빠른 것보다 손이 정확한 쪽입니다."],
+  "B-E":["품질 기준과 반복 작업의 순서가 정리돼 있다고 답하셨어요. 같은 품질을 다시 낼 수 있는 손입니다.","잠자는 시간과 재충전 시간을 지키려 일정을 조정한다고 답하셨어요. 오래 만들 수 있는 몸을 먼저 챙깁니다."],
+  "E-C":["번아웃 신호를 알아채고, 감정이 흔들리는 날에는 결정을 미룬다고 답하셨어요. 자기 상태를 읽으며 달리는 사장님입니다.","목표를 작업으로 나누고 마감일을 붙인다고 답하셨어요. 가고 싶은 곳이 이번 주 할 일로 내려옵니다."],
+  "C-E":["1년 동안 이루려는 변화를 적어 두고 숫자로 추적한다고 답하셨어요. 방향을 종이에 적어 두는 사장님입니다.","에너지가 높은 시간대에 중요한 일을 놓고, 과부하가 오면 줄인다고 답하셨어요. 페이스를 아는 달리기입니다."],
+  "E-M":["일과 사생활의 경계를 지키고, 감당 범위를 넘으면 도움을 요청한다고 답하셨어요. 혼자 끌어안지 않는 힘입니다.","함께 일하는 상대와 확인 시점을 정하고 맡을 범위를 합의한다고 답하셨어요. 손발을 맞추는 방법을 압니다."],
+  "M-E":["의견이 갈리면 상대의 설명을 듣고, 필요한 자료를 먼저 준다고 답하셨어요. 사람이 일하기 좋게 만드는 사장님입니다.","스트레스를 푸는 자기만의 방법이 있고 재충전 시간을 지킨다고 답하셨어요. 사람을 챙기면서 자기도 챙깁니다."],
+  "E-P":["운동·수면·재충전을 지키려 일정을 조정한다고 답하셨어요. 꾸준함이 몸에서 나옵니다.","고객이 들어오는 경로의 성과를 확인하고 다음 단계를 안내하는 절차가 있다고 답하셨어요. 고객 앞에 계속 서는 사장님입니다."],
+  "P-E":["고객이 결정할 때 보여 줄 자료가 있고 후기를 정기적으로 모은다고 답하셨어요. 파는 일을 습관으로 만든 분입니다.","과부하가 오면 일을 줄이고, 잠을 지키려 일정을 바꾼다고 답하셨어요. 그래서 그 습관이 오래 갑니다."],
+  "E-F":["몸의 이상 신호를 미루지 않고, 재충전 시간을 확보한다고 답하셨어요. 무리하지 않는 쪽을 고르는 사장님입니다.","앞으로 세 달의 입출금을 미리 보고 지급 일정을 정리해 둔다고 답하셨어요. 돈도 같은 방식으로 지킵니다."],
+  "F-E":["지난달 이익을 바로 확인할 수 있고, 고정비와 변동비를 구분한다고 답하셨어요. 통장을 감이 아니라 숫자로 보는 분입니다.","일이 넘치면 맡을 일을 줄이고 잠을 지킨다고 답하셨어요. 살림도 몸도 무리하지 않게 운영합니다."],
+  "B-C":["정해 둔 기준으로 품질을 점검하고 납기 차이를 확인한다고 답하셨어요. 약속한 대로 내놓는 손입니다.","중요한 목표를 작업 단위로 나누고 마감일을 정한다고 답하셨어요. 만들 것이 먼저 정해져 있습니다."],
+  "C-B":["정한 목표를 다음에 할 작업 단위로 나누고, 주요 작업에 마감일을 붙인다고 답하셨어요. 큰 그림이 책상 위의 이번 주 할 일로 내려오는 사장님입니다.","주력 상품이 지켜야 할 품질 기준을 정해 두고, 결과물을 그 기준으로 주기적으로 다시 본다고 답하셨어요. 만든 것을 그냥 내보내지 않는 손입니다."],
+  "B-M":["반복 업무의 순서가 정리돼 있고 자료를 나 없이도 찾을 수 있다고 답하셨어요. 함께 일하기 좋은 작업장입니다.","맡을 범위를 합의하고 필요한 정보를 먼저 준다고 답하셨어요. 좋은 것을 함께 만드는 방법을 압니다."],
+  "M-B":["함께 일하는 상대와 진행 확인 시점을 정하고, 빠질 때 대신 도움을 청할 사람을 안다고 답하셨어요. 협업이 끊기지 않게 잇는 분입니다.","품질 기준을 정해 두고 그 기준으로 점검한다고 답하셨어요. 연결한 뒤에 만든 것도 확실합니다."],
+  "B-P":["품질을 기준대로 점검하고 고객 불만을 개선에 반영한다고 답하셨어요. 손이 고객 쪽을 향해 있습니다.","고객이 들어오는 경로의 성과와 재구매를 확인한다고 답하셨어요. 만든 것을 파는 눈이 함께 있습니다."],
+  "P-B":["고객이 선택한 이유를 설명할 자료가 있고 후기를 모은다고 답하셨어요. 고객의 반응을 읽는 눈이 먼저입니다.","불만을 개선에 반영하고 결과물을 기준으로 점검한다고 답하셨어요. 팔고 나서도 손을 놓지 않습니다."],
+  "B-F":["원가와 과정을 꾸준히 다듬고 납기 차이를 확인한다고 답하셨어요. 낭비가 적은 작업 방식입니다.","가격의 근거를 갖고 지난달 이익을 바로 확인한다고 답하셨어요. 만든 만큼 남는지 계산하는 분입니다."],
+  "F-B":["가격 근거가 명확하고 고정비·변동비를 구분한다고 답하셨어요. 살림의 숫자를 아는 사장님입니다.","반복 작업의 순서가 정리돼 있고 원가를 계속 다듬는다고 답하셨어요. 손재주가 낭비 없이 쓰입니다."],
+  "C-M":["올해 목표를 바로 말할 수 있고 주요 작업에 마감이 있다고 답하셨어요. 가고 싶은 곳이 분명한 분입니다.","맡을 범위를 합의하고 확인 시점을 정한다고 답하셨어요. 함께 가는 사람도 그 길을 압니다."],
+  "M-C":["의견이 갈릴 때 원인을 확인하고 필요한 자료를 준다고 답하셨어요. 사람을 잇는 손이 먼저 움직입니다.","목표를 숫자로 추적하고 마감일을 정한다고 답하셨어요. 그 연결이 어디로 가는지도 정해져 있습니다."],
+  "C-P":["매주·매월 우선순위를 정하고 시장 변화를 목표에 반영한다고 답하셨어요. 가야 할 이유를 계속 다시 봅니다.","가치 제안을 한 줄로 말하고 유입 경로 성과를 확인한다고 답하셨어요. 그 이유를 고객에게 전할 줄 압니다."],
+  "P-C":["고객이 결정할 자료가 있고 다음 단계를 안내하는 절차가 있다고 답하셨어요. 파는 흐름이 몸에 붙어 있습니다.","올해 목표와 이번 주 우선순위가 정해져 있다고 답하셨어요. 그 흐름이 어디로 커질지도 정해 두었습니다."],
+  "C-F":["목표를 숫자로 정해 추적하고 월말에 돌아본다고 답하셨어요. 계획이 숫자로 적혀 있는 분입니다.","세 달 입출금을 미리 보고 지급 일정을 정리한다고 답하셨어요. 그 계획에 연료 계산이 붙어 있습니다."],
+  "F-C":["앞으로 나갈 돈의 일정을 정리하고 부족해질 시점을 미리 본다고 답하셨어요. 앞을 보고 살림하는 분입니다.","1년의 변화를 적어 두고 작업 단위로 나눈다고 답하셨어요. 살림이 목표를 향해 움직입니다."],
+  "M-P":["함께 일하는 사람에게 감사를 표현하고 의논할 상대가 있다고 답하셨어요. 관계가 자산인 사장님입니다.","재구매와 후기를 확인하고 다음 단계를 안내한다고 답하셨어요. 그 관계가 단골로 이어집니다."],
+  "P-M":["고객이 선택한 이유를 말할 수 있고 후기를 정기적으로 모은다고 답하셨어요. 고객을 읽는 눈이 먼저입니다.","협력사와 장기 관계를 관리하고 도움 청할 사람을 안다고 답하셨어요. 그 눈이 사람에게도 향합니다."],
+  "M-F":["맡을 범위를 합의하고 확인 시점을 정한다고 답하셨어요. 약속을 지키는 방식으로 믿음을 얻습니다.","수입과 지출을 확인하고 수금을 예정일에 점검한다고 답하셨어요. 셈이 밝은 연결자입니다."],
+  "F-M":["지난달 이익을 바로 확인하고 지급 일정을 정리해 둔다고 답하셨어요. 돈을 꼼꼼히 챙기는 살림꾼입니다.","의견이 갈리면 원인을 확인하고 필요한 자료를 준다고 답하셨어요. 사람에게도 믿음을 줍니다."],
+  "P-F":["유입 경로의 성과와 고객 획득 비용의 기준이 있다고 답하셨어요. 파는 일을 숫자로 보는 분입니다.","가격 근거가 있고 이익을 바로 확인한다고 답하셨어요. 팔고 나서 남는 돈까지 압니다."],
+  "F-P":["이익을 확인하고 세 달 입출금을 미리 본다고 답하셨어요. 살림이 먼저 서 있는 사장님입니다.","유입 경로 성과를 확인하고 다음 단계를 안내한다고 답하셨어요. 그 살림에 파는 힘이 붙어 있습니다."],
+  "MASTER":["여섯 영역 모두 높게, 그리고 고르게 답하셨어요. 어느 한 곳에 기대지 않는 실천입니다.","가장 낮은 영역과 가장 높은 영역의 차이가 작았어요. 흔들려도 무너지지 않는 균형입니다."],
+  "BALANCED":["여섯 영역 어느 하나 처지지 않게 답하셨어요. 고르게 실천하고 있는 분입니다.","높은 영역과 낮은 영역의 차이가 크지 않았어요. 안정감이 이 결과의 특징입니다."],
+};
+/* 닮은 사업가 한 줄 (공유 카드와 공유) */
+const SIMILAR_ACH={"사티아 나델라":"MS를 클라우드·AI 강자로 되살린 경영자","지로 오노":"평생 스시 하나에 매진한 미슐랭 3스타 장인","이본 쉬나드":"환경을 지키는 기업 철학의 상징","라탄 타타":"인도 최대 그룹을 세계로 이끈 경영자","인드라 누이":"펩시코를 이끈 '목적 있는 성장'의 리더","빌 캠벨":"실리콘밸리 경영자들의 스승이 된 코치","하워드 슐츠":"스타벅스를 세계적 브랜드로 키운 경영자","오프라 윈프리":"토크쇼로 미디어 제국을 세운 방송인","사라 블레이클리":"맨손으로 스팽스를 일군 자수성가 창업가","워런 버핏":"가치투자를 대표하는 세계적 투자가","존 보글":"저비용 인덱스 투자를 창시한 혁신가","월트 디즈니":"애니메이션과 테마파크를 창조한 몽상가","빌 게이츠":"PC를 대중화한 마이크로소프트 창업자","에드 캣멀":"픽사의 창의적 조직문화를 만든 리더","마쓰시타 고노스케":"'경영의 신'으로 불린 파나소닉 창업자","스티브 잡스":"혁신의 아이콘, 애플의 창업자","레이 크록":"맥도날드를 세계 프랜차이즈로 키운 경영자","팀 쿡":"애플을 시총 최고로 이끈 운영의 달인","샘 월튼":"세계 최대 유통 월마트를 세운 창업자","리드 헤이스팅스":"스트리밍 혁명을 이끈 넷플릭스 창업자","제프 베조스":"'고객 집착'으로 아마존을 세운 창업자","필 나이트":"나이키를 브랜드 신화로 만든 창업자","찰리 멍거":"버핏의 파트너, 다각적 사고의 투자가","레이 달리오":"세계 최대 헤지펀드를 세운 투자가","메리 케이 애시":"여성 방문판매 제국을 세운 창업가","에스티 로더":"화장품 제국을 일군 뷰티 창업가","제임스 시네갈":"회원제 유통 코스트코를 키운 경영자","이나모리 가즈오":"교세라를 세운 '아메바 경영'의 대가","베르나르 아르노":"명품 제국 LVMH를 이끄는 경영자","젠슨 황":"AI 반도체 시대를 연 엔비디아 창업자","일론 머스크":"전기차·우주로 도전하는 테슬라 창업자","김영모":"대한민국을 대표하는 제과 명장","신춘호":"신라면 신화를 쓴 농심 창업자","정문술":"벤처 1세대, 통 큰 기부로 존경받는 경영자","권오현":"반도체 신화를 이끈 삼성전자 경영자","신창재":"독서·정도경영의 교보생명 경영자","김미경":"자기계발 교육으로 성장한 대표 강사","박신후":"자기 분야를 꾸준히 키워온 사업가","구인회":"화학·전자의 기틀을 놓은 LG 창업자","윤동한":"화장품 ODM을 개척한 한국콜마 창업자","정주영":"'해봤어?'의 도전, 현대 창업자","이원영":"워라밸 기업문화의 제니퍼소프트 창업자","임영진":"디지털 금융을 이끈 신한카드 경영자","김정수":"삼립을 성장시킨 제빵 경영자","정태영":"디자인·브랜딩 경영의 현대카드 대표","박정부":"균일가 유통 다이소를 세운 창업자","이부진":"호텔·면세 사업을 이끈 호텔신라 경영자","최태원":"사회적 가치를 앞세운 SK 회장","권혁빈":"글로벌 게임 신화를 쓴 스마일게이트 창업자","김홍국":"닭고기 수직계열화를 이룬 하림 창업자","최종현":"인재경영으로 SK를 키운 경영자","박현주":"자산운용을 개척한 미래에셋 창업자","우미령":"윤리적 뷰티를 이끈 러쉬코리아 대표","서경배":"K뷰티를 세계로 넓힌 아모레퍼시픽 회장","함영준":"'갓뚜기' 상생경영의 오뚜기 회장","조정호":"성과주의로 성장한 메리츠금융 회장","윤윤수":"휠라를 인수해 부활시킨 경영자","이건희":"'신경영'으로 삼성을 세계로 이끈 회장","구광모":"선택과 집중의 LG 회장"};
+window.__sbaHexdAch = SIMILAR_ACH;
+
 /* ── 닮은 사업가 맵 (블록 코드 기준 · 캐릭터카드 한 줄 요약표) ──
    해외 1명 + 국내 1명(최대 2), 카드에서 안전 확인된 인물만. */
 const SIMILAR = {
@@ -998,7 +1037,13 @@ function makeBlueprint(scores, lowestIdx){
     function paint(tt){ ctx.setTransform(dpr,0,0,dpr,0,0); draw(ctx,W,H,tt); }
     function frame(now){ raf=null; if(!alive) return; if(W!==host.clientWidth||H!==host.clientHeight) size(); if(t0===null) t0=now; paint((now-t0)/1000); raf=requestAnimationFrame(frame); }
     size();
-    if(still){ paint(20); addEventListener('resize', function(){ size(); paint(20); }); return true; }
+    if(still){
+      /* 정지 모드: 크기가 잡힐 때까지 기다렸다가 완성 상태를 한 번 그린다 (숨겨진 화면에서 붙은 경우 대비) */
+      var tries=0; (function once(){ if(host.clientWidth>0&&host.clientHeight>0){ size(); paint(20); } else if(++tries<60){ requestAnimationFrame(once); } })();
+      addEventListener('resize', function(){ size(); paint(20); });
+      if(window.ResizeObserver){ new ResizeObserver(function(){ if(host.clientWidth!==W||host.clientHeight!==H){ size(); paint(20); } }).observe(host); }
+      return true;
+    }
     if(window.IntersectionObserver){ new IntersectionObserver(function(es){ alive=!!(es[0]&&es[0].isIntersecting); if(alive&&!raf) raf=requestAnimationFrame(frame); },{threshold:0}).observe(host); }
     else { alive=true; raf=requestAnimationFrame(frame); }
     document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible'&&alive&&!raf) raf=requestAnimationFrame(frame); });
@@ -1015,15 +1060,18 @@ function mountResultRadar(root, scores, lowestIdx){
   window.__sbaHexdBlueprint=_bp;
 }
 
-/* ── 결과 화면 v2 ─────────────────────────────────── */
+/* ── 결과 화면 v3 ─────────────────────────────────── */
 var DETAIL_OVR={
   MASTER:{g:"이미 여섯 영역 모두 고르게 높은, 더 채울 곳이 없는 완성형입니다. 이제 과제는 '유지'와 '확장'입니다. 첫째, 지금의 높은 수준을 습관과 시스템으로 굳혀 그날의 컨디션에 흔들리지 않게 하세요. 둘째, 모든 걸 직접 하려 하지 말고 믿을 사람에게 나눠 맡겨 당신의 시간을 미래를 그리는 데 쓰세요. 셋째, 완성된 역량을 강의·멘토링·새로운 사업으로 확장해 더 큰 판을 만들어 보세요. 유지에 안주하지 않고 새 목표를 세우는 순간, 마스터는 한 번 더 성장합니다."}
 };
+const AXIS_EN={self:"SELF",production:"PRODUCTION",goal:"GOAL",relation:"RELATION",marketing:"MARKETING",finance:"FINANCE"};
+function eyebrow(t, r){ return '<h3 class="hexd-eyebrow">'+t+(r?'<span class="r">'+r+'</span>':'')+'</h3>'; }
+function fmtDate(t){ const d=new Date(t||Date.now()); const p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'.'+p(d.getMonth()+1)+'.'+p(d.getDate()); }
 /* 성장 방향 글만 외부 자료에서 가져온다 (강점·빈 곳은 이 화면에서 직접 계산) */
 function applyDetail(root,type){
   const d=(DETAIL_OVR[type.code])||(_detail&&_detail[type.code]);
   const gw=root.querySelector('#growthWrap'); if(!gw) return;
-  if(d&&d.g){ gw.innerHTML='<div class="hexd-growth-head">성장 방향</div><div class="hexd-growth-body">'+d.g+'</div>'; gw.style.display='block'; }
+  if(d&&d.g){ gw.innerHTML=eyebrow('성장 방향')+'<div class="hexd-growth-body">'+d.g+'</div>'; gw.style.display='block'; }
   else { gw.style.display='none'; }
 }
 function likertWord(v){ const L=LIKERT_LABELS.find(x=>x.value===v); return L?L.short:String(v); }
@@ -1050,13 +1098,13 @@ function buildGap(scores){
 }
 function renderGap(root, gap){
   const gw=root.querySelector('#gapWrap'); if(!gw) return;
-  const ev=gap.items.map(x=>'<li>&ldquo;'+x.text+'&rdquo; <span class="ans">&mdash; '+likertWord(x.v)+'</span></li>').join('');
-  gw.innerHTML='<div class="hexd-gap-head">먼저 살펴볼 곳</div>'
-    +'<div class="hexd-gap-axis"><span class="nm">'+labelOf(gap.axisId)+'</span><span class="sc">'+gap.score+'점</span></div>'
-    +'<div class="hexd-gap-desc">'+(AXIS_DESC[gap.axisId]||'')+'</div>'
-    +(ev?'<div class="hexd-gap-sub">'+(gap.allHigh?'이 영역도 대체로 높게 답하셨어요.':'이렇게 답하셨어요.')+'</div><ul class="hexd-gap-ev">'+ev+'</ul>':'')
-    +'<div class="hexd-gap-sub">이번 두 주에 해 볼 만한 것</div><div class="hexd-gap-task">'+gap.task+'</div>'
-    +(gap.concernNote?'<div class="hexd-gap-note">'+gap.concernNote+'</div>':'');
+  const ev=gap.items.map(x=>'<li>'+x.text+' <b>'+likertWord(x.v)+'</b></li>').join('');
+  gw.innerHTML=eyebrow('먼저 살펴볼 곳')
+    +'<div class="hexd-gap-axis"><b class="nm">'+labelOf(gap.axisId)+'</b><span class="sc">'+gap.score+'</span></div>'
+    +'<p class="hexd-gap-desc">'+(AXIS_DESC[gap.axisId]||'')+'</p>'
+    +(ev?'<h4 class="hexd-gap-sub">'+(gap.allHigh?'이 영역도 대체로 높게 답하셨어요':'이렇게 답하셨어요')+'</h4><ul class="hexd-gap-ev">'+ev+'</ul>':'')
+    +'<h4 class="hexd-gap-sub">이번 두 주에 해 볼 만한 것</h4><div class="hexd-gap-task">'+gap.task+'</div>'
+    +(gap.concernNote?'<p class="hexd-foot">&#8251; '+gap.concernNote+'</p>':'');
   gw.style.display='block';
 }
 /* 익명 저장: 이름·연락처 없음. 기본은 이 기기(localStorage)에 두고, 저장소 연결 함수(window.SBA_HEXD_SAVE)가 있으면 그쪽으로도 보낸다 */
@@ -1075,71 +1123,83 @@ function showResult(root, opts){
   const lowestIdx = scores.findIndex(s=>s.axisId===gap.axisId);
   if(!_rcode || opts.newCode) _rcode = opts.code || makeCode(type.code+JSON.stringify(_answers));
   saveProgress('result');
+  const byId={}; scores.forEach(s=>{ byId[s.axisId]=s; });
+  const byCode={}; scores.forEach(s=>{ byCode[s.code]=s; });
 
+  /* 표제란 */
   const _ci=root.querySelector('#charImg'); const _cu=CHAR_IMG[type.code];
   if(_ci){ _ci.onerror=function(){ this.style.display='none'; }; if(_cu){ _ci.src=_cu; _ci.alt=type.nickname; _ci.style.display='block'; } else { _ci.style.display='none'; } }
   root.querySelector('#r-code').textContent=type.code;
   root.querySelector('#r-name').textContent=type.nickname;
   root.querySelector('#r-liner').textContent=type.oneLiner;
   const an=root.querySelector('#r-axisnote'); if(an){ an.textContent=type.axisNote||''; an.style.display=type.axisNote?'block':'none'; }
-  const rc=root.querySelector('#r-rcode'); if(rc){ rc.innerHTML='결과 코드 <b>'+_rcode+'</b><span class="hint">이 코드로 결과를 다시 볼 수 있어요</span>'; }
+  const rc=root.querySelector('#r-rcode'); if(rc){ rc.innerHTML='<small>결과 코드</small><b>'+_rcode+'</b><i>이 코드로 다시 볼 수 있어요</i>'; }
 
-  mountResultRadar(root, scores, lowestIdx);
-  const tn=root.querySelector('#tieNote');
-  if(tn){ const notes=(type._tieNotes||[]).map(n=>n.msg); tn.innerHTML=notes.map(m=>'<div>'+m+'</div>').join(''); tn.style.display=notes.length?'block':'none'; }
-
-  const grid=root.querySelector('#scoresGrid'); grid.innerHTML='';
+  /* 치수 */
   const ranked=(type._rank||scores.slice().sort((a,b)=>b.score-a.score));
   const strongSet=new Set([ranked[0].axisId,ranked[1].axisId]);
   const weakSet=new Set([ranked[4].axisId,ranked[5].axisId]);
-  const legend=root.querySelector('#scoresLegend');
-  if(legend) legend.innerHTML='<span><span class="hexd-legend-dot strong"></span>강점</span><span><span class="hexd-legend-dot weak"></span>보강</span>';
+  const sd=root.querySelector('#scoresDate'); if(sd) sd.textContent=fmtDate(opts.t);
+  const grid=root.querySelector('#scoresGrid'); grid.innerHTML='';
   scores.forEach((s)=>{
-    const card=document.createElement('div'); card.className='hexd-score-card'; card.title=AXIS_DESC[s.axisId]||'';
-    const badge=strongSet.has(s.axisId)?'<span class="hexd-axis-badge strong">강점</span>':weakSet.has(s.axisId)?'<span class="hexd-axis-badge weak">보강</span>':'';
-    card.innerHTML=badge+'<div class="hexd-score-label">'+labelOf(s.axisId)+'</div><div class="hexd-score-val" style="color:'+s.color+'">'+s.score+'</div>';
-    grid.appendChild(card);
+    const cls=strongSet.has(s.axisId)?'top':weakSet.has(s.axisId)?'low':'';
+    const tag=cls==='top'?'강점':cls==='low'?'보강':'';
+    const row=document.createElement('div'); row.className='hexd-row'; row.title=AXIS_DESC[s.axisId]||'';
+    row.innerHTML='<div class="lb"><span class="hexd-score-label">'+labelOf(s.axisId)+'</span><small>'+AXIS_EN[s.axisId]+'</small></div>'
+      +'<div class="track"><div class="fill '+cls+'" style="width:0%"></div></div>'
+      +'<div class="v"><span class="hexd-score-val">'+s.score+'</span>'+(tag?'<em class="'+cls+'">'+tag+'</em>':'')+'</div>';
+    grid.appendChild(row);
+    const f=row.querySelector('.fill'); requestAnimationFrame(function(){ requestAnimationFrame(function(){ f.style.width=s.score+'%'; }); });
   });
+  const tn=root.querySelector('#tieNote');
+  if(tn){ const notes=(type._tieNotes||[]).map(n=>n.msg); tn.innerHTML=notes.map(m=>'<div>&#8251; '+m+'</div>').join(''); tn.style.display=notes.length?'block':'none'; }
 
   renderGap(root, gap);
 
+  /* 강점 풀어 쓰기 */
   const swWrap=root.querySelector('#swWrap');
   if(swWrap){
     const st=(type.strengths||[]).slice(0,2);
-    let html='';
-    if(st.length){ html+='<div class="hexd-sw-card strong"><div class="hexd-sw-head">이 유형의 강점</div><ul class="hexd-sw-list">'+st.map(t=>'<li>'+t+'</li>').join('')+'</ul></div>'; }
-    swWrap.innerHTML=html; swWrap.classList.add('single'); swWrap.style.display=html?'grid':'none';
+    const notes=(typeof STRENGTH_NOTES!=='undefined'&&STRENGTH_NOTES[type.code])||[];
+    const parts=type.code.indexOf('-')>0?type.code.split('-'):null;
+    const items=st.map((t,i)=>{
+      const ax=parts?byCode[parts[i]]:null;
+      const axTxt=ax?labelOf(ax.axisId)+' &middot; '+ax.score:'여섯 영역';
+      return '<div class="hexd-st-it"><div class="ax"><b>'+(i+1)+'</b>'+axTxt+'</div><h5>'+t+'</h5>'+(notes[i]?'<p>'+notes[i]+'</p>':'')+'</div>';
+    }).join('');
+    swWrap.innerHTML=items?eyebrow('이 유형의 강점')+'<div class="hexd-st">'+items+'</div>':''; swWrap.style.display=items?'block':'none';
   }
 
+  /* 닮은 사업가 */
   const simWrap=root.querySelector('#similarWrap');
   if(simWrap){
     const sim=SIMILAR[type.code];
-    function personCard(p){
+    function personCard(p, region){
       if(!p||!p.n) return '';
       const logo = p.dom
-        ? '<img src="https://www.google.com/s2/favicons?domain='+p.dom+'&sz=128" alt="'+(p.c||'')+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><span class="hexd-logo-mono" style="display:none">'+(p.mono||'')+'</span>'
-        : '<span class="hexd-logo-mono">'+(p.mono||(p.n||'').slice(0,2))+'</span>';
-      return '<div class="hexd-person"><div class="hexd-logo-box">'+logo+'</div><div class="hexd-person-name">'+p.n+'</div><div class="hexd-person-co">'+(p.c||'')+'</div></div>';
+        ? '<img src="https://www.google.com/s2/favicons?domain='+p.dom+'&sz=64" alt="" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><span class="lgm" style="display:none">'+(p.mono||'')+'</span>'
+        : '<span class="lgm">'+(p.mono||(p.n||'').slice(0,2))+'</span>';
+      const ach=(typeof SIMILAR_ACH!=='undefined'&&SIMILAR_ACH[p.n])||'';
+      return '<div class="hexd-pp"><div class="lg">'+logo+'</div><div><div class="rg">'+region+'</div><div class="hexd-person-name">'+p.n+'</div><div class="hexd-person-co">'+(p.c||'')+'</div>'+(ach?'<div class="ach">'+ach+'</div>':'')+'</div></div>';
     }
-    const cards=(x)=>!x?'':(Array.isArray(x)?x:[x]).map(personCard).join('');
+    const cards=(x,region)=>!x?'':(Array.isArray(x)?x:[x]).map(p=>personCard(p,region)).join('');
     if(sim&&(sim.g||sim.d)){
-      simWrap.innerHTML='<div class="hexd-similar-title">당신과 닮은 사업가</div><div class="hexd-similar-sub">비슷한 강점을 가진 실존 사업가예요</div><div class="hexd-similar-people">'+cards(sim.g)+cards(sim.d)+'</div>';
+      simWrap.innerHTML=eyebrow('당신과 닮은 사업가')+'<div class="hexd-people">'+cards(sim.g,'해외')+cards(sim.d,'국내')+'</div><p class="hexd-sim-note">\'강점이 닮았다\'는 참고용이에요. 약점을 단정하지 않습니다.</p>';
       simWrap.style.display='block';
     } else { simWrap.style.display='none'; }
   }
 
   if(_detail){ applyDetail(root,type); }
   else { fetch(_CB+'type-detail.json').then(function(r){return r.json();}).then(function(j){ _detail=j; applyDetail(root,type); }).catch(function(){ applyDetail(root,type); }); }
-  show(root,'s-result');
 
-  /* 익명 저장 (결과 화면이 뜰 때 1회) */
-  if(!opts.replay){
-    const shown={}; AXES.forEach(ax=>{ shown[ax.id]=buildAxisQuestions(ax.id,_pre).map(q=>({id:q.id, n:q.n, text:q.text})); });
-    persistResult({code:_rcode, t:Date.now(), v:2, pre:JSON.parse(JSON.stringify(_pre)), shown, answers:Object.assign({},_answers),
-      scores:scores.map(s=>({axisId:s.axisId, score:s.score})), type:type.code, nickname:type.nickname,
-      tie:(type._tieNotes||[]).map(n=>({pos:n.pos, step:n.step})), gap:{axisId:gap.axisId, items:gap.items.map(x=>x.id), task:gap.task}, concerns:(_pre.concerns||[]).slice()});
-  }
-
+  /* 다음 단계 */
+  const cs=root.querySelector('#ctaSub'); if(cs) cs.innerHTML='결과 코드 <b>'+_rcode+'</b> 가 신청서에 함께 들어갑니다';
+  const shareUrl=location.origin+location.pathname;
+  const shareMsg='나는 "'+type.nickname+'" 유형 사업가! 나의 유형도 알아보기 → '+shareUrl;
+  const enc=encodeURIComponent(shareMsg);
+  const th=root.querySelector('#shThreads'); if(th) th.href='https://www.threads.net/intent/post?text='+enc;
+  const tw=root.querySelector('#shX'); if(tw) tw.href='https://twitter.com/intent/tweet?text='+enc;
+  root.querySelector('#consultBtn').onclick=()=>{ location.href='/cmpwyv9vbez2s01unagivd0pq?code='+encodeURIComponent(_rcode); };
   root.querySelector('#reviewBtn').onclick=()=>show(root,'s-ax-0');
   root.querySelector('#restartBtn').onclick=()=>{
     root.querySelectorAll('.hexd-screen[id^="s-ax-"], #s-concern').forEach(el=>el.remove());
@@ -1147,21 +1207,16 @@ function showResult(root, opts){
     _answers={}; _pre=emptyPreSurvey(); _preIdx=0;
     show(root,'s-intro');
   };
-  root.querySelector('#shareBtn').onclick=()=>{
-    const text='육각형 사업가 유형 테스트 결과\n유형: '+type.nickname+' ('+type.code+')\n'+type.oneLiner+'\n결과 코드: '+_rcode+'\n테스트 링크: '+location.origin+location.pathname;
-    if(navigator.share){ navigator.share({title:'육각형 사업가 유형',text}).catch(()=>{}); }
-    else { navigator.clipboard.writeText(text).then(()=>{ const sb=root.querySelector('#snackbar'); if(sb){sb.textContent='클립보드에 복사되었습니다';sb.classList.add('show');setTimeout(()=>sb.classList.remove('show'),2800);} }).catch(()=>{}); }
-  };
-  root.querySelector('#consultBtn').onclick=()=>{ location.href='/cmpwyv9vbez2s01unagivd0pq?code='+encodeURIComponent(_rcode); };
 
-  const shw=root.querySelector('#shareWrap');
-  if(shw){
-    shw.style.display='block';
-    const shareUrl=location.origin+location.pathname;
-    const shareMsg='나는 "'+type.nickname+'" 유형 사업가! 나의 유형도 알아보기 → '+shareUrl;
-    const enc=encodeURIComponent(shareMsg);
-    const th=shw.querySelector('#shThreads'); if(th) th.href='https://www.threads.net/intent/post?text='+enc;
-    const tw=shw.querySelector('#shX'); if(tw) tw.href='https://twitter.com/intent/tweet?text='+enc;
+  show(root,'s-result');
+  mountResultRadar(root, scores, lowestIdx); /* 화면이 보인 뒤에 붙여야 크기가 잡힌다 */
+
+  /* 익명 저장 (결과 화면이 뜰 때 1회) */
+  if(!opts.replay){
+    const shown={}; AXES.forEach(ax=>{ shown[ax.id]=buildAxisQuestions(ax.id,_pre).map(q=>({id:q.id, n:q.n, text:q.text})); });
+    persistResult({code:_rcode, t:Date.now(), v:2, pre:JSON.parse(JSON.stringify(_pre)), shown, answers:Object.assign({},_answers),
+      scores:scores.map(s=>({axisId:s.axisId, score:s.score})), type:type.code, nickname:type.nickname,
+      tie:(type._tieNotes||[]).map(n=>({pos:n.pos, step:n.step})), gap:{axisId:gap.axisId, items:gap.items.map(x=>x.id), task:gap.task}, concerns:(_pre.concerns||[]).slice()});
   }
 }
 /* 결과 코드로 다시 보기 (이 기기에 저장된 결과) */
@@ -1175,7 +1230,7 @@ function openByCode(root, code){
   enterMain(root);
   Object.keys(_answers).forEach(function(qid){ const b=root.querySelector('.hexd-scale-btn[data-q="'+qid+'"][data-v="'+_answers[qid]+'"]'); if(b) b.classList.add('sel'); });
   root.querySelectorAll('.hexd-screen[id^="s-ax-"]').forEach(function(div,i){ const qs=buildAxisQuestions(AXES[i].id,_pre); updateAxisProgress(div,i,qs); });
-  showResult(root,{replay:true, code:p.code, newCode:true});
+  showResult(root,{replay:true, code:p.code, newCode:true, t:p.t});
   return true;
 }
 
@@ -1253,7 +1308,7 @@ window.__sbaHexdRun = function(bm){ mount(); if(bm) bm.onContextChange = mount; 
      +".igc-sim{display:flex;gap:26px;align-items:center;background:#FBFAF6;border:2px solid #E7E2D6;border-radius:26px;padding:36px 42px;margin-top:24px}.igc-flag{flex:none;width:88px;height:88px;border-radius:50%;background:#E3EFE9;color:#006241;font-size:26px;font-weight:800;display:flex;align-items:center;justify-content:center}.igc-simn{font-size:44px;font-weight:800;line-height:1.15}.igc-simt{font-size:26px;color:#8a9089;font-weight:600;margin-top:8px;line-height:1.42}.igc-simt b{color:#006241;font-weight:800}"
      +".igc-tbar{width:132px;height:12px;border-radius:999px;background:#006241;margin-top:18px}"
      +".igc-note{font-size:24px;color:#8a9089;margin-top:28px;font-weight:500}"
-     +".igc-ev{font-size:33px!important;font-weight:600!important;line-height:1.42!important}.igc-gsub{font-size:29px;font-weight:800;color:#006241;margin-top:40px}.igc-gtask{font-size:36px;font-weight:700;line-height:1.5;margin-top:16px;background:#E3EFE9;border-radius:26px;padding:30px 36px;color:#20241f}";
+     +".igc-ev{font-size:33px!important;font-weight:600!important;line-height:1.42!important}.igc-gsub{font-size:29px;font-weight:800;color:#006241;margin-top:40px}.igc-gtask{font-size:36px;font-weight:700;line-height:1.5;margin-top:16px;background:#E3EFE9;border-radius:26px;padding:30px 36px;color:#20241f}.igc-mdesc{font-size:27px;color:#4b5148;line-height:1.5;margin-top:10px;font-weight:500}";
     document.head.appendChild(s);
   }
   function igBold(t){ var p=t.split("'"),o='',c=0,q; for(q=0;q<p.length;q++){ if(q%2===1&&c<8&&p[q].length>=2&&p[q].length<=42){ o+="'<b>"+p[q]+"</b>'"; c++; } else if(q%2===1){ o+="'"+p[q]+"'"; } else o+=p[q]; } return o; }
@@ -1262,13 +1317,12 @@ window.__sbaHexdRun = function(bm){ mount(); if(bm) bm.onContextChange = mount; 
   function igRead(){
     var q=function(s){ return document.querySelector('.hexd '+s); };
     var AXC={'자기관리':'#10B981','생산관리':'#F59E0B','목표관리':'#6366F1','관계관리':'#EC4899','판매관리':'#EF4444','재무관리':'#1E3A8A'};
-    var scores=[]; document.querySelectorAll('.hexd .hexd-score-card').forEach(function(c){
+    var scores=[]; document.querySelectorAll('.hexd .hexd-row').forEach(function(c){
       var f=c.querySelector('.hexd-score-fill'); var lb=igText(c.querySelector('.hexd-score-label'));
       scores.push({label:lb,v:parseInt(igText(c.querySelector('.hexd-score-val')),10)||0,color:AXC[lb]||(f&&(f.style.background||f.style.backgroundColor))||'#006241'});
     });
-    var st=[],wk=[]; document.querySelectorAll('.hexd #swWrap .hexd-sw-card.strong .hexd-sw-list li').forEach(function(li){st.push(igText(li));});
-    document.querySelectorAll('.hexd #swWrap .hexd-sw-card.weak .hexd-sw-list li').forEach(function(li){wk.push(igText(li));});
-    var sims=[]; document.querySelectorAll('.hexd #similarWrap .hexd-person').forEach(function(p){ var fg=igText(p.querySelector('.flag')); var nm=igText(p.querySelector('.hexd-person-name'))||igText(p).replace(fg,'').trim(); var co=igText(p.querySelector('.hexd-person-co')); sims.push({flag:fg,name:nm,co:co}); });
+    var st=[],wk=[]; document.querySelectorAll('.hexd #swWrap .hexd-st-it').forEach(function(it){ st.push({t:igText(it.querySelector('h5')),d:igText(it.querySelector('p'))}); });
+    var sims=[]; document.querySelectorAll('.hexd #similarWrap .hexd-pp').forEach(function(p){ var fg=igText(p.querySelector('.flag')); var nm=igText(p.querySelector('.hexd-person-name'))||igText(p).replace(fg,'').trim(); var co=igText(p.querySelector('.hexd-person-co')); sims.push({flag:fg,name:nm,co:co}); });
     sims.forEach(function(o,ix){ o.kr = o.flag ? (o.flag.indexOf('🇰🇷')>-1) : (ix>=sims.length/2); });
     var img=q('#charImg');
     var gapEl=q('#gapWrap'), gap=null;
@@ -1303,7 +1357,7 @@ window.__sbaHexdRun = function(bm){ mount(); if(bm) bm.onContextChange = mount; 
     ctx.fillText(code,w/2,h/2+2);
   }
   function igEl(html){ var d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
-  var IG_ACH={"사티아 나델라":"MS를 클라우드·AI 강자로 되살린 경영자","지로 오노":"평생 스시 하나에 매진한 미슐랭 3스타 장인","이본 쉬나드":"환경을 지키는 기업 철학의 상징","라탄 타타":"인도 최대 그룹을 세계로 이끈 경영자","인드라 누이":"펩시코를 이끈 '목적 있는 성장'의 리더","빌 캠벨":"실리콘밸리 경영자들의 스승이 된 코치","하워드 슐츠":"스타벅스를 세계적 브랜드로 키운 경영자","오프라 윈프리":"토크쇼로 미디어 제국을 세운 방송인","사라 블레이클리":"맨손으로 스팽스를 일군 자수성가 창업가","워런 버핏":"가치투자를 대표하는 세계적 투자가","존 보글":"저비용 인덱스 투자를 창시한 혁신가","월트 디즈니":"애니메이션과 테마파크를 창조한 몽상가","빌 게이츠":"PC를 대중화한 마이크로소프트 창업자","에드 캣멀":"픽사의 창의적 조직문화를 만든 리더","마쓰시타 고노스케":"'경영의 신'으로 불린 파나소닉 창업자","스티브 잡스":"혁신의 아이콘, 애플의 창업자","레이 크록":"맥도날드를 세계 프랜차이즈로 키운 경영자","팀 쿡":"애플을 시총 최고로 이끈 운영의 달인","샘 월튼":"세계 최대 유통 월마트를 세운 창업자","리드 헤이스팅스":"스트리밍 혁명을 이끈 넷플릭스 창업자","제프 베조스":"'고객 집착'으로 아마존을 세운 창업자","필 나이트":"나이키를 브랜드 신화로 만든 창업자","찰리 멍거":"버핏의 파트너, 다각적 사고의 투자가","레이 달리오":"세계 최대 헤지펀드를 세운 투자가","메리 케이 애시":"여성 방문판매 제국을 세운 창업가","에스티 로더":"화장품 제국을 일군 뷰티 창업가","제임스 시네갈":"회원제 유통 코스트코를 키운 경영자","이나모리 가즈오":"교세라를 세운 '아메바 경영'의 대가","베르나르 아르노":"명품 제국 LVMH를 이끄는 경영자","젠슨 황":"AI 반도체 시대를 연 엔비디아 창업자","일론 머스크":"전기차·우주로 도전하는 테슬라 창업자","김영모":"대한민국을 대표하는 제과 명장","신춘호":"신라면 신화를 쓴 농심 창업자","정문술":"벤처 1세대, 통 큰 기부로 존경받는 경영자","권오현":"반도체 신화를 이끈 삼성전자 경영자","신창재":"독서·정도경영의 교보생명 경영자","김미경":"자기계발 교육으로 성장한 대표 강사","박신후":"자기 분야를 꾸준히 키워온 사업가","구인회":"화학·전자의 기틀을 놓은 LG 창업자","윤동한":"화장품 ODM을 개척한 한국콜마 창업자","정주영":"'해봤어?'의 도전, 현대 창업자","이원영":"워라밸 기업문화의 제니퍼소프트 창업자","임영진":"디지털 금융을 이끈 신한카드 경영자","김정수":"삼립을 성장시킨 제빵 경영자","정태영":"디자인·브랜딩 경영의 현대카드 대표","박정부":"균일가 유통 다이소를 세운 창업자","이부진":"호텔·면세 사업을 이끈 호텔신라 경영자","최태원":"사회적 가치를 앞세운 SK 회장","권혁빈":"글로벌 게임 신화를 쓴 스마일게이트 창업자","김홍국":"닭고기 수직계열화를 이룬 하림 창업자","최종현":"인재경영으로 SK를 키운 경영자","박현주":"자산운용을 개척한 미래에셋 창업자","우미령":"윤리적 뷰티를 이끈 러쉬코리아 대표","서경배":"K뷰티를 세계로 넓힌 아모레퍼시픽 회장","함영준":"'갓뚜기' 상생경영의 오뚜기 회장","조정호":"성과주의로 성장한 메리츠금융 회장","윤윤수":"휠라를 인수해 부활시킨 경영자","이건희":"'신경영'으로 삼성을 세계로 이끈 회장","구광모":"선택과 집중의 LG 회장"};
+  var IG_ACH=window.__sbaHexdAch||{};
   function igCards(d){
     var list=[{t:'cover'},{t:'radar'}];
     if(d.gap&&d.gap.axis) list.push({t:'gap'});
@@ -1319,7 +1373,7 @@ window.__sbaHexdRun = function(bm){ mount(); if(bm) bm.onContextChange = mount; 
       if(card.t==='cover'){ var im=d.charSrc?'<img src="'+d.charSrc+'" crossorigin="anonymous" alt="">':'🧑‍💼'; h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px"></div><div class="igc-hex" style="left:-180px;bottom:-160px;opacity:.32"></div><div class="igc-pad">'+brand(p)+'<div style="text-align:center"><div class="igc-kick">나의 사업가 유형은?</div><div class="igc-char">'+im+'</div>'+(d.code?'<canvas data-pill style="display:block;margin:14px auto 0"></canvas>':'')+'<div class="igc-name">'+d.name+'</div><div class="igc-liner">'+(d.liner||'').replace(/, /,',<br>')+'</div></div></div>'+foot()+'</div>'; }
       else if(card.t==='radar'){ var chips=d.scores.map(function(a){return '<div class="igc-chip"><span class="igc-dot" style="background:'+a.color+'"></span><span class="igc-ck">'+a.label+'</span><div class="igc-cv" style="color:'+a.color+'">'+a.v+'</div></div>';}).join(''); h='<div class="igc-card"><div class="igc-pad">'+brand(p)+'<div class="igc-title">나의 경영 육각형</div><div class="igc-tbar"></div><div class="igc-sub">6가지 사장 역량을 한눈에</div><canvas data-radar width="1000" height="760" style="display:block;width:912px;height:693px;margin:18px auto 14px;border-radius:28px"></canvas><div class="igc-chips">'+chips+'</div></div>'+foot()+'</div>'; }
       else if(card.t==='gap'){ var evs=d.gap.ev.map(function(t){return '<div class="igc-mini"><div class="mb" style="background:#cc785c"></div><div class="igc-mtxt igc-ev">'+t+'</div></div>';}).join(''); h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px;opacity:.5"></div><div class="igc-pad">'+brand(p)+'<div class="igc-title">먼저 살펴볼 곳</div><div class="igc-tbar" style="background:#cc785c"></div><div class="igc-sub"><b style="color:#20241f">'+d.gap.axis+'</b> · '+d.gap.score+' · 이렇게 답하셨어요</div>'+evs+'<div class="igc-gsub">이번 두 주에 해 볼 만한 것</div><div class="igc-gtask">'+d.gap.task+'</div></div>'+foot()+'</div>'; }
-      else if(card.t==='sw'){ var its=card.items.map(function(t){return '<div class="igc-mini"><div class="mb" style="background:'+card.bar+'"></div><div class="igc-mtxt">'+t+'</div></div>';}).join(''); h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px;opacity:.5"></div><div class="igc-hex" style="left:-180px;bottom:-160px;opacity:.32"></div><div class="igc-pad">'+brand(p)+'<div class="igc-title">'+card.head+'</div><div class="igc-tbar" style="background:'+card.bar+'"></div><div class="igc-sub">'+card.sub+'</div>'+its+'</div>'+foot()+'</div>'; }
+      else if(card.t==='sw'){ var its=card.items.map(function(t){ var o=(typeof t==='string')?{t:t,d:''}:t; return '<div class="igc-mini"><div class="mb" style="background:'+card.bar+'"></div><div class="igc-mtxt">'+o.t+'</div>'+(o.d?'<div class="igc-mdesc">'+o.d+'</div>':'')+'</div>';}).join(''); h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px;opacity:.5"></div><div class="igc-hex" style="left:-180px;bottom:-160px;opacity:.32"></div><div class="igc-pad">'+brand(p)+'<div class="igc-title">'+card.head+'</div><div class="igc-tbar" style="background:'+card.bar+'"></div><div class="igc-sub">'+card.sub+'</div>'+its+'</div>'+foot()+'</div>'; }
       else if(card.t==='sim'){ var ppl=d.sims.map(function(s){var ach=IG_ACH[s.name]||'비슷한 강점을 가진 경영자';var co=s.co?('<b>'+s.co+'</b> · '):'';var rg=s.kr?'국내':'해외'; return '<div class="igc-sim"><div class="igc-flag">'+rg+'</div><div><div class="igc-simn">'+s.name+'</div><div class="igc-simt">'+co+ach+'</div></div></div>';}).join(''); h='<div class="igc-card"><div class="igc-pad">'+brand(p)+'<div class="igc-title">당신과 닮은 사업가</div><div class="igc-tbar"></div><div class="igc-sub">비슷한 강점을 가진 실존 사업가예요</div>'+ppl+'<div class="igc-note">* \'강점이 닮았다\'는 참고용이에요(약점을 단정하지 않습니다).</div></div>'+foot()+'</div>'; }
       else { h='<div class="igc-card"><div class="igc-pad">'+brand(p)+'<div class="igc-title">성장 방향<span class="p">'+card.part+'</span></div><div class="igc-tbar"></div><div class="igc-sub">지금부터 이렇게 해보세요</div><div class="igc-growth">'+card.text+'</div></div>'+foot()+'</div>'; }
       return igEl(h);
@@ -1375,6 +1429,7 @@ window.__sbaHexdRun = function(bm){ mount(); if(bm) bm.onContextChange = mount; 
     if(t.closest('#shImg')){ e.preventDefault(); e.stopImmediatePropagation(); igCapture('save'); return; }
     if(t.closest('#shLink')){ e.preventDefault(); e.stopImmediatePropagation(); copyTestLink(); return; }
     if(t.closest('#shSys')){ e.preventDefault(); e.stopImmediatePropagation(); igCapture('share'); return; }
+    if(t.closest('#shInsta')){ e.preventDefault(); e.stopImmediatePropagation(); igCapture('insta'); return; }
   },true);
 
   // 성장방향: 문장·단락 단위 줄내림(모바일/PC 적응) + 핵심 인용구 굵게(최대 5)
@@ -1500,7 +1555,7 @@ window.__sbaHexdRun = function(bm){ mount(); if(bm) bm.onContextChange = mount; 
     window.__sbaAutoResult=1;
     btn.click();
   }
-  function runAll(){ enhanceGrowth(); enhanceShare(); enhanceScores(); enhanceQ(); enhanceReviewBoard(); enhanceAutoResult(); }
+  function runAll(){ enhanceGrowth(); enhanceQ(); enhanceReviewBoard(); enhanceAutoResult(); }
   var mo=new MutationObserver(runAll);
   try{ mo.observe(document.body,{childList:true,subtree:true}); }catch(e){}
   setTimeout(runAll,600);
