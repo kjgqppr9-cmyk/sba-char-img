@@ -399,3 +399,14 @@
  .hexd .hexd-people{grid-template-columns:1fr}
  .hexd .hexd-gap-axis .nm{font-size:23px}
 }
+
+/* ── v3.5: 줄내림·행간·강조 ── */
+.hexd .hexd-rcode{display:none}
+.hexd .hexd-growth-body p{margin:0 0 22px;font-size:15px;line-height:1.85;color:#1f2937;word-break:keep-all}
+.hexd .hexd-growth-body p:last-child{margin:0}
+.hexd .hexd-growth-body b,.hexd .hexd-st p b,.hexd .hexd-gap-task b,.hexd .hexd-foot b,.hexd .hexd-tie-note b{color:#006241;font-weight:800}
+.hexd .hexd-st p{line-height:1.8}
+.hexd .hexd-gap-ev li{line-height:1.7}
+.hexd .hexd-gap-task{line-height:1.75}
+.hexd .hexd-cta-sub{margin:10px 0 22px}
+.hexd .hexd-sheet .hexd-type-liner br{display:inline}

@@ -448,7 +448,7 @@ const TYPE_30 = (function(){
   });
   return map;
 })();
-const TYPE_MASTER   = {code:"MASTER",  nickname:"마스터",  oneLiner:"여섯 영역을 고르게, 그리고 높게 실천하고 있다고 답한 사장님.",strengths:["빈 곳 없는 실천","흔들리지 않는 균형"],weaknesses:[],axisNote:"여섯 영역이 모두 높고 차이가 작습니다."};
+const TYPE_MASTER   = {code:"MASTER",  nickname:"마스터",  oneLiner:"여섯 영역을 모두 높고 고르게 실천하고 있는, 이 진단에서 가장 드문 사장님.",strengths:["빈 곳 없는 실천","흔들리지 않는 균형"],weaknesses:[],axisNote:"여섯 영역이 모두 높고 차이가 작습니다. 축하드립니다."};
 const TYPE_BALANCED = {code:"BALANCED",nickname:"균형 사업가",oneLiner:"여섯 영역 어느 하나 처지지 않게 챙기고 있다고 답한 사장님.",strengths:["고른 실천","안정감"],weaknesses:[],axisNote:"여섯 영역이 고르게 높습니다."};
 
 /* ── 2주 과제 (축당 3개 · 검수 문서 3절). 가장 낮게 답한 문항 번호에 따라 하나를 고른다 ── */
@@ -489,40 +489,41 @@ function pickTask(axisId, lowestN){
   const list=TASKS[axisId]||[]; const hit=list.find(t=>t.ids.includes(lowestN)); return (hit||list[0]||{}).text||"";
 }
 
-/* ── 강점 풀어 쓰기 (유형별 2개, 순서 = strengths 순서 = 1위 축 → 2위 축). 잰 문항 안에서만 말한다 ── */
+/* ── 강점 풀어 쓰기 v3.5 (유형별 2개, 순서 = strengths 순서 = 1위 축 → 2위 축).
+   문장 1 = 잰 것(답하신 내용) · 문장 2 = 칭찬(왜 드물고 귀한지) · 문장 3 = 사장님께 주는 의미. 결과 화면에서 문장마다 줄을 바꾼다. ── */
 const STRENGTH_NOTES = {
-  "E-B":["운동이나 활동을 정해 둔 대로 지키고, 일이 넘치면 맡을 일을 줄인다고 답하셨어요. 바쁠수록 자기 리듬부터 지키는 사장님입니다.","품질 기준을 정해 두고 결과물을 그 기준으로 다시 본다고 답하셨어요. 손이 빠른 것보다 손이 정확한 쪽입니다."],
-  "B-E":["품질 기준과 반복 작업의 순서가 정리돼 있다고 답하셨어요. 같은 품질을 다시 낼 수 있는 손입니다.","잠자는 시간과 재충전 시간을 지키려 일정을 조정한다고 답하셨어요. 오래 만들 수 있는 몸을 먼저 챙깁니다."],
-  "E-C":["번아웃 신호를 알아채고, 감정이 흔들리는 날에는 결정을 미룬다고 답하셨어요. 자기 상태를 읽으며 달리는 사장님입니다.","목표를 작업으로 나누고 마감일을 붙인다고 답하셨어요. 가고 싶은 곳이 이번 주 할 일로 내려옵니다."],
-  "C-E":["1년 동안 이루려는 변화를 적어 두고 숫자로 추적한다고 답하셨어요. 방향을 종이에 적어 두는 사장님입니다.","에너지가 높은 시간대에 중요한 일을 놓고, 과부하가 오면 줄인다고 답하셨어요. 페이스를 아는 달리기입니다."],
-  "E-M":["일과 사생활의 경계를 지키고, 감당 범위를 넘으면 도움을 요청한다고 답하셨어요. 혼자 끌어안지 않는 힘입니다.","함께 일하는 상대와 확인 시점을 정하고 맡을 범위를 합의한다고 답하셨어요. 손발을 맞추는 방법을 압니다."],
-  "M-E":["의견이 갈리면 상대의 설명을 듣고, 필요한 자료를 먼저 준다고 답하셨어요. 사람이 일하기 좋게 만드는 사장님입니다.","스트레스를 푸는 자기만의 방법이 있고 재충전 시간을 지킨다고 답하셨어요. 사람을 챙기면서 자기도 챙깁니다."],
-  "E-P":["운동·수면·재충전을 지키려 일정을 조정한다고 답하셨어요. 꾸준함이 몸에서 나옵니다.","고객이 들어오는 경로의 성과를 확인하고 다음 단계를 안내하는 절차가 있다고 답하셨어요. 고객 앞에 계속 서는 사장님입니다."],
-  "P-E":["고객이 결정할 때 보여 줄 자료가 있고 후기를 정기적으로 모은다고 답하셨어요. 파는 일을 습관으로 만든 분입니다.","과부하가 오면 일을 줄이고, 잠을 지키려 일정을 바꾼다고 답하셨어요. 그래서 그 습관이 오래 갑니다."],
-  "E-F":["몸의 이상 신호를 미루지 않고, 재충전 시간을 확보한다고 답하셨어요. 무리하지 않는 쪽을 고르는 사장님입니다.","앞으로 세 달의 입출금을 미리 보고 지급 일정을 정리해 둔다고 답하셨어요. 돈도 같은 방식으로 지킵니다."],
-  "F-E":["지난달 이익을 바로 확인할 수 있고, 고정비와 변동비를 구분한다고 답하셨어요. 통장을 감이 아니라 숫자로 보는 분입니다.","일이 넘치면 맡을 일을 줄이고 잠을 지킨다고 답하셨어요. 살림도 몸도 무리하지 않게 운영합니다."],
-  "B-C":["정해 둔 기준으로 품질을 점검하고 납기 차이를 확인한다고 답하셨어요. 약속한 대로 내놓는 손입니다.","중요한 목표를 작업 단위로 나누고 마감일을 정한다고 답하셨어요. 만들 것이 먼저 정해져 있습니다."],
-  "C-B":["정한 목표를 다음에 할 작업 단위로 나누고, 주요 작업에 마감일을 붙인다고 답하셨어요. 큰 그림이 책상 위의 이번 주 할 일로 내려오는 사장님입니다.","주력 상품이 지켜야 할 품질 기준을 정해 두고, 결과물을 그 기준으로 주기적으로 다시 본다고 답하셨어요. 만든 것을 그냥 내보내지 않는 손입니다."],
-  "B-M":["반복 업무의 순서가 정리돼 있고 자료를 나 없이도 찾을 수 있다고 답하셨어요. 함께 일하기 좋은 작업장입니다.","맡을 범위를 합의하고 필요한 정보를 먼저 준다고 답하셨어요. 좋은 것을 함께 만드는 방법을 압니다."],
-  "M-B":["함께 일하는 상대와 진행 확인 시점을 정하고, 빠질 때 대신 도움을 청할 사람을 안다고 답하셨어요. 협업이 끊기지 않게 잇는 분입니다.","품질 기준을 정해 두고 그 기준으로 점검한다고 답하셨어요. 연결한 뒤에 만든 것도 확실합니다."],
-  "B-P":["품질을 기준대로 점검하고 고객 불만을 개선에 반영한다고 답하셨어요. 손이 고객 쪽을 향해 있습니다.","고객이 들어오는 경로의 성과와 재구매를 확인한다고 답하셨어요. 만든 것을 파는 눈이 함께 있습니다."],
-  "P-B":["고객이 선택한 이유를 설명할 자료가 있고 후기를 모은다고 답하셨어요. 고객의 반응을 읽는 눈이 먼저입니다.","불만을 개선에 반영하고 결과물을 기준으로 점검한다고 답하셨어요. 팔고 나서도 손을 놓지 않습니다."],
-  "B-F":["원가와 과정을 꾸준히 다듬고 납기 차이를 확인한다고 답하셨어요. 낭비가 적은 작업 방식입니다.","가격의 근거를 갖고 지난달 이익을 바로 확인한다고 답하셨어요. 만든 만큼 남는지 계산하는 분입니다."],
-  "F-B":["가격 근거가 명확하고 고정비·변동비를 구분한다고 답하셨어요. 살림의 숫자를 아는 사장님입니다.","반복 작업의 순서가 정리돼 있고 원가를 계속 다듬는다고 답하셨어요. 손재주가 낭비 없이 쓰입니다."],
-  "C-M":["올해 목표를 바로 말할 수 있고 주요 작업에 마감이 있다고 답하셨어요. 가고 싶은 곳이 분명한 분입니다.","맡을 범위를 합의하고 확인 시점을 정한다고 답하셨어요. 함께 가는 사람도 그 길을 압니다."],
-  "M-C":["의견이 갈릴 때 원인을 확인하고 필요한 자료를 준다고 답하셨어요. 사람을 잇는 손이 먼저 움직입니다.","목표를 숫자로 추적하고 마감일을 정한다고 답하셨어요. 그 연결이 어디로 가는지도 정해져 있습니다."],
-  "C-P":["매주·매월 우선순위를 정하고 시장 변화를 목표에 반영한다고 답하셨어요. 가야 할 이유를 계속 다시 봅니다.","가치 제안을 한 줄로 말하고 유입 경로 성과를 확인한다고 답하셨어요. 그 이유를 고객에게 전할 줄 압니다."],
-  "P-C":["고객이 결정할 자료가 있고 다음 단계를 안내하는 절차가 있다고 답하셨어요. 파는 흐름이 몸에 붙어 있습니다.","올해 목표와 이번 주 우선순위가 정해져 있다고 답하셨어요. 그 흐름이 어디로 커질지도 정해 두었습니다."],
-  "C-F":["목표를 숫자로 정해 추적하고 월말에 돌아본다고 답하셨어요. 계획이 숫자로 적혀 있는 분입니다.","세 달 입출금을 미리 보고 지급 일정을 정리한다고 답하셨어요. 그 계획에 연료 계산이 붙어 있습니다."],
-  "F-C":["앞으로 나갈 돈의 일정을 정리하고 부족해질 시점을 미리 본다고 답하셨어요. 앞을 보고 살림하는 분입니다.","1년의 변화를 적어 두고 작업 단위로 나눈다고 답하셨어요. 살림이 목표를 향해 움직입니다."],
-  "M-P":["함께 일하는 사람에게 감사를 표현하고 의논할 상대가 있다고 답하셨어요. 관계가 자산인 사장님입니다.","재구매와 후기를 확인하고 다음 단계를 안내한다고 답하셨어요. 그 관계가 단골로 이어집니다."],
-  "P-M":["고객이 선택한 이유를 말할 수 있고 후기를 정기적으로 모은다고 답하셨어요. 고객을 읽는 눈이 먼저입니다.","협력사와 장기 관계를 관리하고 도움 청할 사람을 안다고 답하셨어요. 그 눈이 사람에게도 향합니다."],
-  "M-F":["맡을 범위를 합의하고 확인 시점을 정한다고 답하셨어요. 약속을 지키는 방식으로 믿음을 얻습니다.","수입과 지출을 확인하고 수금을 예정일에 점검한다고 답하셨어요. 셈이 밝은 연결자입니다."],
-  "F-M":["지난달 이익을 바로 확인하고 지급 일정을 정리해 둔다고 답하셨어요. 돈을 꼼꼼히 챙기는 살림꾼입니다.","의견이 갈리면 원인을 확인하고 필요한 자료를 준다고 답하셨어요. 사람에게도 믿음을 줍니다."],
-  "P-F":["유입 경로의 성과와 고객 획득 비용의 기준이 있다고 답하셨어요. 파는 일을 숫자로 보는 분입니다.","가격 근거가 있고 이익을 바로 확인한다고 답하셨어요. 팔고 나서 남는 돈까지 압니다."],
-  "F-P":["이익을 확인하고 세 달 입출금을 미리 본다고 답하셨어요. 살림이 먼저 서 있는 사장님입니다.","유입 경로 성과를 확인하고 다음 단계를 안내한다고 답하셨어요. 그 살림에 파는 힘이 붙어 있습니다."],
-  "MASTER":["여섯 영역 모두 높게, 그리고 고르게 답하셨어요. 어느 한 곳에 기대지 않는 실천입니다.","가장 낮은 영역과 가장 높은 영역의 차이가 작았어요. 흔들려도 무너지지 않는 균형입니다."],
-  "BALANCED":["여섯 영역 어느 하나 처지지 않게 답하셨어요. 고르게 실천하고 있는 분입니다.","높은 영역과 낮은 영역의 차이가 크지 않았어요. 안정감이 이 결과의 특징입니다."],
+  "E-B":["운동이나 활동을 정해 둔 대로 지키고, 일이 넘치면 맡을 일을 줄인다고 답하셨어요. 바쁠수록 자기 리듬을 먼저 지키는 사장님은 정말 드뭅니다. 오래 가는 사업의 첫 번째 조건을 이미 갖고 계십니다.","품질 기준을 정해 두고 결과물을 그 기준으로 다시 본다고 답하셨어요. 손이 빠른 사장님은 많아도 손이 정확한 사장님은 적습니다. 고객이 믿고 다시 오는 이유가 여기에 있습니다."],
+  "B-E":["품질 기준과 반복 작업의 순서가 정리돼 있다고 답하셨어요. 같은 품질을 다시 낼 수 있다는 건 장인의 손입니다. 사장님이 없어도 흔들리지 않는 뿌리입니다.","잠자는 시간과 재충전 시간을 지키려 일정을 조정한다고 답하셨어요. 만드는 사람이 자기 몸을 챙기는 건 쉽지 않은 일입니다. 그래서 이 손이 오래 갑니다."],
+  "E-C":["번아웃 신호를 알아채고, 감정이 흔들리는 날에는 결정을 미룬다고 답하셨어요. 자기 상태를 읽으며 달리는 사장님은 큰 실수를 피합니다. 판단의 질이 여기서 나옵니다.","목표를 작업으로 나누고 마감일을 붙인다고 답하셨어요. 가고 싶은 곳을 이번 주 할 일로 바꾸는 힘은 배워서 되는 게 아닙니다. 이미 몸에 붙어 있습니다."],
+  "C-E":["1년 동안 이루려는 변화를 적어 두고 숫자로 추적한다고 답하셨어요. 방향을 종이에 적어 두는 사장님은 열에 하나입니다. 그 한 장이 사업의 나침반입니다.","에너지가 높은 시간대에 중요한 일을 놓고, 과부하가 오면 줄인다고 답하셨어요. 페이스를 아는 달리기입니다. 그래서 이 방향이 끝까지 갑니다."],
+  "E-M":["일과 사생활의 경계를 지키고, 감당 범위를 넘으면 도움을 요청한다고 답하셨어요. 혼자 끌어안지 않는 건 약함이 아니라 성숙함입니다. 오래 함께 일할 수 있는 사장님입니다.","함께 일하는 상대와 확인 시점을 정하고 맡을 범위를 합의한다고 답하셨어요. 손발을 맞추는 방법을 아는 분은 사람을 잃지 않습니다. 팀이 커져도 흔들리지 않을 바탕입니다."],
+  "M-E":["의견이 갈리면 상대의 설명을 듣고, 필요한 자료를 먼저 준다고 답하셨어요. 사람이 일하기 좋게 만드는 사장님 곁에는 사람이 남습니다. 그것이 가장 큰 자산입니다.","스트레스를 푸는 자기만의 방법이 있고 재충전 시간을 지킨다고 답하셨어요. 사람을 챙기면서 자기도 챙기는 분은 정말 드뭅니다. 그래서 이 따뜻함이 오래 갑니다."],
+  "E-P":["운동·수면·재충전을 지키려 일정을 조정한다고 답하셨어요. 꾸준함이 의지가 아니라 몸에서 나오는 사장님입니다. 이런 분은 무너지지 않습니다.","고객이 들어오는 경로의 성과를 확인하고 다음 단계를 안내하는 절차가 있다고 답하셨어요. 고객 앞에 계속 서는 일은 용기와 체력이 함께 필요합니다. 두 가지를 다 갖고 계십니다."],
+  "P-E":["고객이 결정할 때 보여 줄 자료가 있고 후기를 정기적으로 모은다고 답하셨어요. 파는 일을 습관으로 만든 분입니다. 매출이 운이 아니라 구조에서 나옵니다.","과부하가 오면 일을 줄이고, 잠을 지키려 일정을 바꾼다고 답하셨어요. 잘 파는 사장님이 자기 몸까지 챙기는 경우는 흔치 않습니다. 그래서 그 습관이 오래 갑니다."],
+  "E-F":["몸의 이상 신호를 미루지 않고, 재충전 시간을 확보한다고 답하셨어요. 무리하지 않는 쪽을 고를 줄 아는 건 경험에서 나오는 지혜입니다. 오래 가는 사장님의 특징입니다.","앞으로 세 달의 입출금을 미리 보고 지급 일정을 정리해 둔다고 답하셨어요. 돈을 미리 보는 사장님은 밤에 잠을 잘 잡니다. 몸과 돈을 같은 방식으로 지키고 계십니다."],
+  "F-E":["지난달 이익을 바로 확인할 수 있고, 고정비와 변동비를 구분한다고 답하셨어요. 통장을 감이 아니라 숫자로 보는 분입니다. 작은 사업에서 가장 귀한 습관입니다.","일이 넘치면 맡을 일을 줄이고 잠을 지킨다고 답하셨어요. 살림도 몸도 무리하지 않게 운영하는 사장님입니다. 그래서 이 사업은 길게 갑니다."],
+  "B-C":["정해 둔 기준으로 품질을 점검하고 납기 차이를 확인한다고 답하셨어요. 약속한 대로 내놓는 손은 말보다 강한 신뢰를 만듭니다. 고객이 이 손을 믿습니다.","중요한 목표를 작업 단위로 나누고 마감일을 정한다고 답하셨어요. 만들 것이 먼저 정해져 있는 사장님입니다. 헤매는 시간이 적은 이유입니다."],
+  "C-B":["정한 목표를 다음에 할 작업 단위로 나누고, 주요 작업에 마감일을 붙인다고 답하셨어요. 큰 그림을 책상 위의 이번 주 할 일로 내려놓는 힘은 정말 드뭅니다. 계획이 계획으로 끝나지 않는 사장님입니다.","주력 상품이 지켜야 할 품질 기준을 정해 두고, 결과물을 그 기준으로 주기적으로 다시 본다고 답하셨어요. 만든 것을 그냥 내보내지 않는 손입니다. 이 손 덕분에 고객이 다시 옵니다."],
+  "B-M":["반복 업무의 순서가 정리돼 있고 자료를 나 없이도 찾을 수 있다고 답하셨어요. 함께 일하기 좋은 작업장을 만드는 건 배려이자 실력입니다. 사람이 이 작업장에 남는 이유입니다.","맡을 범위를 합의하고 필요한 정보를 먼저 준다고 답하셨어요. 좋은 것을 함께 만드는 방법을 아는 분입니다. 혼자 만들 때보다 더 좋은 것이 나옵니다."],
+  "M-B":["함께 일하는 상대와 진행 확인 시점을 정하고, 빠질 때 대신 도움을 청할 사람을 안다고 답하셨어요. 협업이 끊기지 않게 잇는 손은 조직을 지키는 손입니다. 사람이 이 사장님을 믿습니다.","품질 기준을 정해 두고 그 기준으로 점검한다고 답하셨어요. 사람을 연결하면서 만든 것도 확실한 분은 정말 귀합니다. 두 가지가 함께 있으니 커질 준비가 된 사업입니다."],
+  "B-P":["품질을 기준대로 점검하고 고객 불만을 개선에 반영한다고 답하셨어요. 손이 고객 쪽을 향해 있는 장인입니다. 만든 것이 시장에서 살아남는 이유입니다.","고객이 들어오는 경로의 성과와 재구매를 확인한다고 답하셨어요. 만드는 손에 파는 눈이 함께 있는 분은 열에 하나입니다. 사장님은 그 하나입니다."],
+  "P-B":["고객이 선택한 이유를 설명할 자료가 있고 후기를 모은다고 답하셨어요. 고객의 반응을 읽는 눈이 먼저 움직이는 분입니다. 팔리는 것을 만드는 힘입니다.","불만을 개선에 반영하고 결과물을 기준으로 점검한다고 답하셨어요. 팔고 나서도 손을 놓지 않는 상인은 오래 갑니다. 단골이 생기는 이유입니다."],
+  "B-F":["원가와 과정을 꾸준히 다듬고 납기 차이를 확인한다고 답하셨어요. 낭비가 적은 작업 방식은 하루아침에 만들어지지 않습니다. 오래 다듬어 온 손입니다.","가격의 근거를 갖고 지난달 이익을 바로 확인한다고 답하셨어요. 만든 만큼 남는지 계산하는 장인은 정말 드뭅니다. 이 사업이 흑자로 가는 이유입니다."],
+  "F-B":["가격 근거가 명확하고 고정비·변동비를 구분한다고 답하셨어요. 살림의 숫자를 아는 사장님은 어떤 달에도 놀라지 않습니다. 든든한 뿌리입니다.","반복 작업의 순서가 정리돼 있고 원가를 계속 다듬는다고 답하셨어요. 손재주가 낭비 없이 쓰이는 분입니다. 같은 노력으로 더 남기는 구조를 이미 갖고 계십니다."],
+  "C-M":["올해 목표를 바로 말할 수 있고 주요 작업에 마감이 있다고 답하셨어요. 가고 싶은 곳이 분명한 사장님입니다. 사람들이 따라올 수 있는 이유입니다.","맡을 범위를 합의하고 확인 시점을 정한다고 답하셨어요. 함께 가는 사람도 그 길을 알고 있습니다. 혼자 가는 것보다 멀리 갈 수 있는 팀입니다."],
+  "M-C":["의견이 갈릴 때 원인을 확인하고 필요한 자료를 준다고 답하셨어요. 사람을 잇는 손이 먼저 움직이는 분입니다. 좋은 사람이 모이는 사장님입니다.","목표를 숫자로 추적하고 마감일을 정한다고 답하셨어요. 그 연결이 어디로 가는지도 정해져 있습니다. 관계가 성과로 이어지는 드문 조합입니다."],
+  "C-P":["매주·매월 우선순위를 정하고 시장 변화를 목표에 반영한다고 답하셨어요. 가야 할 이유를 계속 다시 보는 사장님입니다. 방향이 낡지 않는 이유입니다.","가치 제안을 한 줄로 말하고 유입 경로 성과를 확인한다고 답하셨어요. 그 이유를 고객에게 전할 줄 아는 분입니다. 좋은 전략이 매출로 이어지는 힘입니다."],
+  "P-C":["고객이 결정할 자료가 있고 다음 단계를 안내하는 절차가 있다고 답하셨어요. 파는 흐름이 몸에 붙어 있는 사장님입니다. 매출이 우연이 아닌 이유입니다.","올해 목표와 이번 주 우선순위가 정해져 있다고 답하셨어요. 그 흐름이 어디로 커질지도 정해 두셨습니다. 잘 파는 데서 멈추지 않고 자라는 상인입니다."],
+  "C-F":["목표를 숫자로 정해 추적하고 월말에 돌아본다고 답하셨어요. 계획이 숫자로 적혀 있는 사장님은 열에 하나입니다. 그래서 계획이 실현됩니다.","세 달 입출금을 미리 보고 지급 일정을 정리한다고 답하셨어요. 그 계획에 연료 계산이 붙어 있습니다. 무리한 목표를 세우지 않는 이유입니다."],
+  "F-C":["앞으로 나갈 돈의 일정을 정리하고 부족해질 시점을 미리 본다고 답하셨어요. 앞을 보고 살림하는 분은 위기를 미리 피합니다. 가장 든든한 종류의 사장님입니다.","1년의 변화를 적어 두고 작업 단위로 나눈다고 답하셨어요. 살림이 목표를 향해 움직이고 있습니다. 지키는 힘과 나아가는 힘을 함께 가진 분입니다."],
+  "M-P":["함께 일하는 사람에게 감사를 표현하고 의논할 상대가 있다고 답하셨어요. 관계가 자산인 사장님입니다. 사람이 사람을 데려오는 사업입니다.","재구매와 후기를 확인하고 다음 단계를 안내한다고 답하셨어요. 그 관계가 단골로 이어지고 있습니다. 광고보다 강한 힘을 이미 갖고 계십니다."],
+  "P-M":["고객이 선택한 이유를 말할 수 있고 후기를 정기적으로 모은다고 답하셨어요. 고객을 읽는 눈이 먼저 움직이는 분입니다. 잘 팔리는 데는 이유가 있습니다.","협력사와 장기 관계를 관리하고 도움 청할 사람을 안다고 답하셨어요. 그 눈이 사람에게도 향합니다. 단골과 협력자가 함께 남는 상인입니다."],
+  "M-F":["맡을 범위를 합의하고 확인 시점을 정한다고 답하셨어요. 약속을 지키는 방식으로 믿음을 얻는 사장님입니다. 오래 함께할 사람이 모입니다.","수입과 지출을 확인하고 수금을 예정일에 점검한다고 답하셨어요. 사람에게 따뜻하면서 돈에는 밝은 분은 정말 드뭅니다. 두 가지를 다 갖고 계십니다."],
+  "F-M":["지난달 이익을 바로 확인하고 지급 일정을 정리해 둔다고 답하셨어요. 돈을 꼼꼼히 챙기는 살림꾼입니다. 이 사업이 흔들리지 않는 이유입니다.","의견이 갈리면 원인을 확인하고 필요한 자료를 준다고 답하셨어요. 살림에 밝은 분이 사람에게도 믿음을 줍니다. 오래 가는 사업의 두 기둥입니다."],
+  "P-F":["유입 경로의 성과와 고객 획득 비용의 기준이 있다고 답하셨어요. 파는 일을 숫자로 보는 사장님입니다. 감이 아니라 근거로 파는 분입니다.","가격 근거가 있고 이익을 바로 확인한다고 답하셨어요. 팔고 나서 남는 돈까지 아는 상인은 열에 하나입니다. 매출이 이익으로 이어지는 구조를 갖고 계십니다."],
+  "F-P":["이익을 확인하고 세 달 입출금을 미리 본다고 답하셨어요. 살림이 먼저 서 있는 사장님입니다. 어떤 달에도 발 뻗고 잘 수 있는 구조입니다.","유입 경로 성과를 확인하고 다음 단계를 안내한다고 답하셨어요. 그 살림에 파는 힘이 붙어 있습니다. 지키면서 키우는 드문 조합입니다."],
+  "MASTER":["여섯 영역 모두 높게, 그리고 고르게 답하셨어요. 60문항 중 어느 한 곳도 놓지 않았다는 뜻입니다. 이 진단에서 가장 드문 결과이고, 사장님이 지금까지 해 온 방식이 옳았다는 증거입니다.","가장 높은 영역과 가장 낮은 영역의 차이가 작았어요. 한 축이 무너져도 나머지가 받쳐 주는 구조입니다. 흔들려도 넘어지지 않는 사업을 이미 만드셨습니다."],
+  "BALANCED":["여섯 영역 어느 하나 처지지 않게 답하셨어요. 고르게 실천한다는 건 매일 여섯 가지를 다 챙긴다는 뜻입니다. 쉽게 되는 일이 아닙니다.","높은 영역과 낮은 영역의 차이가 크지 않았어요. 안정감이 이 결과의 특징입니다. 어디를 밀어도 움직일 준비가 된 사업입니다."],
 };
 /* 닮은 사업가 한 줄 (공유 카드와 공유) */
 const SIMILAR_ACH={"사티아 나델라":"MS를 클라우드·AI 강자로 되살린 경영자","지로 오노":"평생 스시 하나에 매진한 미슐랭 3스타 장인","이본 쉬나드":"환경을 지키는 기업 철학의 상징","라탄 타타":"인도 최대 그룹을 세계로 이끈 경영자","인드라 누이":"펩시코를 이끈 '목적 있는 성장'의 리더","빌 캠벨":"실리콘밸리 경영자들의 스승이 된 코치","하워드 슐츠":"스타벅스를 세계적 브랜드로 키운 경영자","오프라 윈프리":"토크쇼로 미디어 제국을 세운 방송인","사라 블레이클리":"맨손으로 스팽스를 일군 자수성가 창업가","워런 버핏":"가치투자를 대표하는 세계적 투자가","존 보글":"저비용 인덱스 투자를 창시한 혁신가","월트 디즈니":"애니메이션과 테마파크를 창조한 몽상가","빌 게이츠":"PC를 대중화한 마이크로소프트 창업자","에드 캣멀":"픽사의 창의적 조직문화를 만든 리더","마쓰시타 고노스케":"'경영의 신'으로 불린 파나소닉 창업자","스티브 잡스":"혁신의 아이콘, 애플의 창업자","레이 크록":"맥도날드를 세계 프랜차이즈로 키운 경영자","팀 쿡":"애플을 시총 최고로 이끈 운영의 달인","샘 월튼":"세계 최대 유통 월마트를 세운 창업자","리드 헤이스팅스":"스트리밍 혁명을 이끈 넷플릭스 창업자","제프 베조스":"'고객 집착'으로 아마존을 세운 창업자","필 나이트":"나이키를 브랜드 신화로 만든 창업자","찰리 멍거":"버핏의 파트너, 다각적 사고의 투자가","레이 달리오":"세계 최대 헤지펀드를 세운 투자가","메리 케이 애시":"여성 방문판매 제국을 세운 창업가","에스티 로더":"화장품 제국을 일군 뷰티 창업가","제임스 시네갈":"회원제 유통 코스트코를 키운 경영자","이나모리 가즈오":"교세라를 세운 '아메바 경영'의 대가","베르나르 아르노":"명품 제국 LVMH를 이끄는 경영자","젠슨 황":"AI 반도체 시대를 연 엔비디아 창업자","일론 머스크":"전기차·우주로 도전하는 테슬라 창업자","김영모":"대한민국을 대표하는 제과 명장","신춘호":"신라면 신화를 쓴 농심 창업자","정문술":"벤처 1세대, 통 큰 기부로 존경받는 경영자","권오현":"반도체 신화를 이끈 삼성전자 경영자","신창재":"독서·정도경영의 교보생명 경영자","김미경":"자기계발 교육으로 성장한 대표 강사","박신후":"자기 분야를 꾸준히 키워온 사업가","구인회":"화학·전자의 기틀을 놓은 LG 창업자","윤동한":"화장품 ODM을 개척한 한국콜마 창업자","정주영":"'해봤어?'의 도전, 현대 창업자","이원영":"워라밸 기업문화의 제니퍼소프트 창업자","임영진":"디지털 금융을 이끈 신한카드 경영자","김정수":"삼립을 성장시킨 제빵 경영자","정태영":"디자인·브랜딩 경영의 현대카드 대표","박정부":"균일가 유통 다이소를 세운 창업자","이부진":"호텔·면세 사업을 이끈 호텔신라 경영자","최태원":"사회적 가치를 앞세운 SK 회장","권혁빈":"글로벌 게임 신화를 쓴 스마일게이트 창업자","김홍국":"닭고기 수직계열화를 이룬 하림 창업자","최종현":"인재경영으로 SK를 키운 경영자","박현주":"자산운용을 개척한 미래에셋 창업자","우미령":"윤리적 뷰티를 이끈 러쉬코리아 대표","서경배":"K뷰티를 세계로 넓힌 아모레퍼시픽 회장","함영준":"'갓뚜기' 상생경영의 오뚜기 회장","조정호":"성과주의로 성장한 메리츠금융 회장","윤윤수":"휠라를 인수해 부활시킨 경영자","이건희":"'신경영'으로 삼성을 세계로 이끈 회장","구광모":"선택과 집중의 LG 회장"};
@@ -718,9 +719,8 @@ function initBlock(root){
     renderPre(root);
   });
 
-  const co=root.querySelector('#codeOpen'), cf=root.querySelector('#codeForm');
-  if(co&&cf){ co.addEventListener('click',()=>{ cf.hidden=!cf.hidden; if(!cf.hidden){ const ip=cf.querySelector('#codeInput'); if(ip) ip.focus(); } });
-    cf.addEventListener('submit',(e)=>{ e.preventDefault(); const ip=cf.querySelector('#codeInput'); const c=(ip&&ip.value||'').trim().toUpperCase(); if(c.length===6) openByCode(root, c); }); }
+  const lo=root.querySelector('#lastOpen');
+  if(lo){ const last=loadLastResult(); if(last&&last.code){ lo.hidden=false; lo.addEventListener('click',()=>{ openByCode(root, last.code); }); } }
 
   // 진행 중이던 테스트 → 이어하기 배너
   const sv=loadProgress();
@@ -1081,8 +1081,8 @@ function gFill(t, v){ return t.replace(/\{(\w+)\}/g, (m,k)=>(v[k]!=null?v[k]:m))
 function gJosa(w, a, b){ const s=String(w||'').replace(/[^가-힣]+$/,''); const c=s.charCodeAt(s.length-1); if(!(c>=0xAC00&&c<=0xD7A3)) return b; return ((c-0xAC00)%28)?a:b; }
 /* ① 관찰: 점수 모양별 */
 const G_SHAPE = {
-  master:["여섯 축이 모두 높고, 가장 높은 {top} {topS}점과 가장 낮은 {low} {lowS}점의 차이가 {gap}점뿐입니다. 어느 한 곳에 기대지 않고 굴러가는 사업입니다.",
-          "가장 낮은 축인 {low}가 {lowS}점입니다. 빈 곳을 찾는 결과가 아니라, 이 수준을 어떻게 유지하고 어디로 넓힐지를 보는 결과입니다."],
+  master:["여섯 축이 모두 {lowS}점 이상입니다. 이 진단에서 가장 드문 결과입니다. 가장 높은 {top} {topS}점과 가장 낮은 {low} {lowS}점의 차이가 {gap}점뿐이라, 어느 한 곳에 기대지 않고 굴러가는 사업입니다.",
+          "가장 낮은 축인 {low}조차 {lowS}점입니다. 대부분의 사장님은 가장 높은 축이 이 점수에 닿기 어렵습니다. 빈 곳을 찾는 결과가 아니라, 이 수준을 어떻게 지키고 어디로 넓힐지를 보는 결과입니다."],
   balanced:["여섯 축이 {lowS}점에서 {topS}점 사이에 고르게 있습니다. 어느 한 곳이 무너지지 않는 대신, 어디를 밀어야 성장이 보이는지가 덜 선명한 모양입니다.",
             "가장 높은 {top} {topS}점과 가장 낮은 {low} {lowS}점의 차이가 {gap}점입니다. 고른 실천이 이 결과의 특징이고, 다음 질문은 \"어디에 힘을 모을까\"입니다."],
   spike:["{top}가 {topS}점으로 다른 다섯 축보다 뚜렷하게 앞서 있습니다. 사업이 이 한 축의 힘으로 굴러가고 있고, 가장 낮은 {low} {lowS}점과의 간격 {gap}점이 그만큼 눈에 띕니다.",
@@ -1178,11 +1178,16 @@ const G_ORDER = [
 ];
 const G_ORDER_HIGH = [
   "이제 과제는 올리는 것이 아니라 굳히는 것입니다. 여섯 축 중 사장님이 자리를 비워도 이어지는 축이 몇 개인지 세어 보세요. 사장님이 빠지면 멈추는 축이 다음 달의 목표입니다.",
-  "한 달 동안 새로 시작할 일은 없습니다. 대신 {low}에서 지금 하고 있는 방식이 정말 작동하는지 {unit}{u_eul} 기록으로 한 번 확인해 보세요. 높은 점수는 습관의 증거이지 결과의 증거는 아니니까요.",
+  "이번 한 달은 이렇게 써 보세요. {low}에서 사장님이 직접 하는 일 하나를 골라 다른 사람 손에 넘겨 봅니다. 그대로 굴러가면 사장님의 방식이 이미 글로 남았다는 뜻이고, 삐걱이면 거기가 다음 과제입니다.",
+];
+/* 마스터 전용 2문단: 칭찬을 먼저, 꼭 알아야 할 약점 하나를 분명히 */
+const G_MASTER_P2 = [
+  "가장 낮은 {low}도 {lowS}점이라 여기서 더 올릴 것은 많지 않습니다. 대신 꼭 알아 두실 것이 하나 있습니다. 여섯 축을 다 잘하는 사장님의 사업은 사장님이 곧 시스템이 됩니다. 사장님이 자리를 비우는 순간 어느 축이 먼저 멈추는지, 그것이 이 결과의 진짜 빈 곳입니다.",
+  "{low} {lowS}점은 다른 사장님이라면 강점이라고 부를 점수입니다. 그래서 마스터의 약점은 점수표에 없습니다. 모든 걸 직접 잘하는 사람은 맡기는 시점을 놓치기 쉽고, 그 사이 사업은 사장님 한 사람의 크기에 머뭅니다. 이것 하나만 기억하시면 됩니다.",
 ];
 /* ④ 닫는 한 줄 — 연차·모양 풀 + 가장 낮은 축 풀 + 한 걸음 더 풀을 섞어 반복 인상을 줄인다 */
 const G_CLOSE = {
-  master:["지금의 여섯 축을 시스템으로 굳히고, 그다음은 사장님 없이도 굴러가는 판을 그릴 차례입니다.","이 결과는 유지가 과제인 드문 경우입니다. 다음 목표를 세우는 순간 한 번 더 자랍니다.","여섯 축이 모두 높다는 건 다음 사람을 키울 준비가 됐다는 뜻이기도 합니다. 사장님의 방식을 글로 남기는 것이 다음 단계입니다."],
+  master:["지금의 여섯 축을 사장님 없이도 굴러가는 판으로 옮기는 것, 그것이 마스터의 다음 성장입니다.","이 결과는 축하드려야 할 결과입니다. 다음 목표는 점수가 아니라 사장님의 방식을 물려줄 사람입니다.","여섯 축이 모두 높다는 건 다음 사람을 키울 준비가 됐다는 뜻입니다. 사장님의 방식을 글로 남기는 것이 다음 단계입니다."],
   balanced:["고른 사업은 오래 갑니다. 이제 한 축을 골라 뾰족하게 만들 차례입니다.","여섯 축이 고르다는 건 어디를 밀어도 움직인다는 뜻입니다. 하나만 고르세요.","균형은 지키는 것이 아니라 쓰는 것입니다. {low}부터 밀어 보세요."],
   early:["지금은 잘하는 것보다 '재 보는 것'이 먼저입니다. 한 달 뒤 같은 진단을 다시 하면 그때 성장 방향이 선명해집니다.","첫해의 점수는 성적이 아니라 출발선입니다. 한 축만 움직여 보고 다시 재 보세요.","첫해에 여섯 축이 다 높은 사장님은 없습니다. {act}, 이것 하나가 첫해의 성장 방향입니다."],
   mid:["작은 사업의 성장은 여섯 축을 다 올리는 게 아니라, 가장 낮은 축 하나가 사업을 끌어내리지 않게 하는 것에서 시작합니다.","{top}가 만든 지금까지의 성과에 {low} 하나가 더해지면, 같은 노력으로 다른 결과가 납니다.","{topS}점짜리 습관을 이미 갖고 계십니다. 그 습관이 {low}에도 붙는 데 필요한 건 재능이 아니라 한 장의 종이입니다."],
@@ -1209,8 +1214,9 @@ function buildGrowth(scores, type, gap, pre, code){
   const lowN=(gap&&gap.items&&gap.items.length)?gap.items[0].n:1;
   const theme=(G_LOW[low.axisId]||[]).find(t=>t.ids.includes(lowN))||(G_LOW[low.axisId]||[])[0];
   const allHigh=!!(gap&&gap.allHigh);
-  let p2=pair.t;
-  if(allHigh) p2+=' 다만 이 축도 대체로 높게 답하셔서, 빈 곳을 메우기보다 지금 방식이 실제로 작동하는지 기록으로 확인하는 것이 과제입니다.';
+  let p2=(shape==='master')?gFill(gPick(G_MASTER_P2, seed>>2), v):pair.t;
+  if(shape==='master'){}
+  else if(allHigh) p2+=' 다만 이 축도 대체로 높게 답하셔서, 빈 곳을 메우기보다 지금 방식이 실제로 작동하는지 기록으로 확인하는 것이 과제입니다.';
   else if(theme) p2+=' '+theme.why;
   const ctx=G_CTX.filter(c=>{ try{ return !!c.when(pre||{}) && (!c.axes || c.axes.includes(low.axisId)); }catch(e){ return false; } }).slice(0,1).map(c=>c.text);
   const recKey=(v.topRec||'').slice(-3); const orderPool=high?G_ORDER_HIGH:(pair.act.indexOf(recKey)>=0?G_ORDER.slice(1):G_ORDER);
@@ -1221,22 +1227,41 @@ function buildGrowth(scores, type, gap, pre, code){
   else if(pre&&pre.yearsInBiz==='year-8-plus') closeKey='late';
   const closePool=(high?[]:G_CLOSE.step).concat(G_CLOSE[closeKey]);
   const p4=gFill(gPick(closePool, seed>>5), v);
-  return {shape, paras:[p1,p2,p3,p4].filter(Boolean), pairKey:top.axisId+'>'+low.axisId, closeKey};
+  const emph=[pair.act,pair.unit].filter(Boolean);
+  return {shape, paras:[p1,p2,p3,p4].filter(Boolean), pairKey:top.axisId+'>'+low.axisId, closeKey, emph};
 }
 
-/* ── 결과 화면 v3 ─────────────────────────────────── */
+/* ── 결과 화면 v3.5 ─────────────────────────────────── */
 const AXIS_EN={self:"SELF",production:"PRODUCTION",goal:"GOAL",relation:"RELATION",marketing:"MARKETING",finance:"FINANCE"};
+const AXIS_RE=/(자기관리|생산관리|목표관리|관계관리|판매관리|재무관리)(\s?\(?\d{1,3}점\)?)/g;
 function eyebrow(t, r){ return '<h3 class="hexd-eyebrow">'+t+(r?'<span class="r">'+r+'</span>':'')+'</h3>'; }
 function fmtDate(t){ const d=new Date(t||Date.now()); const p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'.'+p(d.getMonth()+1)+'.'+p(d.getDate()); }
+function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escRe(s){ return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+/* 중요한 말을 굵은 초록으로: 축 이름+점수, 따옴표 구절, 지정 구절(extra). 이미 굵게 된 부분은 건드리지 않는다 */
+function emph(text, extra){
+  let html=escHtml(text);
+  const terms=(extra||[]).filter(Boolean).sort((a,b)=>b.length-a.length);
+  function outside(fn){ return html.split(/(<b>.*?<\/b>)/).map(seg=>seg.startsWith('<b>')?seg:fn(seg)).join(''); }
+  terms.forEach(t=>{ const e=escHtml(t); html=outside(seg=>seg.split(e).join('<b>'+e+'</b>')); });
+  html=outside(seg=>seg.replace(/'([^']{2,40})'/g,"<b>'$1'</b>"));
+  html=outside(seg=>seg.replace(AXIS_RE,'<b>$1$2</b>'));
+  return html;
+}
+/* 문장마다 줄을 바꾼다 (읽기 좋게 짧게 짧게). 마침표·물음표·느낌표 뒤 공백에서 끊는다 */
+function lines(html){ return html.replace(/([.!?])\s+(?=\S)/g,'$1<br>'); }
+function para(text, extra){ return '<p>'+lines(emph(text, extra))+'</p>'; }
 function likertWord(v){ const L=LIKERT_LABELS.find(x=>x.value===v); return L?L.short:String(v); }
 /* 빈 곳 블록: 가장 낮은 축 + 낮게 답한 문항 2개(실제 보여 준 문장) + 과제 + 고민 영역 메모 */
-function buildGap(scores){
+function buildGap(scores, type){
   const low=lowestAxis(scores);
   const qs=buildAxisQuestions(low.axisId,_pre).map(q=>({q, v:_answers[q.id]})).filter(x=>x.v!=null);
   qs.sort((a,b)=>a.v-b.v || a.q.n-b.q.n);
   const items=qs.slice(0,2);
   const allHigh=qs.length>0 && qs[0].v>=6;
-  const task=allHigh?TASK_ALL_HIGH:pickTask(low.axisId, items.length?items[0].q.n:1);
+  const master=!!(type&&type.code==='MASTER');
+  const task=master?"여섯 축 중 사장님이 직접 하는 일 하나를 골라, 이번 두 주 동안 다른 사람에게 맡겨 보세요. 맡긴 일이 그대로 굴러가는지 기록해 보는 것이 마스터의 과제입니다."
+             :allHigh?TASK_ALL_HIGH:pickTask(low.axisId, items.length?items[0].q.n:1);
   let concernNote='';
   const cons=(_pre.concerns||[]);
   if(cons.length){
@@ -1244,21 +1269,26 @@ function buildGap(scores){
     if(cons.includes(low.axisId)){ concernNote='먼저 해결하고 싶은 영역으로 고르신 '+labelOf(low.axisId)+'가 답변에서도 가장 낮게 나왔어요. 방향이 같으니, 위의 한 가지부터 시작해 보셔도 좋겠습니다.'; }
     else {
       const c0=other[0]; const cs=scores.find(s=>s.axisId===c0);
-      if(cs && cs.score>=70){ concernNote='"먼저 해결하고 싶은 영역"으로 '+labelOf(c0)+'를 고르셨네요. '+labelOf(c0)+' 점수('+cs.score+')는 높은 편이라, 습관은 있는데 결과가 답답한 상황일 수 있어요. 상담에서 함께 볼 수 있는 부분입니다.'; }
+      if(cs && cs.score>=70){ concernNote='"먼저 해결하고 싶은 영역"으로 '+labelOf(c0)+'를 고르셨네요. '+labelOf(c0)+' 점수('+cs.score+'점)는 높은 편이라, 습관은 있는데 결과가 답답한 상황일 수 있어요. 상담에서 함께 볼 수 있는 부분입니다.'; }
       else if(cs){ concernNote='"먼저 해결하고 싶은 영역"으로 고르신 '+labelOf(c0)+'('+cs.score+'점)도 함께 살펴볼 곳이에요. 두 영역 중 하나부터 가볍게 시작해 보세요.'; }
     }
   }
-  return {axisId:low.axisId, score:low.score, items:items.map(x=>({id:x.q.id, n:x.q.n, text:x.q.text, v:x.v})), task, allHigh, concernNote};
+  return {axisId:low.axisId, score:low.score, items:items.map(x=>({id:x.q.id, n:x.q.n, text:x.q.text, v:x.v})), task, allHigh, master, concernNote};
 }
 function renderGap(root, gap){
   const gw=root.querySelector('#gapWrap'); if(!gw) return;
-  const ev=gap.items.map(x=>'<li>'+x.text+' <b>'+likertWord(x.v)+'</b></li>').join('');
-  gw.innerHTML=eyebrow('먼저 살펴볼 곳')
+  const ev=gap.items.map(x=>'<li>'+escHtml(x.text)+' <b>'+likertWord(x.v)+'</b></li>').join('');
+  const head=gap.master?'그래도 한 곳을 고른다면':'먼저 살펴볼 곳';
+  const evHead=gap.master?'가장 낮게 답하신 문항도 이 정도예요':gap.allHigh?'이 영역도 대체로 높게 답하셨어요':'이렇게 답하셨어요';
+  const taskHead=gap.master?'마스터에게 드리는 두 주 과제':'이번 두 주에 해 볼 만한 것';
+  const masterNote=gap.master?'<p class="hexd-foot">'+lines(emph('꼭 알아 두실 것 하나. 여섯 축을 다 잘하는 사장님의 사업은 사장님이 곧 시스템이 됩니다. 사장님이 자리를 비우는 순간 어느 축이 먼저 멈추는지, 그것이 점수표에 없는 진짜 빈 곳입니다.'))+'</p>':'';
+  gw.innerHTML=eyebrow(head)
     +'<div class="hexd-gap-axis"><b class="nm">'+labelOf(gap.axisId)+'</b><span class="sc">'+gap.score+'</span></div>'
     +'<p class="hexd-gap-desc">'+(AXIS_DESC[gap.axisId]||'')+'</p>'
-    +(ev?'<h4 class="hexd-gap-sub">'+(gap.allHigh?'이 영역도 대체로 높게 답하셨어요':'이렇게 답하셨어요')+'</h4><ul class="hexd-gap-ev">'+ev+'</ul>':'')
-    +'<h4 class="hexd-gap-sub">이번 두 주에 해 볼 만한 것</h4><div class="hexd-gap-task">'+gap.task+'</div>'
-    +(gap.concernNote?'<p class="hexd-foot">&#8251; '+gap.concernNote+'</p>':'');
+    +(ev?'<h4 class="hexd-gap-sub">'+evHead+'</h4><ul class="hexd-gap-ev">'+ev+'</ul>':'')
+    +'<h4 class="hexd-gap-sub">'+taskHead+'</h4><div class="hexd-gap-task">'+lines(emph(gap.task))+'</div>'
+    +masterNote
+    +(gap.concernNote?'<p class="hexd-foot">&#8251; '+lines(emph(gap.concernNote))+'</p>':'');
   gw.style.display='block';
 }
 /* 익명 저장: 이름·연락처 없음. 기본은 이 기기(localStorage)에 두고, 저장소 연결 함수(window.SBA_HEXD_SAVE)가 있으면 그쪽으로도 보낸다 */
@@ -1268,16 +1298,16 @@ function persistResult(p){
   try{ if(typeof window.SBA_HEXD_SAVE==='function') window.SBA_HEXD_SAVE(p); }catch(e){}
 }
 function loadResultByCode(code){ try{ const all=JSON.parse(localStorage.getItem(RESULTS_KEY)||'{}'); return all[String(code||'').toUpperCase()]||null; }catch(e){ return null; } }
+function loadLastResult(){ try{ const all=JSON.parse(localStorage.getItem(RESULTS_KEY)||'{}'); const k=Object.keys(all).sort((a,b)=>(all[b].t||0)-(all[a].t||0))[0]; return k?all[k]:null; }catch(e){ return null; } }
 let _rcode=null;
 function showResult(root, opts){
   opts=opts||{};
   const scores = AXES.map(ax=>{ const qs=buildAxisQuestions(ax.id,_pre); const st=axisStats(_answers,qs); return {axisId:ax.id, code:ax.code, color:ax.color, score:likertToScore(st.mean), rawAvg:st.mean, stats:st}; });
   const type = matchType(scores);
-  const gap = buildGap(scores);
+  const gap = buildGap(scores, type);
   const lowestIdx = scores.findIndex(s=>s.axisId===gap.axisId);
-  if(!_rcode || opts.newCode) _rcode = opts.code || makeCode(type.code+JSON.stringify(_answers));
+  if(!_rcode || opts.newCode) _rcode = opts.code || makeCode(type.code+JSON.stringify(_answers)); /* 내부 식별용(화면에는 안 보임) */
   saveProgress('result');
-  const byId={}; scores.forEach(s=>{ byId[s.axisId]=s; });
   const byCode={}; scores.forEach(s=>{ byCode[s.code]=s; });
 
   /* 표제란 */
@@ -1285,9 +1315,8 @@ function showResult(root, opts){
   if(_ci){ _ci.onerror=function(){ this.style.display='none'; }; if(_cu){ _ci.src=_cu; _ci.alt=type.nickname; _ci.style.display='block'; } else { _ci.style.display='none'; } }
   root.querySelector('#r-code').textContent=type.code;
   root.querySelector('#r-name').textContent=type.nickname;
-  root.querySelector('#r-liner').textContent=type.oneLiner;
+  root.querySelector('#r-liner').innerHTML=lines(escHtml(type.oneLiner));
   const an=root.querySelector('#r-axisnote'); if(an){ an.textContent=type.axisNote||''; an.style.display=type.axisNote?'block':'none'; }
-  const rc=root.querySelector('#r-rcode'); if(rc){ rc.innerHTML='<small>결과 코드</small><b>'+_rcode+'</b><i>이 코드로 다시 볼 수 있어요</i>'; }
 
   /* 치수 */
   const ranked=(type._rank||scores.slice().sort((a,b)=>b.score-a.score));
@@ -1296,8 +1325,8 @@ function showResult(root, opts){
   const sd=root.querySelector('#scoresDate'); if(sd) sd.textContent=fmtDate(opts.t);
   const grid=root.querySelector('#scoresGrid'); grid.innerHTML='';
   scores.forEach((s)=>{
-    const cls=strongSet.has(s.axisId)?'top':weakSet.has(s.axisId)?'low':'';
-    const tag=cls==='top'?'강점':cls==='low'?'보강':'';
+    const cls=type.code==='MASTER'?'top':strongSet.has(s.axisId)?'top':weakSet.has(s.axisId)?'low':'';
+    const tag=type.code==='MASTER'?'':cls==='top'?'강점':cls==='low'?'보강':'';
     const row=document.createElement('div'); row.className='hexd-row'; row.title=AXIS_DESC[s.axisId]||'';
     row.innerHTML='<div class="lb"><span class="hexd-score-label">'+labelOf(s.axisId)+'</span><small>'+AXIS_EN[s.axisId]+'</small></div>'
       +'<div class="track"><div class="fill '+cls+'" style="width:0%"></div></div>'
@@ -1306,11 +1335,9 @@ function showResult(root, opts){
     const f=row.querySelector('.fill'); requestAnimationFrame(function(){ requestAnimationFrame(function(){ f.style.width=s.score+'%'; }); });
   });
   const tn=root.querySelector('#tieNote');
-  if(tn){ const notes=(type._tieNotes||[]).map(n=>n.msg); tn.innerHTML=notes.map(m=>'<div>&#8251; '+m+'</div>').join(''); tn.style.display=notes.length?'block':'none'; }
+  if(tn){ const notes=(type._tieNotes||[]).map(n=>n.msg); tn.innerHTML=notes.map(m=>'<div>&#8251; '+lines(emph(m))+'</div>').join(''); tn.style.display=notes.length?'block':'none'; }
 
-  renderGap(root, gap);
-
-  /* 강점 풀어 쓰기 */
+  /* 강점 풀어 쓰기 (칭찬 먼저) */
   const swWrap=root.querySelector('#swWrap');
   if(swWrap){
     const st=(type.strengths||[]).slice(0,2);
@@ -1319,10 +1346,12 @@ function showResult(root, opts){
     const items=st.map((t,i)=>{
       const ax=parts?byCode[parts[i]]:null;
       const axTxt=ax?labelOf(ax.axisId)+' &middot; '+ax.score:'여섯 영역';
-      return '<div class="hexd-st-it"><div class="ax"><b>'+(i+1)+'</b>'+axTxt+'</div><h5>'+t+'</h5>'+(notes[i]?'<p>'+notes[i]+'</p>':'')+'</div>';
+      return '<div class="hexd-st-it"><div class="ax"><b>'+(i+1)+'</b>'+axTxt+'</div><h5>'+escHtml(t)+'</h5>'+(notes[i]?para(notes[i]):'')+'</div>';
     }).join('');
-    swWrap.innerHTML=items?eyebrow('이 유형의 강점')+'<div class="hexd-st">'+items+'</div>':''; swWrap.style.display=items?'block':'none';
+    swWrap.innerHTML=items?eyebrow(type.code==='MASTER'?'마스터의 강점':'이 유형의 강점')+'<div class="hexd-st">'+items+'</div>':''; swWrap.style.display=items?'block':'none';
   }
+
+  renderGap(root, gap);
 
   /* 닮은 사업가 */
   const simWrap=root.querySelector('#similarWrap');
@@ -1343,16 +1372,15 @@ function showResult(root, opts){
     } else { simWrap.style.display='none'; }
   }
 
-  /* 성장 방향: 점수 모양·1위 축·가장 낮은 축·낮은 문항·사전 맥락으로 조합 (growth.js) */
+  /* 성장 방향: 조합 생성 (growth.js) — 문장마다 줄 바꿈, 흐름이 바뀌면 문단 간격, 중요한 말은 굵은 초록 */
   const gw=root.querySelector('#growthWrap');
   if(gw){
     const g=buildGrowth(scores, type, gap, _pre, _rcode);
-    gw.innerHTML=eyebrow('성장 방향')+'<div class="hexd-growth-body" data-enh="1">'+g.paras.map(p=>'<p>'+p+'</p>').join('')+'</div>';
+    gw.innerHTML=eyebrow('성장 방향')+'<div class="hexd-growth-body" data-enh="1">'+g.paras.map(p=>para(p, g.emph)).join('')+'</div>';
     gw.style.display='block';
   }
 
   /* 다음 단계 */
-  const cs=root.querySelector('#ctaSub'); if(cs) cs.innerHTML='결과 코드 <b>'+_rcode+'</b> 가 신청서에 함께 들어갑니다';
   const shareUrl=location.origin+location.pathname;
   const shareMsg='나는 "'+type.nickname+'" 유형 사업가! 나의 유형도 알아보기 → '+shareUrl;
   const enc=encodeURIComponent(shareMsg);
@@ -1373,17 +1401,17 @@ function showResult(root, opts){
   /* 익명 저장 (결과 화면이 뜰 때 1회) */
   if(!opts.replay){
     const shown={}; AXES.forEach(ax=>{ shown[ax.id]=buildAxisQuestions(ax.id,_pre).map(q=>({id:q.id, n:q.n, text:q.text})); });
-    persistResult({code:_rcode, t:Date.now(), v:2, pre:JSON.parse(JSON.stringify(_pre)), shown, answers:Object.assign({},_answers),
+    persistResult({code:_rcode, t:Date.now(), v:2, user:(window.__sbaHexdUser||''), pre:JSON.parse(JSON.stringify(_pre)), shown, answers:Object.assign({},_answers),
       scores:scores.map(s=>({axisId:s.axisId, score:s.score})), type:type.code, nickname:type.nickname,
       tie:(type._tieNotes||[]).map(n=>({pos:n.pos, step:n.step})), gap:{axisId:gap.axisId, items:gap.items.map(x=>x.id), task:gap.task}, concerns:(_pre.concerns||[]).slice()});
   }
 }
-/* 결과 코드로 다시 보기 (이 기기에 저장된 결과) */
+/* 저장된 결과 다시 보기 (이 기기) */
 function openByCode(root, code){
   const p=loadResultByCode(code);
   const sb=root.querySelector('#snackbar');
   function toast(m){ if(sb){ sb.textContent=m; sb.classList.add('show'); setTimeout(()=>sb.classList.remove('show'),2800); } }
-  if(!p){ toast('이 기기에서 그 코드의 결과를 찾지 못했어요.'); return false; }
+  if(!p){ toast('이 기기에 저장된 결과를 찾지 못했어요.'); return false; }
   _pre=normalizePre(Object.assign(emptyPreSurvey(), p.pre||{})); _answers=Object.assign({},p.answers||{}); _preIdx=0;
   root.querySelectorAll('.hexd-screen[id^="s-ax-"], #s-concern').forEach(el=>el.remove());
   enterMain(root);
@@ -1481,6 +1509,7 @@ window.__sbaHexdRun = function(bm){ window.__sbaHexdUser=pickUserName(bm); mount
     document.head.appendChild(s);
   }
   function igBold(t){ var p=t.split("'"),o='',c=0,q; for(q=0;q<p.length;q++){ if(q%2===1&&c<8&&p[q].length>=2&&p[q].length<=42){ o+="'<b>"+p[q]+"</b>'"; c++; } else if(q%2===1){ o+="'"+p[q]+"'"; } else o+=p[q]; } return o; }
+  function igLines(t){ return t.replace(/([.!?])\s+(?=\S)/g,'$1<br>'); }
   function igSplit(t,max){ var re=/[.!?]\s+/g,parts=[],last=0,m,ch=[],cu='',i; while((m=re.exec(t))){ parts.push(t.slice(last,m.index+1)); last=m.index+m[0].length; } if(last<t.length)parts.push(t.slice(last)); for(i=0;i<parts.length;i++){ var s=(parts[i]||'').trim(); if(!s)continue; if(cu&&(cu.length+s.length)>max){ ch.push(cu.trim()); cu=s; } else cu+=(cu?' ':'')+s; } if(cu.trim())ch.push(cu.trim()); return ch; }
   function igText(el){ return el?(el.textContent||'').trim():''; }
   function igRead(){
@@ -1497,7 +1526,7 @@ window.__sbaHexdRun = function(bm){ window.__sbaHexdUser=pickUserName(bm); mount
     var gapEl=q('#gapWrap'), gap=null;
     if(gapEl && gapEl.style.display!=='none'){ var ev=[]; gapEl.querySelectorAll('.hexd-gap-ev li').forEach(function(li){ ev.push(igText(li)); }); gap={axis:igText(gapEl.querySelector('.hexd-gap-axis .nm')),score:igText(gapEl.querySelector('.hexd-gap-axis .sc')),ev:ev,task:igText(gapEl.querySelector('.hexd-gap-task'))}; }
     var rcodeEl=q('#r-rcode b');
-    return {rcode:rcodeEl?igText(rcodeEl):'',gap:gap,axisNote:igText(q('#r-axisnote')),code:igText(q('#r-code')),name:igText(q('#r-name')),liner:igText(q('#r-liner')),charSrc:img?img.src:'',scores:scores,st:st,wk:wk,sims:sims,growth:igText(q('.hexd-growth-body'))};
+    return {rcode:rcodeEl?igText(rcodeEl):'',gap:gap,axisNote:igText(q('#r-axisnote')),code:igText(q('#r-code')),name:igText(q('#r-name')),liner:igText(q('#r-liner')),charSrc:img?img.src:'',scores:scores,st:st,wk:wk,sims:sims,growth:(function(){ var g=q('.hexd-growth-body'); if(!g) return ''; var ps=g.querySelectorAll('p'); var arr=ps.length?[].map.call(ps,function(p){ return (p.innerText||p.textContent||'').replace(/\s+/g,' ').trim(); }):[(g.innerText||g.textContent||'').replace(/\s+/g,' ').trim()]; return arr.join(' '); })()};
   }
   function igRadar(cv,scores){
     var ctx=cv.getContext('2d'),W=640,H=600,cx=W/2,cy=H/2,R=195,N=scores.length||6;
@@ -1529,19 +1558,19 @@ window.__sbaHexdRun = function(bm){ window.__sbaHexdUser=pickUserName(bm); mount
   var IG_ACH=window.__sbaHexdAch||{};
   function igCards(d){
     var list=[{t:'cover'},{t:'radar'}];
+    if(d.st.length) list.push({t:'sw',head:(d.code==='MASTER'?'마스터의 강점':'이 유형의 강점'),sub:'당신의 무기가 되는 강점',items:d.st,bar:'#006241'});
     if(d.gap&&d.gap.axis) list.push({t:'gap'});
-    if(d.st.length) list.push({t:'sw',head:'이 유형의 강점',sub:'당신의 무기가 되는 강점',items:d.st,bar:'#006241'});
     if(d.wk.length) list.push({t:'sw',head:'보완할 점',sub:'약점이 아니라, 다음 성장 포인트',items:d.wk,bar:'#C8A864'});
     if(d.sims.length) list.push({t:'sim'});
-    if(d.growth){ var gc=igSplit(d.growth,300); gc.forEach(function(c,i){ list.push({t:'growth',text:igBold(c),part:gc.length>1?'('+(i+1)+'/'+gc.length+')':''}); }); }
+    if(d.growth){ var gc=igSplit(d.growth,300); gc.forEach(function(c,i){ list.push({t:'growth',text:igLines(igBold(c)),part:gc.length>1?'('+(i+1)+'/'+gc.length+')':''}); }); }
     var TOTAL=list.length;
     function brand(p){ return '<div class="igc-brand"><span><b>스몰브랜드설계자</b> · 사업가 유형 테스트</span><span>'+p+' / '+TOTAL+'</span></div>'; }
-    function foot(){ return '<div class="igc-foot"><span><b>@스몰브랜드설계자</b></span><span>'+(d.rcode?'결과 코드 '+d.rcode:'스브설 · 사업가 유형 테스트')+'</span></div>'; }
+    function foot(){ return '<div class="igc-foot"><span><b>@스몰브랜드설계자</b></span><span>스브설 · 사업가 유형 테스트</span></div>'; }
     return list.map(function(card,ix){
       var p=ix+1,h;
       if(card.t==='cover'){ var im=d.charSrc?'<img src="'+d.charSrc+'" crossorigin="anonymous" alt="">':'🧑‍💼'; h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px"></div><div class="igc-hex" style="left:-180px;bottom:-160px;opacity:.32"></div><div class="igc-pad">'+brand(p)+'<div style="text-align:center"><div class="igc-kick">나의 사업가 유형은?</div><div class="igc-char">'+im+'</div>'+(d.code?'<canvas data-pill style="display:block;margin:14px auto 0"></canvas>':'')+'<div class="igc-name">'+d.name+'</div><div class="igc-liner">'+(d.liner||'').replace(/, /,',<br>')+'</div></div></div>'+foot()+'</div>'; }
-      else if(card.t==='radar'){ var chips=d.scores.map(function(a){return '<div class="igc-chip"><span class="igc-dot" style="background:'+a.color+'"></span><span class="igc-ck">'+a.label+'</span><div class="igc-cv" style="color:'+a.color+'">'+a.v+'</div></div>';}).join(''); h='<div class="igc-card"><div class="igc-pad">'+brand(p)+'<div class="igc-title">나의 경영 육각형</div><div class="igc-tbar"></div><div class="igc-sub">6가지 사장 역량을 한눈에</div><canvas data-radar width="1000" height="760" style="display:block;width:912px;height:693px;margin:18px auto 14px;border-radius:28px"></canvas><div class="igc-chips">'+chips+'</div></div>'+foot()+'</div>'; }
-      else if(card.t==='gap'){ var evs=d.gap.ev.map(function(t){return '<div class="igc-mini"><div class="mb" style="background:#cc785c"></div><div class="igc-mtxt igc-ev">'+t+'</div></div>';}).join(''); h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px;opacity:.5"></div><div class="igc-pad">'+brand(p)+'<div class="igc-title">먼저 살펴볼 곳</div><div class="igc-tbar" style="background:#cc785c"></div><div class="igc-sub"><b style="color:#20241f">'+d.gap.axis+'</b> · '+d.gap.score+' · 이렇게 답하셨어요</div>'+evs+'<div class="igc-gsub">이번 두 주에 해 볼 만한 것</div><div class="igc-gtask">'+d.gap.task+'</div></div>'+foot()+'</div>'; }
+      else if(card.t==='radar'){ var chips=d.scores.map(function(a){return '<div class="igc-chip"><span class="igc-dot" style="background:'+a.color+'"></span><span class="igc-ck">'+a.label+'</span><div class="igc-cv" style="color:'+a.color+'">'+a.v+'</div></div>';}).join(''); h='<div class="igc-card"><div class="igc-pad">'+brand(p)+'<div class="igc-title">나의 경영 육각형</div><div class="igc-tbar"></div><div class="igc-sub">6가지 사장 역량을 한눈에</div><canvas data-radar width="1000" height="640" style="display:block;width:912px;height:584px;margin:18px auto 14px;border-radius:28px"></canvas><div class="igc-chips">'+chips+'</div></div>'+foot()+'</div>'; }
+      else if(card.t==='gap'){ var evs=d.gap.ev.map(function(t){return '<div class="igc-mini"><div class="mb" style="background:#cc785c"></div><div class="igc-mtxt igc-ev">'+t+'</div></div>';}).join(''); h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px;opacity:.5"></div><div class="igc-pad">'+brand(p)+'<div class="igc-title">'+(d.code==='MASTER'?'그래도 한 곳을 고른다면':'먼저 살펴볼 곳')+'</div><div class="igc-tbar" style="background:#cc785c"></div><div class="igc-sub"><b style="color:#20241f">'+d.gap.axis+'</b> · '+d.gap.score+' · 이렇게 답하셨어요</div>'+evs+'<div class="igc-gsub">이번 두 주에 해 볼 만한 것</div><div class="igc-gtask">'+d.gap.task+'</div></div>'+foot()+'</div>'; }
       else if(card.t==='sw'){ var its=card.items.map(function(t){ var o=(typeof t==='string')?{t:t,d:''}:t; return '<div class="igc-mini"><div class="mb" style="background:'+card.bar+'"></div><div class="igc-mtxt">'+o.t+'</div>'+(o.d?'<div class="igc-mdesc">'+o.d+'</div>':'')+'</div>';}).join(''); h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px;opacity:.5"></div><div class="igc-hex" style="left:-180px;bottom:-160px;opacity:.32"></div><div class="igc-pad">'+brand(p)+'<div class="igc-title">'+card.head+'</div><div class="igc-tbar" style="background:'+card.bar+'"></div><div class="igc-sub">'+card.sub+'</div>'+its+'</div>'+foot()+'</div>'; }
       else if(card.t==='sim'){ var ppl=d.sims.map(function(s){var ach=IG_ACH[s.name]||'비슷한 강점을 가진 경영자';var co=s.co?('<b>'+s.co+'</b> · '):'';var rg=s.kr?'국내':'해외'; return '<div class="igc-sim"><div class="igc-flag">'+rg+'</div><div><div class="igc-simn">'+s.name+'</div><div class="igc-simt">'+co+ach+'</div></div></div>';}).join(''); h='<div class="igc-card"><div class="igc-pad">'+brand(p)+'<div class="igc-title">당신과 닮은 사업가</div><div class="igc-tbar"></div><div class="igc-sub">비슷한 강점을 가진 실존 사업가예요</div>'+ppl+'<div class="igc-note">* \'강점이 닮았다\'는 참고용이에요(약점을 단정하지 않습니다).</div></div>'+foot()+'</div>'; }
       else { h='<div class="igc-card"><div class="igc-pad">'+brand(p)+'<div class="igc-title">성장 방향<span class="p">'+card.part+'</span></div><div class="igc-tbar"></div><div class="igc-sub">지금부터 이렇게 해보세요</div><div class="igc-growth">'+card.text+'</div></div>'+foot()+'</div>'; }
@@ -1584,7 +1613,7 @@ window.__sbaHexdRun = function(bm){ window.__sbaHexdUser=pickUserName(bm); mount
       var cards=igCards(d);
       var stage=document.createElement('div'); stage.style.cssText='position:fixed;left:-99999px;top:0;z-index:-1';
       cards.forEach(function(c){ stage.appendChild(c); }); document.body.appendChild(stage);
-      cards.forEach(function(c){ var rc=c.querySelector('canvas[data-radar]'); if(rc){ var bp=window.__sbaHexdBlueprint; if(!(bp&&bp.drawStatic(rc,1000,760))) igRadar(rc,d.scores); } var pc=c.querySelector('canvas[data-pill]'); if(pc) igPill(pc,d.code||''); });
+      cards.forEach(function(c){ var rc=c.querySelector('canvas[data-radar]'); if(rc){ var bp=window.__sbaHexdBlueprint; if(!(bp&&bp.drawStatic(rc,1000,640))) igRadar(rc,d.scores); } var pc=c.querySelector('canvas[data-pill]'); if(pc) igPill(pc,d.code||''); });
       var blobs=[],i=0,code=d.code||'결과';
       function finish(){
         stage.remove();
