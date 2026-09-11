@@ -1248,9 +1248,42 @@ function emph(text, extra){
   html=outside(seg=>seg.replace(AXIS_RE,'<b>$1$2</b>'));
   return html;
 }
-/* 문장마다 줄을 바꾼다 (읽기 좋게 짧게 짧게). 마침표·물음표·느낌표 뒤 공백에서 끊는다 */
-function lines(html){ return html.replace(/([.!?])\s+(?=\S)/g,'$1<br>'); }
-function para(text, extra){ return '<p>'+lines(emph(text, extra))+'</p>'; }
+/* 줄내림 규칙(절대 원칙): ① 문장마다 줄을 바꾼다 ② 한 줄이 MAX자를 넘으면 쉼표 뒤(없으면 가운데에 가까운 띄어쓰기)에서 한 번 더 끊는다.
+   모바일 본문 한 줄이 22자 안팎이라 MAX=22 → 대부분의 줄이 화면에서 다시 접히지 않는다. 공유 카드도 같은 함수를 쓴다(window.__sbaHexdBreak). */
+const LINE_MAX=24;
+const BR_END=/(고|면|서|니|라|데|만|도|은|는|이|가|을|를|에|로|의|와|과|께|에서|부터|까지|처럼|보다|이라|이고|이면|지만|라서|면서)$/;
+const BR_COUNTER=/^(칸|장|개|명|번|줄|가지|달|주|시간|분|점|곳|사람|축|문항|글자|자)(?:$|[을를이가은는의에도만로와과께,.])/;
+const BR_NUM=/^(한|두|세|네|다섯|여섯|일곱|여덟|아홉|열|\d+)$/;
+function splitSentences(t){ return String(t||'').replace(/([.!?])\s+(?=\S)/g,'$1\n').split('\n').map(s=>s.trim()).filter(Boolean); }
+/* 한 문장이 길면 자연스러운 자리에서 한 번 더 끊는다: 쉼표 뒤 > 어미·조사 뒤 > 가운데 띄어쓰기. 따옴표 안, 수사+단위 사이("두 칸")는 끊지 않는다.
+   한 번 끊은 뒤 조각이 MAX+6 이하면 더 쪼개지 않는다(너무 잘게 부서지는 것 방지). */
+function breakLine(s, max, depth){
+  depth=depth||0;
+  if(s.length<=max) return [s];
+  if(depth>0 && s.length<=max+6) return [s];
+  const mid=s.length/2; let best=-1, bestScore=-1e9, q=0;
+  for(let i=0;i<s.length;i++){
+    const ch=s[i]; if(ch==="'"||ch==='"'){ q^=1; continue; }
+    if(ch!==' '||q) continue;
+    const before=s.slice(0,i).trim(), after=s.slice(i+1).trim();
+    if(before.length<6||after.length<5) continue;
+    const pw=before.split(' ').pop(), nw=after.split(' ')[0];
+    let sc=-Math.abs(i-mid);
+    if(/[,،]$/.test(pw)) sc+=14; else if(BR_END.test(pw)) sc+=5;
+    if(BR_NUM.test(pw)||BR_COUNTER.test(nw)) sc-=30;
+    if(sc>bestScore){ bestScore=sc; best=i; }
+  }
+  if(best<0) return [s];
+  return breakLine(s.slice(0,best).trim(), max, depth+1).concat(breakLine(s.slice(best+1).trim(), max, depth+1));
+}
+function breakText(t, max){ const out=[]; splitSentences(t).forEach(s=>{ breakLine(s, max||LINE_MAX).forEach(l=>out.push(l)); }); return out; }
+window.__sbaHexdBreak=breakText;
+/* 굵게(<b>) 표시가 섞인 HTML 조각을 같은 규칙으로 줄 바꿈 (공유 카드용) */
+window.__sbaHexdLinesHtml=function(html,max){ const plain=String(html).replace(/<b>/g,'').replace(/<\/b>/g,'').replace(/<br\s*\/?>/g,' '); return breakText(plain,max||24).join('<br>').replace(//g,'<b>').replace(//g,'</b>'); };
+/* 이미 HTML 이 된 문자열(따옴표 굵게 등) 전용: 문장 뒤에서만 끊는다 */
+function lines(html){ return String(html).replace(/([.!?])\s+(?=\S)/g,'$1<br>'); }
+function para(text, extra){ return '<p>'+breakText(text).map(l=>emph(l, extra)).join('<br>')+'</p>'; }
+function linesOf(text, extra){ return breakText(text).map(l=>emph(l, extra)).join('<br>'); }
 function likertWord(v){ const L=LIKERT_LABELS.find(x=>x.value===v); return L?L.short:String(v); }
 /* 빈 곳 블록: 가장 낮은 축 + 낮게 답한 문항 2개(실제 보여 준 문장) + 과제 + 고민 영역 메모 */
 function buildGap(scores, type){
@@ -1281,20 +1314,41 @@ function renderGap(root, gap){
   const head=gap.master?'그래도 한 곳을 고른다면':'먼저 살펴볼 곳';
   const evHead=gap.master?'가장 낮게 답하신 문항도 이 정도예요':gap.allHigh?'이 영역도 대체로 높게 답하셨어요':'이렇게 답하셨어요';
   const taskHead=gap.master?'마스터에게 드리는 두 주 과제':'이번 두 주에 해 볼 만한 것';
-  const masterNote=gap.master?'<p class="hexd-foot">'+lines(emph('꼭 알아 두실 것 하나. 여섯 축을 다 잘하는 사장님의 사업은 사장님이 곧 시스템이 됩니다. 사장님이 자리를 비우는 순간 어느 축이 먼저 멈추는지, 그것이 점수표에 없는 진짜 빈 곳입니다.'))+'</p>':'';
+  const masterNote=gap.master?'<p class="hexd-foot">'+linesOf('꼭 알아 두실 것 하나. 여섯 축을 다 잘하는 사장님의 사업은 사장님이 곧 시스템이 됩니다. 사장님이 자리를 비우는 순간 어느 축이 먼저 멈추는지, 그것이 점수표에 없는 진짜 빈 곳입니다.')+'</p>':'';
   gw.innerHTML=eyebrow(head)
     +'<div class="hexd-gap-axis"><b class="nm">'+labelOf(gap.axisId)+'</b><span class="sc">'+gap.score+'</span></div>'
     +'<p class="hexd-gap-desc">'+(AXIS_DESC[gap.axisId]||'')+'</p>'
     +(ev?'<h4 class="hexd-gap-sub">'+evHead+'</h4><ul class="hexd-gap-ev">'+ev+'</ul>':'')
-    +'<h4 class="hexd-gap-sub">'+taskHead+'</h4><div class="hexd-gap-task">'+lines(emph(gap.task))+'</div>'
+    +'<h4 class="hexd-gap-sub">'+taskHead+'</h4><div class="hexd-gap-task">'+linesOf(gap.task)+'</div>'
     +masterNote
-    +(gap.concernNote?'<p class="hexd-foot">&#8251; '+lines(emph(gap.concernNote))+'</p>':'');
+    +(gap.concernNote?'<p class="hexd-foot">&#8251; '+linesOf(gap.concernNote)+'</p>':'');
   gw.style.display='block';
 }
 /* 익명 저장: 이름·연락처 없음. 기본은 이 기기(localStorage)에 두고, 저장소 연결 함수(window.SBA_HEXD_SAVE)가 있으면 그쪽으로도 보낸다 */
 const RESULTS_KEY="sba_hexd_results_v2";
+/* 서버 저장: 식스샵 커스텀 DB `hexd-results` (public 채널은 생성만 열려 있음 → 방문자는 쓰기만, 읽기는 관리자·본인만) */
+const CDB_URL="https://cdb.sixshop.io/public/hexd-results", CDB_STORE="sba01";
+function serverDoc(p){
+  const sc={}; (p.scores||[]).forEach(s=>{ sc[s.axisId]=s.score; });
+  const gapItems=(p.gapItems||[]).map(x=>'"'+x.text+'" — '+x.word).join('\n');
+  const summary=['사전: '+JSON.stringify(p.pre||{}),'먼저 살펴볼 곳: '+(p.gapLabel||'')+' '+(p.gapScore!=null?p.gapScore+'점':''),'낮게 답한 문항:\n'+gapItems,'과제: '+(p.gap&&p.gap.task||''),'고민 영역: '+((p.concerns||[]).join(', ')||'없음'),'동률: '+JSON.stringify(p.tie||[])].join('\n\n');
+  return {code:p.code, date:new Date(p.t||Date.now()).toISOString(), user:p.user||'', type:p.type, nickname:p.nickname||'',
+    scoreSelf:sc.self, scoreProduction:sc.production, scoreGoal:sc.goal, scoreRelation:sc.relation, scoreMarketing:sc.marketing, scoreFinance:sc.finance,
+    lowest:p.gapLabel||'', summary:summary, version:'v'+(p.v||2)+'.5',
+    payload:JSON.stringify({pre:p.pre, answers:p.answers, shown:p.shown, gap:p.gap, tie:p.tie, concerns:p.concerns})};
+}
+function saveToServer(p){
+  try{
+    if(!window.fetch) return;
+    const key='sba_hexd_sent_'+p.code; try{ if(sessionStorage.getItem(key)) return; }catch(e){}
+    fetch(CDB_URL,{method:'POST',mode:'cors',headers:{'Content-Type':'application/json','ss-store-id':CDB_STORE},body:JSON.stringify(serverDoc(p))})
+      .then(r=>{ if(r.ok){ try{ sessionStorage.setItem(key,'1'); }catch(e){} } else { console.warn('[sba-hexd] 저장 응답',r.status); } })
+      .catch(e=>{ console.warn('[sba-hexd] 저장 실패',e); });
+  }catch(e){}
+}
 function persistResult(p){
   try{ const all=JSON.parse(localStorage.getItem(RESULTS_KEY)||'{}'); all[p.code]=p; const keys=Object.keys(all).sort((a,b)=>(all[b].t||0)-(all[a].t||0)); keys.slice(20).forEach(k=>{ delete all[k]; }); localStorage.setItem(RESULTS_KEY, JSON.stringify(all)); }catch(e){}
+  saveToServer(p);
   try{ if(typeof window.SBA_HEXD_SAVE==='function') window.SBA_HEXD_SAVE(p); }catch(e){}
 }
 function loadResultByCode(code){ try{ const all=JSON.parse(localStorage.getItem(RESULTS_KEY)||'{}'); return all[String(code||'').toUpperCase()]||null; }catch(e){ return null; } }
@@ -1315,7 +1369,7 @@ function showResult(root, opts){
   if(_ci){ _ci.onerror=function(){ this.style.display='none'; }; if(_cu){ _ci.src=_cu; _ci.alt=type.nickname; _ci.style.display='block'; } else { _ci.style.display='none'; } }
   root.querySelector('#r-code').textContent=type.code;
   root.querySelector('#r-name').textContent=type.nickname;
-  root.querySelector('#r-liner').innerHTML=lines(escHtml(type.oneLiner));
+  root.querySelector('#r-liner').innerHTML=breakText(type.oneLiner, 20).map(escHtml).join('<br>');
   const an=root.querySelector('#r-axisnote'); if(an){ an.textContent=type.axisNote||''; an.style.display=type.axisNote?'block':'none'; }
 
   /* 치수 */
@@ -1335,7 +1389,7 @@ function showResult(root, opts){
     const f=row.querySelector('.fill'); requestAnimationFrame(function(){ requestAnimationFrame(function(){ f.style.width=s.score+'%'; }); });
   });
   const tn=root.querySelector('#tieNote');
-  if(tn){ const notes=(type._tieNotes||[]).map(n=>n.msg); tn.innerHTML=notes.map(m=>'<div>&#8251; '+lines(emph(m))+'</div>').join(''); tn.style.display=notes.length?'block':'none'; }
+  if(tn){ const notes=(type._tieNotes||[]).map(n=>n.msg); tn.innerHTML=notes.map(m=>'<div>&#8251; '+linesOf(m)+'</div>').join(''); tn.style.display=notes.length?'block':'none'; }
 
   /* 강점 풀어 쓰기 (칭찬 먼저) */
   const swWrap=root.querySelector('#swWrap');
@@ -1403,7 +1457,8 @@ function showResult(root, opts){
     const shown={}; AXES.forEach(ax=>{ shown[ax.id]=buildAxisQuestions(ax.id,_pre).map(q=>({id:q.id, n:q.n, text:q.text})); });
     persistResult({code:_rcode, t:Date.now(), v:2, user:(window.__sbaHexdUser||''), pre:JSON.parse(JSON.stringify(_pre)), shown, answers:Object.assign({},_answers),
       scores:scores.map(s=>({axisId:s.axisId, score:s.score})), type:type.code, nickname:type.nickname,
-      tie:(type._tieNotes||[]).map(n=>({pos:n.pos, step:n.step})), gap:{axisId:gap.axisId, items:gap.items.map(x=>x.id), task:gap.task}, concerns:(_pre.concerns||[]).slice()});
+      tie:(type._tieNotes||[]).map(n=>({pos:n.pos, step:n.step})), gap:{axisId:gap.axisId, items:gap.items.map(x=>x.id), task:gap.task}, concerns:(_pre.concerns||[]).slice(),
+      gapLabel:labelOf(gap.axisId), gapScore:gap.score, gapItems:gap.items.map(x=>({text:x.text, word:likertWord(x.v)}))});
   }
 }
 /* 저장된 결과 다시 보기 (이 기기) */
@@ -1498,10 +1553,10 @@ window.__sbaHexdRun = function(bm){ window.__sbaHexdUser=pickUserName(bm); mount
      +".igc-pill{display:inline-block;background:#006241;color:#fff;font-size:34px;font-weight:800;height:72px;line-height:72px;padding:0 46px;border-radius:999px;letter-spacing:1px;text-align:center}"
      +".igc-name{font-size:92px;font-weight:800;line-height:1.08;margin-top:22px;letter-spacing:-3px}"
      +".igc-liner{font-size:35px;color:#3d423a;margin-top:22px;font-weight:600;line-height:1.5;padding:0 22px}"
-     +".igc-chips{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}.igc-chip{background:#FBFAF6;border:2px solid #E7E2D6;border-radius:22px;padding:20px 16px}"
-     +".igc-dot{width:16px;height:16px;border-radius:50%;display:inline-block;vertical-align:middle}.igc-ck{font-size:25px;font-weight:700;color:#4b5148;margin-left:8px;vertical-align:middle}.igc-cv{font-size:46px;font-weight:800;margin-top:4px}"
+     +".igc-chips{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}.igc-chip{background:#FBFAF6;border:2px solid #E7E2D6;border-radius:20px;padding:14px 16px 12px}"
+     +".igc-dot{width:16px;height:16px;border-radius:50%;display:inline-block;vertical-align:middle}.igc-ck{font-size:23px;font-weight:700;color:#4b5148;margin-left:8px;vertical-align:middle}.igc-cv{font-size:40px;font-weight:800;margin-top:2px;line-height:1.1}"
      +".igc-mini{background:#FBFAF6;border:2px solid #E7E2D6;border-radius:26px;padding:28px 46px 38px 56px;margin-top:26px;position:relative}.igc-mini .mb{position:absolute;left:22px;top:22px;bottom:22px;width:12px;border-radius:999px}.igc-mtxt{font-size:43px;font-weight:700;line-height:1.35}"
-     +".igc-growth{font-size:37px;line-height:1.62;color:#20241f;margin-top:38px;font-weight:500}.igc-growth b{font-weight:800;color:#006241}"
+     +".igc-growth{font-size:35px;line-height:1.58;color:#20241f;margin-top:34px;font-weight:500}.igc-growth b{font-weight:800;color:#006241}"
      +".igc-sim{display:flex;gap:26px;align-items:center;background:#FBFAF6;border:2px solid #E7E2D6;border-radius:26px;padding:36px 42px;margin-top:24px}.igc-flag{flex:none;width:88px;height:88px;border-radius:50%;background:#E3EFE9;color:#006241;font-size:26px;font-weight:800;display:flex;align-items:center;justify-content:center}.igc-simn{font-size:44px;font-weight:800;line-height:1.15}.igc-simt{font-size:26px;color:#8a9089;font-weight:600;margin-top:8px;line-height:1.42}.igc-simt b{color:#006241;font-weight:800}"
      +".igc-tbar{width:132px;height:12px;border-radius:999px;background:#006241;margin-top:18px}"
      +".igc-note{font-size:24px;color:#8a9089;margin-top:28px;font-weight:500}"
@@ -1509,7 +1564,7 @@ window.__sbaHexdRun = function(bm){ window.__sbaHexdUser=pickUserName(bm); mount
     document.head.appendChild(s);
   }
   function igBold(t){ var p=t.split("'"),o='',c=0,q; for(q=0;q<p.length;q++){ if(q%2===1&&c<8&&p[q].length>=2&&p[q].length<=42){ o+="'<b>"+p[q]+"</b>'"; c++; } else if(q%2===1){ o+="'"+p[q]+"'"; } else o+=p[q]; } return o; }
-  function igLines(t){ return t.replace(/([.!?])\s+(?=\S)/g,'$1<br>'); }
+  function igLines(t){ var f=window.__sbaHexdLinesHtml; return f ? f(t,24) : t.replace(/([.!?])\s+(?=\S)/g,'$1<br>'); }
   function igSplit(t,max){ var re=/[.!?]\s+/g,parts=[],last=0,m,ch=[],cu='',i; while((m=re.exec(t))){ parts.push(t.slice(last,m.index+1)); last=m.index+m[0].length; } if(last<t.length)parts.push(t.slice(last)); for(i=0;i<parts.length;i++){ var s=(parts[i]||'').trim(); if(!s)continue; if(cu&&(cu.length+s.length)>max){ ch.push(cu.trim()); cu=s; } else cu+=(cu?' ':'')+s; } if(cu.trim())ch.push(cu.trim()); return ch; }
   function igText(el){ return el?(el.textContent||'').trim():''; }
   function igRead(){
@@ -1562,14 +1617,14 @@ window.__sbaHexdRun = function(bm){ window.__sbaHexdUser=pickUserName(bm); mount
     if(d.gap&&d.gap.axis) list.push({t:'gap'});
     if(d.wk.length) list.push({t:'sw',head:'보완할 점',sub:'약점이 아니라, 다음 성장 포인트',items:d.wk,bar:'#C8A864'});
     if(d.sims.length) list.push({t:'sim'});
-    if(d.growth){ var gc=igSplit(d.growth,300); gc.forEach(function(c,i){ list.push({t:'growth',text:igLines(igBold(c)),part:gc.length>1?'('+(i+1)+'/'+gc.length+')':''}); }); }
+    if(d.growth){ var gc=igSplit(d.growth,250); if(gc.length>1&&gc[gc.length-1].length<90){ gc[gc.length-2]+=' '+gc[gc.length-1]; gc.pop(); } gc.forEach(function(c,i){ list.push({t:'growth',text:igLines(igBold(c)),part:gc.length>1?'('+(i+1)+'/'+gc.length+')':''}); }); }
     var TOTAL=list.length;
-    function brand(p){ return '<div class="igc-brand"><span><b>스몰브랜드설계자</b> · 사업가 유형 테스트</span><span>'+p+' / '+TOTAL+'</span></div>'; }
-    function foot(){ return '<div class="igc-foot"><span><b>@스몰브랜드설계자</b></span><span>스브설 · 사업가 유형 테스트</span></div>'; }
+    function brand(p){ return '<div class="igc-brand"><span><b>사업가 유형 테스트</b></span><span>'+p+' / '+TOTAL+'</span></div>'; }
+    function foot(){ return '<div class="igc-foot"><span><b>@스몰브랜드설계자</b></span><span>스브설 사업가 유형 테스트 › 유형 : '+(d.name||'')+'</span></div>'; }
     return list.map(function(card,ix){
       var p=ix+1,h;
       if(card.t==='cover'){ var im=d.charSrc?'<img src="'+d.charSrc+'" crossorigin="anonymous" alt="">':'🧑‍💼'; h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px"></div><div class="igc-hex" style="left:-180px;bottom:-160px;opacity:.32"></div><div class="igc-pad">'+brand(p)+'<div style="text-align:center"><div class="igc-kick">나의 사업가 유형은?</div><div class="igc-char">'+im+'</div>'+(d.code?'<canvas data-pill style="display:block;margin:14px auto 0"></canvas>':'')+'<div class="igc-name">'+d.name+'</div><div class="igc-liner">'+(d.liner||'').replace(/, /,',<br>')+'</div></div></div>'+foot()+'</div>'; }
-      else if(card.t==='radar'){ var chips=d.scores.map(function(a){return '<div class="igc-chip"><span class="igc-dot" style="background:'+a.color+'"></span><span class="igc-ck">'+a.label+'</span><div class="igc-cv" style="color:'+a.color+'">'+a.v+'</div></div>';}).join(''); h='<div class="igc-card"><div class="igc-pad">'+brand(p)+'<div class="igc-title">나의 경영 육각형</div><div class="igc-tbar"></div><div class="igc-sub">6가지 사장 역량을 한눈에</div><canvas data-radar width="1000" height="640" style="display:block;width:912px;height:584px;margin:18px auto 14px;border-radius:28px"></canvas><div class="igc-chips">'+chips+'</div></div>'+foot()+'</div>'; }
+      else if(card.t==='radar'){ var chips=d.scores.map(function(a){return '<div class="igc-chip"><span class="igc-dot" style="background:'+a.color+'"></span><span class="igc-ck">'+a.label+'</span><div class="igc-cv" style="color:'+a.color+'">'+a.v+'</div></div>';}).join(''); h='<div class="igc-card"><div class="igc-pad">'+brand(p)+'<div class="igc-title">나의 경영 육각형</div><div class="igc-tbar"></div><div class="igc-sub">6가지 사장 역량을 한눈에</div><canvas data-radar width="1000" height="580" style="display:block;width:912px;height:529px;margin:16px auto 14px;border-radius:28px"></canvas><div class="igc-chips">'+chips+'</div></div>'+foot()+'</div>'; }
       else if(card.t==='gap'){ var evs=d.gap.ev.map(function(t){return '<div class="igc-mini"><div class="mb" style="background:#cc785c"></div><div class="igc-mtxt igc-ev">'+t+'</div></div>';}).join(''); h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px;opacity:.5"></div><div class="igc-pad">'+brand(p)+'<div class="igc-title">'+(d.code==='MASTER'?'그래도 한 곳을 고른다면':'먼저 살펴볼 곳')+'</div><div class="igc-tbar" style="background:#cc785c"></div><div class="igc-sub"><b style="color:#20241f">'+d.gap.axis+'</b> · '+d.gap.score+' · 이렇게 답하셨어요</div>'+evs+'<div class="igc-gsub">이번 두 주에 해 볼 만한 것</div><div class="igc-gtask">'+d.gap.task+'</div></div>'+foot()+'</div>'; }
       else if(card.t==='sw'){ var its=card.items.map(function(t){ var o=(typeof t==='string')?{t:t,d:''}:t; return '<div class="igc-mini"><div class="mb" style="background:'+card.bar+'"></div><div class="igc-mtxt">'+o.t+'</div>'+(o.d?'<div class="igc-mdesc">'+o.d+'</div>':'')+'</div>';}).join(''); h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px;opacity:.5"></div><div class="igc-hex" style="left:-180px;bottom:-160px;opacity:.32"></div><div class="igc-pad">'+brand(p)+'<div class="igc-title">'+card.head+'</div><div class="igc-tbar" style="background:'+card.bar+'"></div><div class="igc-sub">'+card.sub+'</div>'+its+'</div>'+foot()+'</div>'; }
       else if(card.t==='sim'){ var ppl=d.sims.map(function(s){var ach=IG_ACH[s.name]||'비슷한 강점을 가진 경영자';var co=s.co?('<b>'+s.co+'</b> · '):'';var rg=s.kr?'국내':'해외'; return '<div class="igc-sim"><div class="igc-flag">'+rg+'</div><div><div class="igc-simn">'+s.name+'</div><div class="igc-simt">'+co+ach+'</div></div></div>';}).join(''); h='<div class="igc-card"><div class="igc-pad">'+brand(p)+'<div class="igc-title">당신과 닮은 사업가</div><div class="igc-tbar"></div><div class="igc-sub">비슷한 강점을 가진 실존 사업가예요</div>'+ppl+'<div class="igc-note">* \'강점이 닮았다\'는 참고용이에요(약점을 단정하지 않습니다).</div></div>'+foot()+'</div>'; }
@@ -1613,7 +1668,7 @@ window.__sbaHexdRun = function(bm){ window.__sbaHexdUser=pickUserName(bm); mount
       var cards=igCards(d);
       var stage=document.createElement('div'); stage.style.cssText='position:fixed;left:-99999px;top:0;z-index:-1';
       cards.forEach(function(c){ stage.appendChild(c); }); document.body.appendChild(stage);
-      cards.forEach(function(c){ var rc=c.querySelector('canvas[data-radar]'); if(rc){ var bp=window.__sbaHexdBlueprint; if(!(bp&&bp.drawStatic(rc,1000,640))) igRadar(rc,d.scores); } var pc=c.querySelector('canvas[data-pill]'); if(pc) igPill(pc,d.code||''); });
+      cards.forEach(function(c){ var rc=c.querySelector('canvas[data-radar]'); if(rc){ var bp=window.__sbaHexdBlueprint; if(!(bp&&bp.drawStatic(rc,1000,580))) igRadar(rc,d.scores); } var pc=c.querySelector('canvas[data-pill]'); if(pc) igPill(pc,d.code||''); });
       var blobs=[],i=0,code=d.code||'결과';
       function finish(){
         stage.remove();
