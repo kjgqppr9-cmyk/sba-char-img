@@ -1081,19 +1081,19 @@ function gFill(t, v){ return t.replace(/\{(\w+)\}/g, (m,k)=>(v[k]!=null?v[k]:m))
 function gJosa(w, a, b){ const s=String(w||'').replace(/[^가-힣]+$/,''); const c=s.charCodeAt(s.length-1); if(!(c>=0xAC00&&c<=0xD7A3)) return b; return ((c-0xAC00)%28)?a:b; }
 /* ① 관찰: 점수 모양별 */
 const G_SHAPE = {
-  master:["여섯 축이 모두 {lowS}점 이상입니다. 이 진단에서 가장 드문 결과입니다. 가장 높은 {top} {topS}점과 가장 낮은 {low} {lowS}점의 차이가 {gap}점뿐이라, 어느 한 곳에 기대지 않고 굴러가는 사업입니다.",
+  master:["여섯 축이 모두 {lowS}점 이상입니다. 【이 진단에서 가장 드문 결과】입니다. 가장 높은 {top} {topS}점과 가장 낮은 {low} {lowS}점의 차이가 {gap}점뿐이라, 【어느 한 곳에 기대지 않고 굴러가는 사업】입니다.",
           "가장 낮은 축인 {low}조차 {lowS}점입니다. 대부분의 사장님은 가장 높은 축이 이 점수에 닿기 어렵습니다. 빈 곳을 찾는 결과가 아니라, 이 수준을 어떻게 지키고 어디로 넓힐지를 보는 결과입니다."],
   balanced:["여섯 축이 {lowS}점에서 {topS}점 사이에 고르게 있습니다. 어느 한 곳이 무너지지 않는 대신, 어디를 밀어야 성장이 보이는지가 덜 선명한 모양입니다.",
             "가장 높은 {top} {topS}점과 가장 낮은 {low} {lowS}점의 차이가 {gap}점입니다. 고른 실천이 이 결과의 특징이고, 다음 질문은 \"어디에 힘을 모을까\"입니다."],
-  spike:["{top}가 {topS}점으로 다른 다섯 축보다 뚜렷하게 앞서 있습니다. 사업이 이 한 축의 힘으로 굴러가고 있고, 가장 낮은 {low} {lowS}점과의 간격 {gap}점이 그만큼 눈에 띕니다.",
-         "여섯 축 중 {top}가 {topS}점으로 혼자 앞서 있습니다. 강한 축 하나가 있다는 건 좋은 소식이고, 그 힘을 어디에 빌려줄지가 이번 결과의 핵심입니다."],
-  twin:["{top} {topS}점과 {top2} {top2S}점이 나란히 높고, 그 뒤로 간격이 벌어집니다. 두 축이 사업을 끌고 가는 모양이며, 가장 뒤처진 {low} {lowS}점이 그 속도를 따라오지 못하고 있습니다.",
+  spike:["{top}가 {topS}점으로 다른 다섯 축보다 뚜렷하게 앞서 있습니다. 사업이 【이 한 축의 힘】으로 굴러가고 있고, 가장 낮은 {low} {lowS}점과의 간격 {gap}점이 그만큼 눈에 띕니다.",
+         "여섯 축 중 {top}가 {topS}점으로 혼자 앞서 있습니다. 강한 축 하나가 있다는 건 좋은 소식이고, 【그 힘을 어디에 빌려줄지】가 이번 결과의 핵심입니다."],
+  twin:["{top} {topS}점과 {top2} {top2S}점이 나란히 높고, 그 뒤로 간격이 벌어집니다. 【두 축이 사업을 끌고 가는 모양】이며, 가장 뒤처진 {low} {lowS}점이 그 속도를 따라오지 못하고 있습니다.",
         "앞서는 두 축 {top}·{top2}와 가장 낮은 {low} {lowS}점 사이가 {gap}점입니다. 끌고 가는 힘은 충분하니, 끌려오지 못하는 한 곳을 먼저 봅니다."],
-  sink:["다른 다섯 축은 제 몫을 하고 있는데 {low} 하나가 {lowS}점으로 내려앉아 있습니다. 두 번째로 낮은 {low2}보다도 {sinkGap}점 아래라, 이 한 축이 전체 모양을 정합니다.",
-        "{low}가 {lowS}점으로 혼자 낮습니다. 나머지 다섯 축이 받쳐 주고 있어서 지금은 티가 덜 나지만, 사업이 커질수록 이 축이 먼저 신호를 보냅니다."],
-  low:["여섯 축이 모두 {topS}점 아래에 있습니다. 어느 한 곳이 문제라기보다, 아직 습관이 자리 잡는 중이라고 읽는 편이 맞습니다. 그래서 순서가 중요합니다.",
-       "가장 높은 {top}도 {topS}점으로 아직 여유가 있고, {low}는 {lowS}점으로 더 그렇습니다. 모든 걸 한꺼번에 올리려 하면 아무것도 안 올라갑니다. 한 축부터 갑니다."],
-  mixed:["{top}가 {topS}점으로 앞서고 {low}가 {lowS}점으로 가장 뒤에 있습니다. 두 축의 차이 {gap}점이 지금 사업의 모양이고, 성장 방향은 이 간격을 어떻게 쓰느냐에 달려 있습니다.",
+  sink:["다른 다섯 축은 제 몫을 하고 있는데 {low} 하나가 {lowS}점으로 내려앉아 있습니다. 두 번째로 낮은 {low2}보다도 {sinkGap}점 아래라, 【이 한 축이 전체 모양을 정합니다.】",
+        "{low}가 {lowS}점으로 혼자 낮습니다. 나머지 다섯 축이 받쳐 주고 있어서 지금은 티가 덜 나지만, 사업이 커질수록 【이 축이 먼저 신호를 보냅니다.】"],
+  low:["여섯 축이 모두 {topS}점 아래에 있습니다. 어느 한 곳이 문제라기보다, 아직 습관이 자리 잡는 중이라고 읽는 편이 맞습니다. 그래서 【순서】가 중요합니다.",
+       "가장 높은 {top}도 {topS}점으로 아직 여유가 있고, {low}는 {lowS}점으로 더 그렇습니다. 모든 걸 한꺼번에 올리려 하면 아무것도 안 올라갑니다. 【한 축부터】 갑니다."],
+  mixed:["{top}가 {topS}점으로 앞서고 {low}가 {lowS}점으로 가장 뒤에 있습니다. 두 축의 차이 {gap}점이 지금 사업의 모양이고, 성장 방향은 【이 간격을 어떻게 쓰느냐】에 달려 있습니다.",
          "높은 축과 낮은 축이 분명하게 갈립니다. {top} {topS}점은 이미 습관이 되어 있고, {low} {lowS}점은 아직 손이 덜 간 상태입니다."],
 };
 /* 1위 축이 이미 적고 있는 것 (지렛대의 '옆자리') */
@@ -1172,18 +1172,18 @@ const G_CTX = [
 ];
 /* ③ 다음 한 달의 순서 — 조합별 행동(act)·적을 것(unit)·1위 축의 옆자리(topRec)를 넣어 손에 잡히게 */
 const G_ORDER = [
-  "순서는 이렇습니다. 첫 두 주는 {act}, 이것 하나만 합니다. {top}는 이미 몸에 익어 있으니 당분간 지금 수준만 유지합니다. 셋째 주부터 {unit}{u_eul} {topRec} 옆에 같이 적어 보세요. 그때부터 두 축이 한 장에서 관리됩니다.",
-  "한 달만 이렇게 해 보세요. 새로운 일을 더하지 않습니다. {act}, 이것뿐입니다. 2주 뒤에 {unit}{u_ig} 하나라도 적혀 있으면 그걸로 충분합니다. 눈금이 움직인 겁니다.",
-  "우선순위는 분명합니다. {low2}({low2S}점)도 낮지만 지금은 건드리지 않습니다. 한 번에 한 축입니다. {unit}{u_ig} 적히기 시작하면 그때 {low2}를 봅니다. 한 달 뒤에 다시 재 보세요.",
+  "순서는 이렇습니다. 첫 두 주는 {act}, 【이것 하나만】 합니다. {top}는 이미 몸에 익어 있으니 당분간 지금 수준만 유지합니다. 셋째 주부터 {unit}{u_eul} {topRec} 옆에 같이 적어 보세요. 그때부터 두 축이 한 장에서 관리됩니다.",
+  "한 달만 이렇게 해 보세요. 【새로운 일을 더하지 않습니다.】 {act}, 이것뿐입니다. 2주 뒤에 {unit}{u_ig} 하나라도 적혀 있으면 【그걸로 충분합니다.】 눈금이 움직인 겁니다.",
+  "우선순위는 분명합니다. {low2}({low2S}점)도 낮지만 지금은 건드리지 않습니다. 【한 번에 한 축】입니다. {unit}{u_ig} 적히기 시작하면 그때 {low2}를 봅니다. 한 달 뒤에 다시 재 보세요.",
 ];
 const G_ORDER_HIGH = [
-  "이제 과제는 올리는 것이 아니라 굳히는 것입니다. 여섯 축 중 사장님이 자리를 비워도 이어지는 축이 몇 개인지 세어 보세요. 사장님이 빠지면 멈추는 축이 다음 달의 목표입니다.",
+  "이제 과제는 올리는 것이 아니라 【굳히는 것】입니다. 여섯 축 중 사장님이 자리를 비워도 이어지는 축이 몇 개인지 세어 보세요. 사장님이 빠지면 멈추는 축이 다음 달의 목표입니다.",
   "이번 한 달은 이렇게 써 보세요. {low}에서 사장님이 직접 하는 일 하나를 골라 다른 사람 손에 넘겨 봅니다. 그대로 굴러가면 사장님의 방식이 이미 글로 남았다는 뜻이고, 삐걱이면 거기가 다음 과제입니다.",
 ];
 /* 마스터 전용 2문단: 칭찬을 먼저, 꼭 알아야 할 약점 하나를 분명히 */
 const G_MASTER_P2 = [
-  "가장 낮은 {low}도 {lowS}점이라 여기서 더 올릴 것은 많지 않습니다. 대신 꼭 알아 두실 것이 하나 있습니다. 여섯 축을 다 잘하는 사장님의 사업은 사장님이 곧 시스템이 됩니다. 사장님이 자리를 비우는 순간 어느 축이 먼저 멈추는지, 그것이 이 결과의 진짜 빈 곳입니다.",
-  "{low} {lowS}점은 다른 사장님이라면 강점이라고 부를 점수입니다. 그래서 마스터의 약점은 점수표에 없습니다. 모든 걸 직접 잘하는 사람은 맡기는 시점을 놓치기 쉽고, 그 사이 사업은 사장님 한 사람의 크기에 머뭅니다. 이것 하나만 기억하시면 됩니다.",
+  "가장 낮은 {low}도 {lowS}점이라 여기서 더 올릴 것은 많지 않습니다. 대신 꼭 알아 두실 것이 하나 있습니다. 여섯 축을 다 잘하는 사장님의 사업은 【사장님이 곧 시스템】이 됩니다. 사장님이 자리를 비우는 순간 어느 축이 먼저 멈추는지, 그것이 이 결과의 진짜 빈 곳입니다.",
+  "{low} {lowS}점은 다른 사장님이라면 강점이라고 부를 점수입니다. 그래서 【마스터의 약점은 점수표에 없습니다.】 모든 걸 직접 잘하는 사람은 맡기는 시점을 놓치기 쉽고, 그 사이 사업은 사장님 한 사람의 크기에 머뭅니다. 이것 하나만 기억하시면 됩니다.",
 ];
 /* ④ 닫는 한 줄 — 연차·모양 풀 + 가장 낮은 축 풀 + 한 걸음 더 풀을 섞어 반복 인상을 줄인다 */
 const G_CLOSE = {
@@ -1240,7 +1240,7 @@ function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&l
 function escRe(s){ return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
 /* 중요한 말을 굵은 초록으로: 축 이름+점수, 따옴표 구절, 지정 구절(extra). 이미 굵게 된 부분은 건드리지 않는다 */
 function emph(text, extra){
-  let html=escHtml(text);
+  let html=escHtml(text).replace(/【([^】]{1,40})】/g,'<b>$1</b>'); /* 글 안의 【핵심 구절】 표식 → 굵은 초록 */
   const terms=(extra||[]).filter(Boolean).sort((a,b)=>b.length-a.length);
   function outside(fn){ return html.split(/(<b>.*?<\/b>)/).map(seg=>seg.startsWith('<b>')?seg:fn(seg)).join(''); }
   terms.forEach(t=>{ const e=escHtml(t); html=outside(seg=>seg.split(e).join('<b>'+e+'</b>')); });
@@ -1250,17 +1250,20 @@ function emph(text, extra){
 }
 /* 줄내림 규칙(절대 원칙): ① 문장마다 줄을 바꾼다 ② 한 줄이 MAX자를 넘으면 쉼표 뒤(없으면 가운데에 가까운 띄어쓰기)에서 한 번 더 끊는다.
    모바일 본문 한 줄이 22자 안팎이라 MAX=22 → 대부분의 줄이 화면에서 다시 접히지 않는다. 공유 카드도 같은 함수를 쓴다(window.__sbaHexdBreak). */
-const LINE_MAX=24;
+const LINE_MAX=44; /* 화면: 문장은 한 줄. 44자를 넘는 긴 문장만 자연스러운 자리에서 나눈다. 좁은 화면에서는 각 줄이 균형 있게(text-wrap:balance) 접힌다 */
 const BR_END=/(고|면|서|니|라|데|만|도|은|는|이|가|을|를|에|로|의|와|과|께|에서|부터|까지|처럼|보다|이라|이고|이면|지만|라서|면서)$/;
 const BR_COUNTER=/^(칸|장|개|명|번|줄|가지|달|주|시간|분|점|곳|사람|축|문항|글자|자)(?:$|[을를이가은는의에도만로와과께,.])/;
 const BR_NUM=/^(한|두|세|네|다섯|여섯|일곱|여덟|아홉|열|\d+)$/;
-function splitSentences(t){ return String(t||'').replace(/([.!?])\s+(?=\S)/g,'$1\n').split('\n').map(s=>s.trim()).filter(Boolean); }
+const BR_AUX=/^(있|없|않|싶|같|버리|드리)[가-힣]{0,4}[.,]?$/;
+const BR_BOUND=/^(건|것|게|수|지|데|때|줄|뿐|만큼|대로|채|척|등|중|편|셈|탓|덕|때문|이)(?:$|[을를이가은는의에도만로와과께,.])/; /* 의존명사 앞에서는 끊지 않는다("있다는 / 건") */
+function splitSentences(t){ return String(t||'').replace(/([.!?]['"”’】]?)\s+(?=\S)/g,'$1\n').split('\n').map(s=>s.trim()).filter(Boolean); }
 /* 한 문장이 길면 자연스러운 자리에서 한 번 더 끊는다: 쉼표 뒤 > 어미·조사 뒤 > 가운데 띄어쓰기. 따옴표 안, 수사+단위 사이("두 칸")는 끊지 않는다.
    한 번 끊은 뒤 조각이 MAX+6 이하면 더 쪼개지 않는다(너무 잘게 부서지는 것 방지). */
-function breakLine(s, max, depth){
+function breakLine(s, max, depth, strict){
   depth=depth||0;
-  if(s.length<=max) return [s];
-  if(depth>0 && s.length<=max+6) return [s];
+  const vis=s.replace(/[\u0001\u0002]/g,'').length; /* 굵게 표식은 글자 수에서 뺀다 */
+  if(vis<=max) return [s];
+  if(!strict && depth>0 && vis<=max+6) return [s];
   const mid=s.length/2; let best=-1, bestScore=-1e9, q=0;
   for(let i=0;i<s.length;i++){
     const ch=s[i]; if(ch==="'"||ch==='"'){ q^=1; continue; }
@@ -1270,20 +1273,21 @@ function breakLine(s, max, depth){
     const pw=before.split(' ').pop(), nw=after.split(' ')[0];
     let sc=-Math.abs(i-mid);
     if(/[,،]$/.test(pw)) sc+=14; else if(BR_END.test(pw)) sc+=5;
-    if(BR_NUM.test(pw)||BR_COUNTER.test(nw)) sc-=30;
+    if(BR_NUM.test(pw)||BR_COUNTER.test(nw)||BR_BOUND.test(nw)) sc-=30;
+    if(BR_AUX.test(nw)) sc-=18; /* 보조용언 앞("받쳐 주고 / 있어서")도 피한다 */
     if(sc>bestScore){ bestScore=sc; best=i; }
   }
   if(best<0) return [s];
-  return breakLine(s.slice(0,best).trim(), max, depth+1).concat(breakLine(s.slice(best+1).trim(), max, depth+1));
+  return breakLine(s.slice(0,best).trim(), max, depth+1, strict).concat(breakLine(s.slice(best+1).trim(), max, depth+1, strict));
 }
-function breakText(t, max){ const out=[]; splitSentences(t).forEach(s=>{ breakLine(s, max||LINE_MAX).forEach(l=>out.push(l)); }); return out; }
+function breakText(t, max, strict){ const out=[]; splitSentences(t).forEach(s=>{ breakLine(s, max||LINE_MAX, 0, strict).forEach(l=>out.push(l)); }); return out; }
 window.__sbaHexdBreak=breakText;
 /* 굵게(<b>) 표시가 섞인 HTML 조각을 같은 규칙으로 줄 바꿈 (공유 카드용) */
-window.__sbaHexdLinesHtml=function(html,max){ const plain=String(html).replace(/<b>/g,'').replace(/<\/b>/g,'').replace(/<br\s*\/?>/g,' '); return breakText(plain,max||24).join('<br>').replace(//g,'<b>').replace(//g,'</b>'); };
+window.__sbaHexdLinesHtml=function(html,max){ const plain=String(html).replace(/<b>/g,'').replace(/<\/b>/g,'').replace(/<br\s*\/?>/g,' ').replace(/<[^>]+>/g,''); return breakText(plain,max||26,true).join('<br>').replace(//g,'<b>').replace(//g,'</b>'); };
 /* 이미 HTML 이 된 문자열(따옴표 굵게 등) 전용: 문장 뒤에서만 끊는다 */
 function lines(html){ return String(html).replace(/([.!?])\s+(?=\S)/g,'$1<br>'); }
-function para(text, extra){ return '<p>'+breakText(text).map(l=>emph(l, extra)).join('<br>')+'</p>'; }
-function linesOf(text, extra){ return breakText(text).map(l=>emph(l, extra)).join('<br>'); }
+function para(text, extra){ return '<p>'+breakText(text).map(l=>'<span class="ln">'+emph(l, extra)+'</span>').join('')+'</p>'; }
+function linesOf(text, extra){ return breakText(text).map(l=>'<span class="ln">'+emph(l, extra)+'</span>').join(''); }
 function likertWord(v){ const L=LIKERT_LABELS.find(x=>x.value===v); return L?L.short:String(v); }
 /* 빈 곳 블록: 가장 낮은 축 + 낮게 답한 문항 2개(실제 보여 준 문장) + 과제 + 고민 영역 메모 */
 function buildGap(scores, type){
@@ -1553,35 +1557,36 @@ window.__sbaHexdRun = function(bm){ window.__sbaHexdUser=pickUserName(bm); mount
      +".igc-pill{display:inline-block;background:#006241;color:#fff;font-size:34px;font-weight:800;height:72px;line-height:72px;padding:0 46px;border-radius:999px;letter-spacing:1px;text-align:center}"
      +".igc-name{font-size:92px;font-weight:800;line-height:1.08;margin-top:22px;letter-spacing:-3px}"
      +".igc-liner{font-size:35px;color:#3d423a;margin-top:22px;font-weight:600;line-height:1.5;padding:0 22px}"
-     +".igc-chips{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}.igc-chip{background:#FBFAF6;border:2px solid #E7E2D6;border-radius:20px;padding:14px 16px 12px}"
-     +".igc-dot{width:16px;height:16px;border-radius:50%;display:inline-block;vertical-align:middle}.igc-ck{font-size:23px;font-weight:700;color:#4b5148;margin-left:8px;vertical-align:middle}.igc-cv{font-size:40px;font-weight:800;margin-top:2px;line-height:1.1}"
+     +".igc-chips{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}.igc-chip{position:relative;background:#FBFAF6;border:2px solid #E7E2D6;border-radius:22px;padding:22px 18px 20px}.igc-tag{position:absolute;right:16px;top:16px;font-size:20px;font-weight:800;color:#006241;background:#E3EFE9;border-radius:999px;padding:4px 12px}.igc-tag.low{color:#A75A3F;background:#F3E4DC}"
+     +".igc-dot{width:16px;height:16px;border-radius:50%;display:inline-block;vertical-align:middle}.igc-ck{font-size:23px;font-weight:700;color:#4b5148;margin-left:8px;vertical-align:middle}.igc-cv{font-size:44px;font-weight:800;margin-top:8px;line-height:1.1}"
      +".igc-mini{background:#FBFAF6;border:2px solid #E7E2D6;border-radius:26px;padding:28px 46px 38px 56px;margin-top:26px;position:relative}.igc-mini .mb{position:absolute;left:22px;top:22px;bottom:22px;width:12px;border-radius:999px}.igc-mtxt{font-size:43px;font-weight:700;line-height:1.35}"
-     +".igc-growth{font-size:35px;line-height:1.58;color:#20241f;margin-top:34px;font-weight:500}.igc-growth b{font-weight:800;color:#006241}"
+     +".igc-growth{font-size:34px;line-height:1.56;color:#20241f;margin-top:28px;font-weight:500}.igc-gp+.igc-gp{margin-top:34px}.igc-growth.tight{font-size:32px;line-height:1.5}.igc-growth.tight .igc-gp+.igc-gp{margin-top:28px}.igc-growth b{font-weight:800;color:#006241}"
      +".igc-sim{display:flex;gap:26px;align-items:center;background:#FBFAF6;border:2px solid #E7E2D6;border-radius:26px;padding:36px 42px;margin-top:24px}.igc-flag{flex:none;width:88px;height:88px;border-radius:50%;background:#E3EFE9;color:#006241;font-size:26px;font-weight:800;display:flex;align-items:center;justify-content:center}.igc-simn{font-size:44px;font-weight:800;line-height:1.15}.igc-simt{font-size:26px;color:#8a9089;font-weight:600;margin-top:8px;line-height:1.42}.igc-simt b{color:#006241;font-weight:800}"
      +".igc-tbar{width:132px;height:12px;border-radius:999px;background:#006241;margin-top:18px}"
      +".igc-note{font-size:24px;color:#8a9089;margin-top:28px;font-weight:500}"
-     +".igc-ev{font-size:33px!important;font-weight:600!important;line-height:1.42!important}.igc-gsub{font-size:29px;font-weight:800;color:#006241;margin-top:40px}.igc-gtask{font-size:36px;font-weight:700;line-height:1.5;margin-top:16px;background:#E3EFE9;border-radius:26px;padding:30px 36px;color:#20241f}.igc-mdesc{font-size:27px;color:#4b5148;line-height:1.5;margin-top:10px;font-weight:500}";
+     +".igc-ev{font-size:33px!important;font-weight:600!important;line-height:1.42!important}.igc-ans{display:inline-block;margin:6px 0 0 2px;font-size:23px;font-weight:800;color:#a75a3f;background:#F6E8E1;border-radius:999px;padding:3px 14px;line-height:1.3;vertical-align:middle}.igc-gsub{font-size:29px;font-weight:800;color:#006241;margin-top:40px}.igc-gtask{font-size:36px;font-weight:700;line-height:1.5;margin-top:16px;background:#E3EFE9;border-radius:26px;padding:30px 36px;color:#20241f}.igc-mdesc{font-size:27px;color:#4b5148;line-height:1.5;margin-top:10px;font-weight:500}";
     document.head.appendChild(s);
   }
   function igBold(t){ var p=t.split("'"),o='',c=0,q; for(q=0;q<p.length;q++){ if(q%2===1&&c<8&&p[q].length>=2&&p[q].length<=42){ o+="'<b>"+p[q]+"</b>'"; c++; } else if(q%2===1){ o+="'"+p[q]+"'"; } else o+=p[q]; } return o; }
   function igLines(t){ var f=window.__sbaHexdLinesHtml; return f ? f(t,24) : t.replace(/([.!?])\s+(?=\S)/g,'$1<br>'); }
   function igSplit(t,max){ var re=/[.!?]\s+/g,parts=[],last=0,m,ch=[],cu='',i; while((m=re.exec(t))){ parts.push(t.slice(last,m.index+1)); last=m.index+m[0].length; } if(last<t.length)parts.push(t.slice(last)); for(i=0;i<parts.length;i++){ var s=(parts[i]||'').trim(); if(!s)continue; if(cu&&(cu.length+s.length)>max){ ch.push(cu.trim()); cu=s; } else cu+=(cu?' ':'')+s; } if(cu.trim())ch.push(cu.trim()); return ch; }
-  function igText(el){ return el?(el.textContent||'').trim():''; }
+  function igText(el){ return el?String(el.innerText||el.textContent||'').replace(/\s+/g,' ').trim():''; }
   function igRead(){
     var q=function(s){ return document.querySelector('.hexd '+s); };
     var AXC={'자기관리':'#10B981','생산관리':'#F59E0B','목표관리':'#6366F1','관계관리':'#EC4899','판매관리':'#EF4444','재무관리':'#1E3A8A'};
     var scores=[]; document.querySelectorAll('.hexd .hexd-row').forEach(function(c){
       var f=c.querySelector('.hexd-score-fill'); var lb=igText(c.querySelector('.hexd-score-label'));
-      scores.push({label:lb,v:parseInt(igText(c.querySelector('.hexd-score-val')),10)||0,color:AXC[lb]||(f&&(f.style.background||f.style.backgroundColor))||'#006241'});
+      var tg=c.querySelector('.v em'); scores.push({label:lb,v:parseInt(igText(c.querySelector('.hexd-score-val')),10)||0,color:AXC[lb]||(f&&(f.style.background||f.style.backgroundColor))||'#006241',tag:tg?igText(tg):'',tagCls:tg&&tg.className||''});
     });
     var st=[],wk=[]; document.querySelectorAll('.hexd #swWrap .hexd-st-it').forEach(function(it){ st.push({t:igText(it.querySelector('h5')),d:igText(it.querySelector('p'))}); });
     var sims=[]; document.querySelectorAll('.hexd #similarWrap .hexd-pp').forEach(function(p){ var fg=igText(p.querySelector('.flag')); var nm=igText(p.querySelector('.hexd-person-name'))||igText(p).replace(fg,'').trim(); var co=igText(p.querySelector('.hexd-person-co')); sims.push({flag:fg,name:nm,co:co}); });
     sims.forEach(function(o,ix){ o.kr = o.flag ? (o.flag.indexOf('🇰🇷')>-1) : (ix>=sims.length/2); });
     var img=q('#charImg');
     var gapEl=q('#gapWrap'), gap=null;
-    if(gapEl && gapEl.style.display!=='none'){ var ev=[]; gapEl.querySelectorAll('.hexd-gap-ev li').forEach(function(li){ ev.push(igText(li)); }); gap={axis:igText(gapEl.querySelector('.hexd-gap-axis .nm')),score:igText(gapEl.querySelector('.hexd-gap-axis .sc')),ev:ev,task:igText(gapEl.querySelector('.hexd-gap-task'))}; }
+    if(gapEl && gapEl.style.display!=='none'){ var ev=[]; gapEl.querySelectorAll('.hexd-gap-ev li').forEach(function(li){ var bb=li.querySelector('b'); var a=bb?igText(bb):''; var c=li.cloneNode(true); var cb=c.querySelector('b'); if(cb) cb.remove(); ev.push({t:igText(c),a:a}); }); gap={axis:igText(gapEl.querySelector('.hexd-gap-axis .nm')),score:igText(gapEl.querySelector('.hexd-gap-axis .sc')),ev:ev,task:igText(gapEl.querySelector('.hexd-gap-task'))}; }
     var rcodeEl=q('#r-rcode b');
-    return {rcode:rcodeEl?igText(rcodeEl):'',gap:gap,axisNote:igText(q('#r-axisnote')),code:igText(q('#r-code')),name:igText(q('#r-name')),liner:igText(q('#r-liner')),charSrc:img?img.src:'',scores:scores,st:st,wk:wk,sims:sims,growth:(function(){ var g=q('.hexd-growth-body'); if(!g) return ''; var ps=g.querySelectorAll('p'); var arr=ps.length?[].map.call(ps,function(p){ return (p.innerText||p.textContent||'').replace(/\s+/g,' ').trim(); }):[(g.innerText||g.textContent||'').replace(/\s+/g,' ').trim()]; return arr.join(' '); })()};
+    var gEl=q('.hexd-growth-body'); var growthParas=gEl?[].map.call(gEl.querySelectorAll('p'),function(p){ return p.innerHTML.replace(/<br\s*\/?>/g,' ').replace(/<\/?span[^>]*>/g,' ').replace(/\s+/g,' ').trim(); }).filter(Boolean):[];
+    return {growthParas:growthParas,rcode:rcodeEl?igText(rcodeEl):'',gap:gap,axisNote:igText(q('#r-axisnote')),code:igText(q('#r-code')),name:igText(q('#r-name')),liner:igText(q('#r-liner')),charSrc:img?img.src:'',scores:scores,st:st,wk:wk,sims:sims,growth:(function(){ var g=q('.hexd-growth-body'); if(!g) return ''; var ps=g.querySelectorAll('p'); var arr=ps.length?[].map.call(ps,function(p){ return (p.innerText||p.textContent||'').replace(/\s+/g,' ').trim(); }):[(g.innerText||g.textContent||'').replace(/\s+/g,' ').trim()]; return arr.join(' '); })()};
   }
   function igRadar(cv,scores){
     var ctx=cv.getContext('2d'),W=640,H=600,cx=W/2,cy=H/2,R=195,N=scores.length||6;
@@ -1617,18 +1622,18 @@ window.__sbaHexdRun = function(bm){ window.__sbaHexdUser=pickUserName(bm); mount
     if(d.gap&&d.gap.axis) list.push({t:'gap'});
     if(d.wk.length) list.push({t:'sw',head:'보완할 점',sub:'약점이 아니라, 다음 성장 포인트',items:d.wk,bar:'#C8A864'});
     if(d.sims.length) list.push({t:'sim'});
-    if(d.growth){ var gc=igSplit(d.growth,250); if(gc.length>1&&gc[gc.length-1].length<90){ gc[gc.length-2]+=' '+gc[gc.length-1]; gc.pop(); } gc.forEach(function(c,i){ list.push({t:'growth',text:igLines(igBold(c)),part:gc.length>1?'('+(i+1)+'/'+gc.length+')':''}); }); }
+    if(d.growthParas&&d.growthParas.length){ var packs=[],cur=[],ln=0; function cntL(pk){ var n=0; pk.forEach(function(h,j){ n+=(h.match(/<br>/g)||[]).length+1+(j?0.65:0); }); return n; } d.growthParas.forEach(function(pg){ var h=igLines(igBold(pg)); var L=(h.match(/<br>/g)||[]).length+1+(cur.length?0.65:0); if(cur.length&&ln+L>16.5){ packs.push(cur); cur=[]; ln=L-0.65; } else { ln+=L; } cur.push(h); }); if(cur.length) packs.push(cur); var tightLast=false; if(packs.length>1){ var la=packs[packs.length-1], pv=packs[packs.length-2]; if(cntL(la)<=5 && cntL(pv)+cntL(la)+0.65<=18.5){ packs.pop(); packs[packs.length-1]=pv.concat(la); tightLast=true; } } packs.forEach(function(pk,i){ list.push({t:'growth',paras:pk,tight:(tightLast&&i===packs.length-1),part:packs.length>1?'('+(i+1)+'/'+packs.length+')':''}); }); }
     var TOTAL=list.length;
     function brand(p){ return '<div class="igc-brand"><span><b>사업가 유형 테스트</b></span><span>'+p+' / '+TOTAL+'</span></div>'; }
-    function foot(){ return '<div class="igc-foot"><span><b>@스몰브랜드설계자</b></span><span>스브설 사업가 유형 테스트 › 유형 : '+(d.name||'')+'</span></div>'; }
+    function foot(){ return '<div class="igc-foot"><span><b>@스몰브랜드설계자</b></span><span>유형 : '+(d.name||'')+'</span></div>'; }
     return list.map(function(card,ix){
       var p=ix+1,h;
       if(card.t==='cover'){ var im=d.charSrc?'<img src="'+d.charSrc+'" crossorigin="anonymous" alt="">':'🧑‍💼'; h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px"></div><div class="igc-hex" style="left:-180px;bottom:-160px;opacity:.32"></div><div class="igc-pad">'+brand(p)+'<div style="text-align:center"><div class="igc-kick">나의 사업가 유형은?</div><div class="igc-char">'+im+'</div>'+(d.code?'<canvas data-pill style="display:block;margin:14px auto 0"></canvas>':'')+'<div class="igc-name">'+d.name+'</div><div class="igc-liner">'+(d.liner||'').replace(/, /,',<br>')+'</div></div></div>'+foot()+'</div>'; }
-      else if(card.t==='radar'){ var chips=d.scores.map(function(a){return '<div class="igc-chip"><span class="igc-dot" style="background:'+a.color+'"></span><span class="igc-ck">'+a.label+'</span><div class="igc-cv" style="color:'+a.color+'">'+a.v+'</div></div>';}).join(''); h='<div class="igc-card"><div class="igc-pad">'+brand(p)+'<div class="igc-title">나의 경영 육각형</div><div class="igc-tbar"></div><div class="igc-sub">6가지 사장 역량을 한눈에</div><canvas data-radar width="1000" height="580" style="display:block;width:912px;height:529px;margin:16px auto 14px;border-radius:28px"></canvas><div class="igc-chips">'+chips+'</div></div>'+foot()+'</div>'; }
-      else if(card.t==='gap'){ var evs=d.gap.ev.map(function(t){return '<div class="igc-mini"><div class="mb" style="background:#cc785c"></div><div class="igc-mtxt igc-ev">'+t+'</div></div>';}).join(''); h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px;opacity:.5"></div><div class="igc-pad">'+brand(p)+'<div class="igc-title">'+(d.code==='MASTER'?'그래도 한 곳을 고른다면':'먼저 살펴볼 곳')+'</div><div class="igc-tbar" style="background:#cc785c"></div><div class="igc-sub"><b style="color:#20241f">'+d.gap.axis+'</b> · '+d.gap.score+' · 이렇게 답하셨어요</div>'+evs+'<div class="igc-gsub">이번 두 주에 해 볼 만한 것</div><div class="igc-gtask">'+d.gap.task+'</div></div>'+foot()+'</div>'; }
-      else if(card.t==='sw'){ var its=card.items.map(function(t){ var o=(typeof t==='string')?{t:t,d:''}:t; return '<div class="igc-mini"><div class="mb" style="background:'+card.bar+'"></div><div class="igc-mtxt">'+o.t+'</div>'+(o.d?'<div class="igc-mdesc">'+o.d+'</div>':'')+'</div>';}).join(''); h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px;opacity:.5"></div><div class="igc-hex" style="left:-180px;bottom:-160px;opacity:.32"></div><div class="igc-pad">'+brand(p)+'<div class="igc-title">'+card.head+'</div><div class="igc-tbar" style="background:'+card.bar+'"></div><div class="igc-sub">'+card.sub+'</div>'+its+'</div>'+foot()+'</div>'; }
+      else if(card.t==='radar'){ var chips=d.scores.map(function(a){return '<div class="igc-chip"><span class="igc-dot" style="background:'+a.color+'"></span><span class="igc-ck">'+a.label+'</span>'+(a.tag?'<span class="igc-tag '+a.tagCls+'">'+a.tag+'</span>':'')+'<div class="igc-cv" style="color:'+a.color+'">'+a.v+'</div></div>';}).join(''); h='<div class="igc-card"><div class="igc-pad">'+brand(p)+'<div class="igc-title">나의 경영 육각형</div><div class="igc-tbar"></div><div class="igc-sub">6가지 사장 역량을 한눈에</div><canvas data-radar width="1000" height="548" style="display:block;width:912px;height:500px;margin:14px auto 16px;border-radius:28px"></canvas><div class="igc-chips">'+chips+'</div></div>'+foot()+'</div>'; }
+      else if(card.t==='gap'){ var evs=d.gap.ev.map(function(t){ var o=(typeof t==='string')?{t:t,a:''}:t; return '<div class="igc-mini"><div class="mb" style="background:#cc785c"></div><div class="igc-mtxt igc-ev">'+igLines(o.t)+(o.a?'<span class="igc-ans">'+o.a+'</span>':'')+'</div></div>';}).join(''); h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px;opacity:.5"></div><div class="igc-pad">'+brand(p)+'<div class="igc-title">'+(d.code==='MASTER'?'그래도 한 곳을 고른다면':'먼저 살펴볼 곳')+'</div><div class="igc-tbar" style="background:#cc785c"></div><div class="igc-sub"><b style="color:#20241f">'+d.gap.axis+'</b> · '+d.gap.score+' · 이렇게 답하셨어요</div>'+evs+'<div class="igc-gsub">이번 두 주에 해 볼 만한 것</div><div class="igc-gtask">'+igLines(d.gap.task)+'</div></div>'+foot()+'</div>'; }
+      else if(card.t==='sw'){ var its=card.items.map(function(t){ var o=(typeof t==='string')?{t:t,d:''}:t; return '<div class="igc-mini"><div class="mb" style="background:'+card.bar+'"></div><div class="igc-mtxt">'+o.t+'</div>'+(o.d?'<div class="igc-mdesc">'+igLines(o.d)+'</div>':'')+'</div>';}).join(''); h='<div class="igc-card"><div class="igc-hex" style="right:-160px;top:-140px;opacity:.5"></div><div class="igc-hex" style="left:-180px;bottom:-160px;opacity:.32"></div><div class="igc-pad">'+brand(p)+'<div class="igc-title">'+card.head+'</div><div class="igc-tbar" style="background:'+card.bar+'"></div><div class="igc-sub">'+card.sub+'</div>'+its+'</div>'+foot()+'</div>'; }
       else if(card.t==='sim'){ var ppl=d.sims.map(function(s){var ach=IG_ACH[s.name]||'비슷한 강점을 가진 경영자';var co=s.co?('<b>'+s.co+'</b> · '):'';var rg=s.kr?'국내':'해외'; return '<div class="igc-sim"><div class="igc-flag">'+rg+'</div><div><div class="igc-simn">'+s.name+'</div><div class="igc-simt">'+co+ach+'</div></div></div>';}).join(''); h='<div class="igc-card"><div class="igc-pad">'+brand(p)+'<div class="igc-title">당신과 닮은 사업가</div><div class="igc-tbar"></div><div class="igc-sub">비슷한 강점을 가진 실존 사업가예요</div>'+ppl+'<div class="igc-note">* \'강점이 닮았다\'는 참고용이에요(약점을 단정하지 않습니다).</div></div>'+foot()+'</div>'; }
-      else { h='<div class="igc-card"><div class="igc-pad">'+brand(p)+'<div class="igc-title">성장 방향<span class="p">'+card.part+'</span></div><div class="igc-tbar"></div><div class="igc-sub">지금부터 이렇게 해보세요</div><div class="igc-growth">'+card.text+'</div></div>'+foot()+'</div>'; }
+      else { h='<div class="igc-card"><div class="igc-pad">'+brand(p)+'<div class="igc-title">성장 방향<span class="p">'+card.part+'</span></div><div class="igc-tbar"></div><div class="igc-sub">지금부터 이렇게 해보세요</div><div class="igc-growth'+(card.tight?' tight':'')+'">'+card.paras.map(function(x){ return '<div class="igc-gp">'+x+'</div>'; }).join('')+'</div></div>'+foot()+'</div>'; }
       return igEl(h);
     });
   }
@@ -1668,7 +1673,7 @@ window.__sbaHexdRun = function(bm){ window.__sbaHexdUser=pickUserName(bm); mount
       var cards=igCards(d);
       var stage=document.createElement('div'); stage.style.cssText='position:fixed;left:-99999px;top:0;z-index:-1';
       cards.forEach(function(c){ stage.appendChild(c); }); document.body.appendChild(stage);
-      cards.forEach(function(c){ var rc=c.querySelector('canvas[data-radar]'); if(rc){ var bp=window.__sbaHexdBlueprint; if(!(bp&&bp.drawStatic(rc,1000,580))) igRadar(rc,d.scores); } var pc=c.querySelector('canvas[data-pill]'); if(pc) igPill(pc,d.code||''); });
+      cards.forEach(function(c){ var rc=c.querySelector('canvas[data-radar]'); if(rc){ var bp=window.__sbaHexdBlueprint; if(!(bp&&bp.drawStatic(rc,1000,548))) igRadar(rc,d.scores); } var pc=c.querySelector('canvas[data-pill]'); if(pc) igPill(pc,d.code||''); });
       var blobs=[],i=0,code=d.code||'결과';
       function finish(){
         stage.remove();

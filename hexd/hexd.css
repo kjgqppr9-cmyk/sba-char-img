@@ -410,3 +410,7 @@
 .hexd .hexd-gap-task{line-height:1.75}
 .hexd .hexd-cta-sub{margin:10px 0 22px}
 .hexd .hexd-sheet .hexd-type-liner br{display:inline}
+/* ── v3.7: 문장 한 줄 = 블록, 좁은 화면에서는 균형 있게 접힘 · 문단(호흡) 간격 ── */
+.hexd .ln{display:block;text-wrap:balance;word-break:keep-all;overflow-wrap:anywhere}
+.hexd .hexd-growth-body p{margin:0 0 30px}
+.hexd .hexd-growth-body p:last-child{margin:0}
