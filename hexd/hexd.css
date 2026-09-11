@@ -414,13 +414,13 @@
 .hexd .hexd-next{padding:20px 18px 18px}
 .hexd .hexd-cta-row{display:grid;grid-template-columns:1.25fr 1fr;gap:10px;align-items:stretch}
 .hexd .hexd-cta{padding:2px;box-shadow:0 10px 24px rgba(0,98,65,.18)}
-.hexd .hexd-cta span{font-size:15.5px;padding:13px 16px}
+.hexd .hexd-cta span{font-size:15.5px;padding:0 16px;min-height:46px;display:flex;align-items:center;justify-content:center;line-height:1.2}
 .hexd .hexd-cta,.hexd .hexd-cta2{min-height:50px}
-.hexd .hexd-cta2{display:flex;align-items:center;justify-content:center;border:2px solid transparent;border-radius:999px;background:linear-gradient(#f2f0eb,#f2f0eb) padding-box,var(--hx-gold) border-box;color:#006241;font:inherit;font-size:15px;font-weight:800;padding:0 14px;cursor:pointer;letter-spacing:-.01em;transition:transform .18s cubic-bezier(.34,1.4,.64,1)}
+.hexd .hexd-cta2{display:flex;align-items:center;justify-content:center;line-height:1.2;border:2px solid transparent;border-radius:999px;background:linear-gradient(#f2f0eb,#f2f0eb) padding-box,var(--hx-gold) border-box;color:#006241;font:inherit;font-size:15px;font-weight:800;padding:0 14px;cursor:pointer;letter-spacing:-.01em;transition:transform .18s cubic-bezier(.34,1.4,.64,1)}
 .hexd .hexd-cta2:hover{transform:translateY(-2px)}
 .hexd .hexd-next .hexd-cta-sub{margin:9px 0 16px;font-size:12px}
 .hexd .hexd-next .hexd-links{margin-top:16px}
-@media(max-width:520px){ .hexd .hexd-next{padding:18px 14px 16px} .hexd .hexd-cta-row{gap:8px} .hexd .hexd-cta span{font-size:14.5px;padding:12px 10px} .hexd .hexd-cta2{font-size:14px;padding:0 8px} }
+@media(max-width:520px){ .hexd .hexd-next{padding:18px 14px 16px} .hexd .hexd-cta-row{gap:8px} .hexd .hexd-cta span{font-size:14.5px;padding:0 10px} .hexd .hexd-cta2{font-size:14px;padding:0 8px} }
 /* ── v3.7: 문장 한 줄 = 블록, 좁은 화면에서는 균형 있게 접힘 · 문단(호흡) 간격 ── */
 .hexd .ln{display:block;text-wrap:balance;word-break:keep-all;overflow-wrap:anywhere}
 .hexd .hexd-growth-body p{margin:0 0 30px}
