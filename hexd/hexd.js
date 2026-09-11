@@ -1027,7 +1027,14 @@ function makeBlueprint(scores, lowestIdx){
     for(var m=0;m<motes.length;m++){ var o=motes[m], yy=((o.y-tt*o.s)%1+1)%1, xx=o.x*W+Math.sin(tt*0.5+o.ph)*10, al=0.14+0.24*(0.5+0.5*Math.sin(tt*1.3+o.ph)); ctx.fillStyle='rgba('+GOLD2+','+al.toFixed(3)+')'; ctx.beginPath(); ctx.arc(xx,yy*H,o.r,0,6.283); ctx.fill(); }
   }
   /* 정지 화면(공유 카드용): 캔버스 픽셀 크기를 직접 정해 완성 상태만 그린다 */
-  function drawStatic(cv,W,H){ cv.width=W; cv.height=H; var ctx=cv.getContext('2d'); if(!ctx) return false; ctx.setTransform(1,0,0,1,0,0); draw(ctx,W,H,20); return true; }
+  /* 공유 카드용 캔버스는 무대(CSS 배경)가 없으므로 어두운 초록 바닥을 먼저 깐다 (그라데이션 대신 동심원 겹칠) */
+  function drawStatic(cv,W,H){ cv.width=W; cv.height=H; var ctx=cv.getContext('2d'); if(!ctx) return false; ctx.setTransform(1,0,0,1,0,0);
+    draw(ctx,W,H,20); /* draw() 가 clearRect 로 시작하므로 바닥은 그린 뒤에 아래쪽으로 깐다 */
+    ctx.globalCompositeOperation='destination-over';
+    var cx=W*0.5, cy=H*0.52, R0=Math.max(W,H)*0.75, steps=[[.25,'20,58,46',1],[.4,'18,51,41',1],[.6,'16,45,36',1],[.8,'13,37,28',1]];
+    for(var i=0;i<steps.length;i++){ ctx.fillStyle='rgb('+steps[i][1]+')'; ctx.beginPath(); ctx.arc(cx,cy,R0*steps[i][0],0,6.2832); ctx.fill(); }
+    ctx.fillStyle='#07140F'; ctx.fillRect(0,0,W,H);
+    ctx.globalCompositeOperation='source-over'; return true; }
   /* 화면용: host 크기에 맞춰 dpr 반영, 보일 때만 그린다 */
   function mount(host,cv){
     var ctx=cv.getContext('2d'); if(!ctx) return false;
