@@ -1414,7 +1414,17 @@ window.__sbaHexdDev = {
   openByCode: function(c){ return openByCode(document.querySelector('.hexd'), c); }
 };
 
-window.__sbaHexdRun = function(bm){ mount(); if(bm) bm.onContextChange = mount; };
+/* 로그인한 회원 이름 → 저장 파일명에 쓴다 (블록 상단 <data value="$customer"> 로 bm.context.customer 가 채워진다) */
+function pickUserName(bm){
+  try{
+    var c=bm&&bm.context&&(bm.context.customer||bm.context.member||bm.context.user); if(!c) return '';
+    var cand=[c.nickname,c.nickName,c.name,c.userName,c.username,c.displayName,c.fullName];
+    for(var i=0;i<cand.length;i++){ if(cand[i]&&String(cand[i]).trim()) return String(cand[i]).trim(); }
+    if(c.email) return String(c.email).split('@')[0];
+  }catch(e){}
+  return '';
+}
+window.__sbaHexdRun = function(bm){ window.__sbaHexdUser=pickUserName(bm); mount(); if(bm) bm.onContextChange = function(){ window.__sbaHexdUser=pickUserName(bm); mount(); }; };
 })();
 
 /* ══ 결과 카드 저장·공유 (테마 body 에서 이동, v2 수정) ══ */
@@ -1531,18 +1541,36 @@ window.__sbaHexdRun = function(bm){ mount(); if(bm) bm.onContextChange = mount; 
       return igEl(h);
     });
   }
-  function igDownAll(blobs,code,done){ var i=0; (function d(){ if(i>=blobs.length){ if(done){ done(); } else { toast(blobs.length+'장을 저장했어요!'); } return; } downloadBlob(blobs[i],'사업가유형_'+code+'_'+(i+1)+'.png'); i++; setTimeout(d,650); })(); }
+  function igDownAll(blobs,code,done){ var i=0; (function d(){ if(i>=blobs.length){ if(done){ done(); } else { toast(blobs.length+'장을 저장했어요!'); } return; } downloadBlob(blobs[i],igFileName(i+1,blobs.length)); i++; setTimeout(d,650); })(); }
   function igShare(blobs,code){
-    var files=[],i; for(i=0;i<blobs.length;i++){ try{ files.push(new File([blobs[i]],'사업가유형_'+code+'_'+(i+1)+'.png',{type:'image/png'})); }catch(e){} }
+    var files=[],i; for(i=0;i<blobs.length;i++){ try{ files.push(new File([blobs[i]],igFileName(i+1,blobs.length),{type:'image/png'})); }catch(e){} }
     if(files.length&&navigator.canShare&&navigator.canShare({files:files})&&navigator.share){ navigator.share({files:files,title:'사업가 유형 테스트 결과'}).then(function(){toast('공유했어요!');}).catch(function(){ igDownAll(blobs,code); }); }
     else { igDownAll(blobs,code); }
   }
   // 결과 저장/공유/인스타 → 1080×1350 카드 여러 장 (mode: save | share | insta)
   function igMob(){ return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent||''); }
+  function igIOS(){ return /iPhone|iPad|iPod/i.test(navigator.userAgent||'') || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); }
+  // 파일명: {로그인 이름 또는 '사장님'}_{날짜}_사장님 유형 진단_{n}of{총}.png
+  function igSafeName(s){ return String(s||'').replace(/[\\\/:*?"<>|\r\n\t]+/g,' ').replace(/\s+/g,' ').trim().slice(0,30); }
+  function igUserName(){ return igSafeName(window.__sbaHexdUser)||'사장님'; }
+  function igDate(){ var d=new Date(); function p(n){ return (n<10?'0':'')+n; } return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+  function igFileName(i,n){ return igUserName()+'_'+igDate()+'_사장님 유형 진단_'+i+'of'+n+'.png'; }
+  // 저장: 아이폰·아이패드는 파일 다운로드가 사진 앱으로 가지 않으므로 공유 창(이미지 저장)으로, 그 외는 바로 내려받기
+  function igSave(blobs,code){
+    if(igIOS()){
+      var files=[],i; for(i=0;i<blobs.length;i++){ try{ files.push(new File([blobs[i]],igFileName(i+1,blobs.length),{type:'image/png'})); }catch(e){} }
+      if(files.length&&navigator.canShare&&navigator.canShare({files:files})&&navigator.share){
+        toast('공유 창에서 「이미지 저장」을 눌러 주세요');
+        navigator.share({files:files,title:'사장님 유형 진단'}).then(function(){ toast('저장했어요!'); }).catch(function(){ igDownAll(blobs,code); });
+        return;
+      }
+    }
+    igDownAll(blobs,code);
+  }
   function igFonts(cb){ var done=0; function go(){ if(!done){ done=1; cb(); } } try{ if(document.fonts&&document.fonts.ready){ try{ document.fonts.load('800 43px Pretendard'); document.fonts.load('700 26px Pretendard'); }catch(e){} document.fonts.ready.then(go,go); setTimeout(go,1500); } else { go(); } }catch(e){ go(); } }
   function igCapture(mode){
     if(mode==='insta'&&!igMob()){ try{ window.open('https://www.instagram.com/','_blank'); }catch(e){} }
-    igStyle(); toast(mode==='share'?'공유할 카드를 만들고 있어요…':'인스타 카드를 만들고 있어요…');
+    igStyle(); toast(mode==='share'?'공유할 카드를 만들고 있어요…':mode==='insta'?'인스타 카드를 만들고 있어요…':'결과 카드를 만들고 있어요…');
     igFonts(function(){ loadH2C(function(err){
       if(err||!window.html2canvas){ toast('잠시 후 다시 시도해 주세요.'); return; }
       var d=igRead(); if(!d.name){ toast('결과를 먼저 확인해 주세요.'); return; }
@@ -1553,7 +1581,7 @@ window.__sbaHexdRun = function(bm){ mount(); if(bm) bm.onContextChange = mount; 
       var blobs=[],i=0,code=d.code||'결과';
       function finish(){
         stage.remove();
-        if(mode==='save'){ igDownAll(blobs,code); return; }
+        if(mode==='save'){ igSave(blobs,code); return; }
         if(mode==='insta'){
           if(igMob()){ toast('공유 창에서 Instagram을 선택해 주세요'); igShare(blobs,code); }
           else { igDownAll(blobs,code,function(){ toast('저장 완료! 인스타그램 탭에서 올려주세요.'); }); }
