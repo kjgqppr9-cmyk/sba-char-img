@@ -1454,10 +1454,14 @@ function showResult(root, opts){
   const shareUrl=location.origin+location.pathname;
   const shareMsg='나는 "'+type.nickname+'" 유형 사업가! 나의 유형도 알아보기 → '+shareUrl;
   const enc=encodeURIComponent(shareMsg);
-  const th=root.querySelector('#shThreads'); if(th) th.href='https://www.threads.net/intent/post?text='+enc;
-  const tw=root.querySelector('#shX'); if(tw) tw.href='https://twitter.com/intent/tweet?text='+enc;
   root.querySelector('#consultBtn').onclick=()=>{ location.href='/cmpwyv9vbez2s01unagivd0pq?code='+encodeURIComponent(_rcode); };
   root.querySelector('#reviewBtn').onclick=()=>show(root,'s-ax-0');
+  /* 후기 남기기: 테마의 후기 글쓰기 스크립트(sbaResultChar)와 같은 형식으로 결과 캐릭터를 기억한 뒤 게시판 글쓰기로 이동 */
+  const rw=root.querySelector('#reviewWrite'); if(rw) rw.onclick=()=>{
+    try{ const src=(root.querySelector('#charImg')||{}).getAttribute?root.querySelector('#charImg').getAttribute('src')||'':''; const fn=src.split('/').pop().split('?')[0]; const cc=fn.split('.')[0];
+      if(cc) localStorage.setItem('sbaResultChar', JSON.stringify({url:'https://cdn.jsdelivr.net/gh/kjgqppr9-cmyk/sba-char-img@8cef259/'+cc+'.png', code:type.code, name:type.nickname, t:Date.now()})); }catch(e){}
+    location.href='/boards/4786/write';
+  };
   root.querySelector('#restartBtn').onclick=()=>{
     root.querySelectorAll('.hexd-screen[id^="s-ax-"], #s-concern').forEach(el=>el.remove());
     clearProgress(); _rcode=null;
