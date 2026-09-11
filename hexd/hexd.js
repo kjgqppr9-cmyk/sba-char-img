@@ -720,7 +720,11 @@ function initBlock(root){
   });
 
   const lo=root.querySelector('#lastOpen');
-  if(lo){ const last=loadLastResult(); if(last&&last.code){ lo.hidden=false; lo.addEventListener('click',()=>{ openByCode(root, last.code); }); } }
+  if(lo){ let lastCode=null; lo.addEventListener('click',()=>{ if(lastCode) openByCode(root, lastCode); });
+    const arm=(p)=>{ if(p&&p.code){ lastCode=p.code; lo.hidden=false; } };
+    arm(loadLastResult()); /* 이 기기 저장분 */
+    fetchMyLastResult(function(p){ if(p) arm(loadLastResult()); }); /* 로그인 회원: 서버(본인 채널) 최근 결과를 이 기기 저장소에 합친 뒤 가장 최근 것으로 */
+  }
 
   // 진행 중이던 테스트 → 이어하기 배너
   const sv=loadProgress();
@@ -1343,7 +1347,10 @@ function renderGap(root, gap){
 /* 익명 저장: 이름·연락처 없음. 기본은 이 기기(localStorage)에 두고, 저장소 연결 함수(window.SBA_HEXD_SAVE)가 있으면 그쪽으로도 보낸다 */
 const RESULTS_KEY="sba_hexd_results_v2";
 /* 서버 저장: 식스샵 커스텀 DB `hexd-results` (public 채널은 생성만 열려 있음 → 방문자는 쓰기만, 읽기는 관리자·본인만) */
-const CDB_URL="https://cdb.sixshop.io/public/hexd-results", CDB_STORE="sba01";
+const CDB_URL="https://cdb.sixshop.io/public/hexd-results", CDB_MY_URL="https://cdb.sixshop.io/my/hexd-results", CDB_STORE="sba01";
+/* 식스샵 회원 토큰: 블록 런타임(blockMaker)이 쓰는 것과 같은 자리(localStorage "sixshop-user-info".token) */
+function customerToken(){ try{ const u=JSON.parse(localStorage.getItem('sixshop-user-info')||'null'); return (u&&u.token)?String(u.token):''; }catch(e){ return ''; } }
+function cdbHeaders(tok){ const h={'Content-Type':'application/json','ss-store-id':CDB_STORE}; if(tok) h['Authorization']='Bearer '+tok; return h; }
 function serverDoc(p){
   const sc={}; (p.scores||[]).forEach(s=>{ sc[s.axisId]=s.score; });
   const gapItems=(p.gapItems||[]).map(x=>'"'+x.text+'" — '+x.word).join('\n');
@@ -1357,9 +1364,12 @@ function saveToServer(p){
   try{
     if(!window.fetch) return;
     const key='sba_hexd_sent_'+p.code; try{ if(sessionStorage.getItem(key)) return; }catch(e){}
-    fetch(CDB_URL,{method:'POST',mode:'cors',headers:{'Content-Type':'application/json','ss-store-id':CDB_STORE},body:JSON.stringify(serverDoc(p))})
-      .then(r=>{ if(r.ok){ try{ sessionStorage.setItem(key,'1'); }catch(e){} } else { console.warn('[sba-hexd] 저장 응답',r.status); } })
-      .catch(e=>{ console.warn('[sba-hexd] 저장 실패',e); });
+    const body=JSON.stringify(serverDoc(p)), tok=customerToken();
+    function ok(){ try{ sessionStorage.setItem(key,'1'); }catch(e){} }
+    function toPublic(){ return fetch(CDB_URL,{method:'POST',mode:'cors',headers:cdbHeaders(''),body:body}).then(r=>{ if(r.ok) ok(); else console.warn('[sba-hexd] 저장 응답',r.status); }); }
+    /* 로그인 회원 → 본인 채널(소유자 기록, 다른 기기에서 조회 가능). 실패하면 공개 채널로 */
+    const first = tok ? fetch(CDB_MY_URL,{method:'POST',mode:'cors',headers:cdbHeaders(tok),body:body}).then(r=>{ if(r.ok){ ok(); return true; } return false; }).catch(()=>false) : Promise.resolve(false);
+    first.then(done=>{ if(!done) return toPublic(); }).catch(e=>{ console.warn('[sba-hexd] 저장 실패',e); });
   }catch(e){}
 }
 function persistResult(p){
@@ -1368,6 +1378,19 @@ function persistResult(p){
   try{ if(typeof window.SBA_HEXD_SAVE==='function') window.SBA_HEXD_SAVE(p); }catch(e){}
 }
 function loadResultByCode(code){ try{ const all=JSON.parse(localStorage.getItem(RESULTS_KEY)||'{}'); return all[String(code||'').toUpperCase()]||null; }catch(e){ return null; } }
+function fetchMyLastResult(cb){
+  const tok=customerToken(); if(!tok||!window.fetch){ cb(null); return; }
+  fetch(CDB_MY_URL+'?fields=code,date,type,nickname,user,payload&sort=date:desc&limit=1',{mode:'cors',headers:cdbHeaders(tok)})
+    .then(r=>r.ok?r.json():null).then(rows=>{
+      const row=Array.isArray(rows)?rows[0]:null; if(!row||!row.code){ cb(null); return; }
+      let pl={}; try{ pl=JSON.parse(row.payload||'{}')||{}; }catch(e){}
+      if(!pl.answers){ cb(null); return; }
+      const p={code:String(row.code).toUpperCase(), t:Date.parse(row.date)||Date.now(), v:2, user:row.user||'', pre:pl.pre||{}, shown:pl.shown||null, answers:pl.answers||{}, gap:pl.gap||null, tie:pl.tie||[], concerns:pl.concerns||[], type:row.type||'', nickname:row.nickname||'', fromServer:true};
+      try{ const all=JSON.parse(localStorage.getItem(RESULTS_KEY)||'{}'); if(!all[p.code]){ all[p.code]=p; localStorage.setItem(RESULTS_KEY, JSON.stringify(all)); } }catch(e){}
+      try{ sessionStorage.setItem('sba_hexd_sent_'+p.code,'1'); }catch(e){} /* 다시 열 때 서버에 또 저장하지 않게 */
+      cb(p);
+    }).catch(()=>cb(null));
+}
 function loadLastResult(){ try{ const all=JSON.parse(localStorage.getItem(RESULTS_KEY)||'{}'); const k=Object.keys(all).sort((a,b)=>(all[b].t||0)-(all[a].t||0))[0]; return k?all[k]:null; }catch(e){ return null; } }
 let _rcode=null;
 function showResult(root, opts){
@@ -1499,6 +1522,7 @@ function openByCode(root, code){
 
 /* ── 개발 확인용 훅 (하네스에서 8가지 시나리오 재현) ── */
 window.__sbaHexdDev = {
+  fetchMyLast: function(cb){ return fetchMyLastResult(cb||function(){}); }, loadLast: function(){ return loadLastResult(); },
   run: function(pre, answerFn, opts){
     opts=opts||{};
     const root=document.querySelector('.hexd'); if(!root) return null;
