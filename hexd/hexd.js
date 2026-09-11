@@ -1598,6 +1598,7 @@ window.__sbaHexdRun = function(bm){ window.__sbaHexdUser=pickUserName(bm); mount
       }
       (function next(){
         if(i>=cards.length){ finish(); return; }
+        toast((mode==='share'?'공유할 카드':mode==='insta'?'인스타 카드':'결과 카드')+' '+(i+1)+'/'+cards.length+' 만드는 중…');
         window.html2canvas(cards[i],{width:1080,height:1350,scale:1,backgroundColor:null,useCORS:true,logging:false}).then(function(cv){
           cv.toBlob(function(b){ if(b) blobs.push(b); i++; next(); },'image/png');
         }).catch(function(){ stage.remove(); toast('잠시 후 다시 시도해 주세요.'); });
