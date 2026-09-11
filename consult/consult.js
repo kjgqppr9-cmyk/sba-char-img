@@ -231,22 +231,9 @@ window.__sbaConsultRun = function(bm){
         if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
       });
       /* 모바일 하단 버튼: 히어로 70% 지나면 뜨고, 폼이 보이면 숨는다 */
-      var bar = root.querySelector('.csx-bar') || document.querySelector('.csx-bar--portal'), hero = root.querySelector('.hf');
-      /* 식스샵 '블록 등장 애니메이션'(visibility:hidden → transform)이 블록 전체에 걸리면 position:fixed 가 블록 기준이 되어
-         버튼이 엉뚱한 곳에 잠깐씩만 보인다 → 바를 body 로 옮겨 화면 기준으로 고정하고, 클릭은 바 자체에서 처리 */
-      if(bar && bar.parentNode !== document.body){
-        bar.classList.add('csx-bar--portal'); bar.style.visibility = 'visible'; document.body.appendChild(bar);
-        bar.addEventListener('click', function(e){ var go = e.target.closest('[data-go]'); if(!go) return; e.preventDefault();
-          var f = document.querySelector('.cs-form') || document.querySelector('form'); if(f) f.scrollIntoView({behavior:'smooth', block:'start'}); });
-      }
-      function tick(){
-        if(!bar) return;
-        var form = document.querySelector('.cs-form'), vh = innerHeight;
-        var past = hero ? (hero.getBoundingClientRect().bottom < vh*0.3) : (scrollY > 400);
-        var formIn = false; if(form){ var r=form.getBoundingClientRect(); formIn = r.top < vh*0.85 && r.bottom > 0; }
-        bar.classList.toggle('on', past && !formIn);
-      }
-      addEventListener('scroll', tick, {passive:true}); addEventListener('resize', tick); setTimeout(tick, 300);
+      /* 모바일 하단 고정 버튼은 2026-09-11 대표님 지시로 제거. 옛 템플릿에 남아 있으면 지운다 */
+      root.querySelectorAll('.csx-bar').forEach(function(b){ b.remove(); });
+      document.querySelectorAll('.csx-bar--portal').forEach(function(b){ b.remove(); });
       fitHdr(root); addEventListener('resize', function(){ fitHdr(root); }); setTimeout(function(){ fitHdr(root); }, 900);
       /* 스크롤 등장: 같은 부모 안에서는 순번(--i)만큼 시간차. 숫자는 켜질 때 0 부터 센다 */
       var reduced=false; try{ reduced=matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
