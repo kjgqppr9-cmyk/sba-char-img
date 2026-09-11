@@ -163,6 +163,21 @@
   .csx-bar .btn{width:100%;justify-content:center;padding:15px}
 }
 @media (prefers-reduced-motion:reduce){.csx .btn{transition:none}.csx-bar{transition:none}}
+/* 하단 고정 버튼(body 로 옮긴 뒤): .csx 밖이므로 독립 스타일. 진단 결과 화면 CTA 와 같은 금빛 테두리 초록, 맥동 없음 */
+.csx-bar--portal{display:none}
+@media (max-width:1024px){
+  .csx-bar--portal{display:block;position:fixed;left:0;right:0;bottom:0;z-index:60;padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    background:rgba(242,240,235,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-top:1px solid rgba(0,0,0,.08);
+    transform:translateY(110%);transition:transform .3s ease;visibility:visible;font-family:var(--font-family-body,Pretendard),Pretendard,sans-serif;box-sizing:border-box}
+  .csx-bar--portal.on{transform:none}
+  .csx-bar--portal .btn{display:flex;width:100%;min-height:50px;align-items:center;justify-content:center;gap:10px;color:#fff;font-weight:800;font-size:15.5px;letter-spacing:-.01em;
+    padding:0 16px;border:2px solid transparent;border-radius:999px;cursor:pointer;font-family:inherit;animation:none;position:relative;
+    background:linear-gradient(145deg,#008a55,#00613e) padding-box,linear-gradient(90deg,#B07E22 0%,#D9AE4B 28%,#F3D889 50%,#D9AE4B 72%,#B07E22 100%) border-box;
+    box-shadow:0 10px 24px rgba(0,98,65,.18)}
+  .csx-bar--portal .btn::before{display:none}
+  .csx-bar--portal .btn svg{width:18px;height:18px;animation:none}
+}
+@media (prefers-reduced-motion:reduce){.csx-bar--portal{transition:none}}
 
 /* ══ 모션 ══════════════════════════════════════════════════════════
    ① 스크롤 등장([data-rv]) ② 둥근 카드 테두리를 금빛 스파크가 시계 방향으로 한 바퀴(.gl) ③ 타임라인 선 그리기 ④ 진초록 판의 반짝이 */
