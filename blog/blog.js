@@ -75,6 +75,23 @@
   'html[data-sba-blog] .board-wrapper li>.divider{background:var(--b-line)!important}',
   'html[data-sba-blog="dark"] .board-wrapper .pagination .btn-prev,html[data-sba-blog="dark"] .board-wrapper .pagination .btn-next{background:var(--b-surface)!important;box-shadow:none!important}',
   'html[data-sba-blog="dark"] .board-wrapper .pagination button{color:var(--b-soft)!important}',
+  /* 식스샵 기본 게시판 목록(Board_wrapper) */
+  'html[data-sba-blog] section:has([class*="Board_wrapper"]){background:transparent!important}',
+  'html[data-sba-blog] [class*="Board_wrapper"]{max-width:760px!important;margin-left:auto!important;margin-right:auto!important;color:var(--b-text)!important}',
+  'html[data-sba-blog] [class*="Board_wrapper"]>h2{color:var(--b-head)!important;font-size:clamp(26px,6vw,34px)!important;font-weight:800!important;letter-spacing:-.02em!important}',
+  'html[data-sba-blog] [class*="BoardList_wrapper"] *:not(img){background-color:transparent!important}',
+  'html[data-sba-blog] [class*="BoardList_board-item"]{background:var(--b-surface)!important;border-radius:18px!important;padding:16px 18px!important;margin-bottom:12px!important;box-shadow:inset 0 0 0 1px var(--b-line)!important}',
+  'html[data-sba-blog] [class*="BoardList_post-title-wrapper"] *{color:var(--b-head)!important;font-weight:700!important}',
+  'html[data-sba-blog] [class*="BoardList_post-contents-wrapper"] *{color:var(--b-soft)!important}',
+  'html[data-sba-blog] [class*="BoardList_post-meta-row"] *,html[data-sba-blog] [class*="Board_wrapper"] .tc-text-60,html[data-sba-blog] [class*="Board_wrapper"] .tc-text-40{color:var(--b-muted)!important}',
+  'html[data-sba-blog] [class*="BoardList_thumbnail-image"] img{border-radius:12px!important}',
+  'html[data-sba-blog] [class*="Board_wrapper"] [class*="SearchResultText_search-result-line"]{background:var(--b-line)!important}',
+  'html[data-sba-blog] [class*="InputText_input-container"]{background:var(--b-surface)!important;border-color:var(--b-line)!important;border-radius:999px!important}',
+  'html[data-sba-blog] [class*="InputText_input-container"] input{color:var(--b-text)!important;background:transparent!important}',
+  'html[data-sba-blog] [class*="InputText_input-container"] input::placeholder{color:var(--b-muted)!important}',
+  'html[data-sba-blog] [class*="Board_wrapper"] [class*="IconButton"],html[data-sba-blog] [class*="Board_wrapper"] [class*="InputText_icon"]{color:var(--b-soft)!important}',
+  /* 게시판 페이지 틀에 딸린 빈 게시판 블록("게시판 선택")은 블로그 화면에서 숨긴다 */
+  'html[data-sba-blog] section.section-type-Custom-T02:has(.board-wrapper){display:none!important}',
   '@media (prefers-reduced-motion:reduce){html[data-sba-blog] body,.sba-mode button{transition:none}}'
   ].join('\n');
 
@@ -99,7 +116,7 @@
   }
 
   function mountToggle() {
-    var host = document.querySelector('[class*="Post_post-wrapper"]') || document.querySelector('.board-wrapper');
+    var host = document.querySelector('[class*="Post_post-wrapper"]') || document.querySelector('[class*="Board_wrapper"]');
     if (!host) return;
     for (var i = 0; i < host.children.length; i++) { if (host.children[i].classList.contains('sba-mode')) return; }
     var wrap = document.createElement('div'); wrap.className = 'sba-mode';
@@ -109,7 +126,8 @@
       var b = e.target.closest('button[data-t]'); if (!b) return;
       save(b.getAttribute('data-t')); apply();
     });
-    host.insertBefore(wrap, host.firstChild);
+    var head = host.querySelector(':scope > h2');
+    if (head && /Board_wrapper/.test(host.className)) host.insertBefore(wrap, head.nextSibling); else host.insertBefore(wrap, host.firstChild);
   }
   function syncToggle() {
     var v = ROOT.getAttribute('data-sba-blog');
