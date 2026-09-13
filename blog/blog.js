@@ -31,6 +31,7 @@
   /* 본문: 행간 넓게, 덩어리 사이 빈 줄 하나만큼 */
   'html[data-sba-blog] .ck-content{font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,sans-serif!important;color:var(--b-text)!important;font-size:17px!important;line-height:1.95!important;letter-spacing:-.012em!important;font-weight:var(--b-w)!important;word-break:keep-all;overflow-wrap:anywhere}',
   'html[data-sba-blog] .ck-content p{margin:0 0 1.95em!important;font-size:inherit!important;line-height:inherit!important;color:inherit!important}',
+  '@media (max-width:767px){html[data-sba-blog] .ck-content{padding-left:5px!important;padding-right:5px!important}html[data-sba-blog] [class*="Post_post-header"],html[data-sba-blog] [class*="Post_post-info"],html[data-sba-blog] .sba-mode{padding-left:5px;padding-right:5px}}',
   'html[data-sba-blog] .ck-content h2{color:var(--b-head)!important;font-size:23px!important;line-height:1.5!important;letter-spacing:-.02em!important;font-weight:700!important;margin:2.5em 0 1.1em!important;word-break:keep-all}',
   /* 글 첫 문단은 인용구 자리: 코럴 인용 + 작은 출처 */
   'html[data-sba-blog] .ck-content>p:first-child{font-size:14px!important;line-height:1.85!important;color:var(--b-muted)!important;margin-bottom:2.6em!important}',
