@@ -22,7 +22,7 @@
   /* 글 틀: PC 읽기 폭 700 */
   'html[data-sba-blog] [class*="Post_wrapper"]{max-width:760px!important;margin-left:auto!important;margin-right:auto!important;color:var(--b-text)}',
   'html[data-sba-blog] [class*="Post_wrapper"]>h2{color:var(--b-em)!important;font-size:14px!important;letter-spacing:.08em!important;font-weight:700!important;opacity:.9}',
-  'html[data-sba-blog] [class*="Post_post-wrapper"]{background:transparent!important;border-color:var(--b-line)!important;box-shadow:none!important}',
+  'html[data-sba-blog] [class*="Post_post-wrapper"]{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding-left:0!important;padding-right:0!important}',
   'html[data-sba-blog] [class*="Post_post-header"] h2{color:var(--b-head)!important;font-size:clamp(25px,6.2vw,34px)!important;line-height:1.38!important;letter-spacing:-.025em!important;font-weight:800!important;word-break:keep-all}',
   'html[data-sba-blog] [class*="Post_post-info"] *{color:var(--b-muted)!important}',
   'html[data-sba-blog] [class*="Post_wrapper"] [class*="divider"]{background:var(--b-line)!important;border-color:var(--b-line)!important}',
@@ -31,7 +31,10 @@
   /* 본문: 행간 넓게, 덩어리 사이 빈 줄 하나만큼 */
   'html[data-sba-blog] .ck-content{font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,sans-serif!important;color:var(--b-text)!important;font-size:17px!important;line-height:1.95!important;letter-spacing:-.012em!important;font-weight:var(--b-w)!important;word-break:keep-all;overflow-wrap:anywhere}',
   'html[data-sba-blog] .ck-content p{margin:0 0 1.95em!important;font-size:inherit!important;line-height:inherit!important;color:inherit!important}',
-  'html[data-sba-blog] .ck-content h2{color:var(--b-head)!important;font-size:23px!important;line-height:1.5!important;letter-spacing:-.02em!important;font-weight:700!important;margin:3.1em 0 1.15em!important;word-break:keep-all}',
+  'html[data-sba-blog] .ck-content h2{color:var(--b-head)!important;font-size:23px!important;line-height:1.5!important;letter-spacing:-.02em!important;font-weight:700!important;margin:2.5em 0 1.1em!important;word-break:keep-all}',
+  /* 글 첫 문단은 인용구 자리: 코럴 인용 + 작은 출처 */
+  'html[data-sba-blog] .ck-content>p:first-child{font-size:14px!important;line-height:1.85!important;color:var(--b-muted)!important;margin-bottom:2.6em!important}',
+  'html[data-sba-blog] .ck-content>p:first-child i{display:inline-block;font-size:18px!important;line-height:1.75!important;margin-bottom:8px;font-weight:600!important}',
   'html[data-sba-blog] .ck-content h3{color:var(--b-head)!important;font-size:19px!important;line-height:1.55!important;font-weight:700!important;margin:2.4em 0 .8em!important}',
   'html[data-sba-blog] .ck-content strong,html[data-sba-blog] .ck-content b{color:var(--b-em)!important;font-weight:700!important}',
   'html[data-sba-blog] .ck-content i,html[data-sba-blog] .ck-content em{color:var(--b-em2)!important;font-style:normal!important;font-weight:650!important}',
