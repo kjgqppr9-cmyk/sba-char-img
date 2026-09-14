@@ -98,7 +98,9 @@
   'html[data-sba-blog] [class*="BoardList_board-item"]{display:flex!important;text-decoration:none!important;overflow:hidden;transition:transform .25s ease,box-shadow .25s ease}',
   'html[data-sba-blog] [class*="BoardList_thumbnail-image"]{flex:none!important;height:auto!important;aspect-ratio:1200/630!important;--aspect-ratio:1200/630!important;overflow:hidden}',
   'html[data-sba-blog] [class*="BoardList_thumbnail-image"] img{width:100%!important;height:100%!important;object-fit:cover!important;transition:transform .5s ease}',
-  'html[data-sba-blog] [class*="BoardList_post-info-wrapper"]{display:flex!important;flex-direction:column!important;flex:1 1 auto!important;min-width:0}',
+  'html[data-sba-blog] [class*="BoardList_post-info-wrapper"]{display:flex!important;flex-direction:column!important;flex:1 1 auto!important;min-width:0;align-items:stretch!important;text-align:left!important}',
+  /* 설명이 비거나 짧아도 제목·날짜 줄이 가운데로 몰리지 않게 폭을 채우고 왼쪽에 붙인다 */
+  'html[data-sba-blog] [class*="BoardList_post-contents-wrapper"],html[data-sba-blog] [class*="BoardList_post-title-wrapper"],html[data-sba-blog] [class*="BoardList_post-meta-row"]{width:100%!important;text-align:left!important;justify-content:flex-start!important;align-items:flex-start!important}',
   'html[data-sba-blog] [class*="BoardList_post-title-wrapper"] p{white-space:normal!important;display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;text-overflow:clip!important;word-break:keep-all;letter-spacing:-.02em!important;line-height:1.45!important}',
   'html[data-sba-blog] [data-sba-ex]::after{content:attr(data-sba-ex);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;color:var(--b-soft);font-size:14px;line-height:1.62;font-weight:400;letter-spacing:-.01em;word-break:keep-all;margin-top:8px;min-height:3.24em}',
   'html[data-sba-blog] [class*="BoardList_post-meta-row"]{margin-top:auto!important;padding-top:14px}',
@@ -201,6 +203,8 @@
   }
 
   /* 카드 설명 한 줄: 페이지 데이터(__NEXT_DATA__)의 본문에서 인용구·소제목을 건너뛴 첫 문단들 */
+  /* 메뉴를 눌러 들어오면(클라이언트 이동) __NEXT_DATA__ 는 처음 연 페이지 것이라 목록 글이 없다.
+     글 페이지 HTML 에도 본문 데이터가 없다(2026-09-14 실측). 그래서 지금 목록 주소의 HTML 을 한 번 받아 읽는다. */
   var META = {}, asked = {};
   function excerpt(html) {
     var d = new DOMParser().parseFromString('<div>' + (html || '') + '</div>', 'text/html').body.firstChild, out = '', first = true;
@@ -232,9 +236,10 @@
       var m = (a.getAttribute('href') || '').match(/\/posts\/([^?#/]+)/); if (!m) return;
       var slug = decodeURIComponent(m[1]), info = META[slug];
       if (!info) {
-        if (!asked[slug]) {
-          asked[slug] = 1;
-          fetch('/posts/' + encodeURIComponent(slug)).then(function (r) { return r.text(); }).then(function (t) {
+        var src = location.pathname + location.search;
+        if (!asked[src]) {
+          asked[src] = 1;
+          fetch(src, { credentials: 'same-origin' }).then(function (r) { return r.text(); }).then(function (t) {
             readNext(new DOMParser().parseFromString(t, 'text/html')); decorate();
           }).catch(function () {});
         }
