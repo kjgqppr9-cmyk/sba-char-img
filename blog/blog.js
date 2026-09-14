@@ -13,8 +13,8 @@
   'html[data-sba-blog] section:has([class*="Post_wrapper"]),html[data-sba-blog] section:has(.board-wrapper),html[data-sba-blog] section:has([class*="Post_wrapper"]) [class*="section-outer"],html[data-sba-blog] section:has(.board-wrapper) [class*="section-outer"]{background:transparent!important}',
 
   /* 도구줄: 보기 방식(목록 화면만) + 화면 모드. 미끄러지는 손잡이가 달린 분할 버튼 */
-  'html[data-sba-blog]{--b-thumb:#FFFFFF;--b-track:#E6E2D8}',
-  'html[data-sba-blog="dark"]{--b-thumb:#2A4B3F;--b-track:#152C23}',
+  'html[data-sba-blog]{--b-thumb:#FFFFFF;--b-track:#E6E2D8;--b-item:#FFFFFF}',
+  'html[data-sba-blog="dark"]{--b-thumb:#2A4B3F;--b-track:#152C23;--b-item:#1A3229}',
   '.sba-mode{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin:0 0 26px}',
   '.sba-mode.has-view{justify-content:space-between}',
   '.sba-seg{position:relative;display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;padding:3px;border-radius:12px;background:var(--b-track);box-shadow:inset 0 0 0 1px var(--b-line)}',
@@ -109,7 +109,8 @@
   'html[data-sba-blog]:not([data-sba-view="list"]) [class*="Board_wrapper"]{max-width:900px!important}',
   'html[data-sba-blog]:not([data-sba-view="list"]) [class*="BoardList_wrapper"]{display:grid!important;grid-template-columns:1fr;gap:18px}',
   'html[data-sba-blog]:not([data-sba-view="list"]) [class*="BoardList_wrapper"]>li{display:flex;margin:0!important}',
-  'html[data-sba-blog] [class*="BoardList_wrapper"] [class*="BoardList_board-item"]{background-color:var(--b-surface)!important}',
+  'html[data-sba-blog] [class*="BoardList_wrapper"]{border:0!important;padding:0!important;border-radius:0!important}',
+  'html[data-sba-blog] [class*="BoardList_wrapper"] [class*="BoardList_board-item"]{background-color:var(--b-item)!important}',
   'html[data-sba-blog]:not([data-sba-view="list"]) [class*="BoardList_board-item"]{flex-direction:column!important;align-items:stretch!important;width:100%;padding:0!important;margin:0!important;border-radius:18px!important;gap:0!important}',
   'html[data-sba-blog]:not([data-sba-view="list"]) [class*="BoardList_thumbnail-image"]{width:100%!important;border-radius:0!important}',
   'html[data-sba-blog]:not([data-sba-view="list"]) [class*="BoardList_thumbnail-image"] img{border-radius:0!important}',
