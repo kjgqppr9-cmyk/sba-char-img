@@ -397,6 +397,27 @@ const NET = (function(){
   const items = [];
   let raf = 0, last = 0;
   const rnd = (a,b) => a + Math.random() * (b - a);
+  /* 배경 그물은 천천히 흐르므로 초당 30번이면 충분하다(느린 PC 최적화, 2026-09-14).
+     그래도 한 번 그리는 데 오래 걸리면 단계를 내린다: 1단계 점 절반·초당 20번, 2단계 빛번짐 생략·초당 15번 */
+  const LVQ = [{ms:1000/30, part:1, glow:true}, {ms:1000/20, part:0.5, glow:true}, {ms:1000/15, part:0.5, glow:false}];
+  let lvq = 0, costAcc = 0, costN = 0;
+
+  /* 빛번짐 원은 매 프레임 그라데이션을 새로 만들지 않고, 한 번 그려 둔 원판을
+     globalAlpha 로 진하기만 바꿔 찍는다. 그라데이션 알파는 globalAlpha 와 곱해지므로 결과가 같다. */
+  const SPR = {};
+  function sprite(key, stops){
+    if(SPR[key]) return SPR[key];
+    const S = 96, c = document.createElement('canvas'); c.width = c.height = S;
+    const x = c.getContext('2d'), g = x.createRadialGradient(S/2, S/2, 0, S/2, S/2, S/2);
+    stops.forEach(function(s){ g.addColorStop(s[0], s[1]); });
+    x.fillStyle = g; x.fillRect(0, 0, S, S);
+    return (SPR[key] = c);
+  }
+  function stamp(ctx, img, cx, cy, r, alpha){
+    if(alpha <= 0.002) return;
+    ctx.globalAlpha = alpha > 1 ? 1 : alpha;
+    ctx.drawImage(img, cx - r, cy - r, r * 2, r * 2);
+  }
 
   function build(it){
     if(it.mode === "grid"){ buildGrid(it); return; }
@@ -490,26 +511,35 @@ const NET = (function(){
       if(ph > c.duty) continue;
       const a = Math.pow(Math.sin((ph / c.duty) * Math.PI), 1.3) * c.a * k;
       const x = x0 + c.c * S, y = y0 + c.r * S;
-      const g = ctx.createLinearGradient(x, y, x + S, y + S);
-      g.addColorStop(0, 'rgba(46,196,140,' + (a * 0.16).toFixed(3) + ')');
-      g.addColorStop(1, 'rgba(0,148,96,'   + (a * 0.10).toFixed(3) + ')');
-      ctx.fillStyle = g;
+      /* 칸 자리는 고정이라 그라데이션은 칸마다 한 번만 만들고, 진하기는 globalAlpha 로 */
+      if(!c.g || c.gx !== x || c.gy !== y){
+        c.g = ctx.createLinearGradient(x, y, x + S, y + S);
+        c.g.addColorStop(0, 'rgba(46,196,140,1)');
+        c.g.addColorStop(1, 'rgba(0,148,96,0.625)');
+        c.gx = x; c.gy = y;
+      }
+      ctx.globalAlpha = Math.min(1, a * 0.16);
+      ctx.fillStyle = c.g;
       rrect(ctx, x + pad, y + pad, S - pad*2, S - pad*2, rad);
       ctx.fill();
+      ctx.globalAlpha = 1;
       if(c.ring){
         ctx.strokeStyle = 'rgba(0,148,96,' + (a * 0.22).toFixed(3) + ')';
         ctx.lineWidth = 1.2; ctx.stroke();
       }
     }
 
-    /* 위아래 끝을 지운다 — 섹션 경계에서 격자가 뚝 잘리면 지저분하다 */
-    const fade = ctx.createLinearGradient(0, 0, 0, it.H);
-    fade.addColorStop(0,    'rgba(0,0,0,1)');
-    fade.addColorStop(0.14, 'rgba(0,0,0,0)');
-    fade.addColorStop(0.86, 'rgba(0,0,0,0)');
-    fade.addColorStop(1,    'rgba(0,0,0,1)');
+    /* 위아래 끝을 지운다 — 섹션 경계에서 격자가 뚝 잘리면 지저분하다(그라데이션은 크기가 바뀔 때만 새로) */
+    if(!it.fade || it.fadeH !== it.H){
+      it.fade = ctx.createLinearGradient(0, 0, 0, it.H);
+      it.fade.addColorStop(0,    'rgba(0,0,0,1)');
+      it.fade.addColorStop(0.14, 'rgba(0,0,0,0)');
+      it.fade.addColorStop(0.86, 'rgba(0,0,0,0)');
+      it.fade.addColorStop(1,    'rgba(0,0,0,1)');
+      it.fadeH = it.H;
+    }
     ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillStyle = fade;
+    ctx.fillStyle = it.fade;
     ctx.fillRect(0, 0, it.W, it.H);
     ctx.globalCompositeOperation = 'source-over';
   }
@@ -552,7 +582,8 @@ const NET = (function(){
     if(w === it.W && h === it.H && it.cv.width) return true;   /* 달라진 게 없으면 그냥 둔다 */
     /* 4K 에서 dpr 2 를 그대로 쓰면 비트맵이 7680px 이 되어 메모리와 그리기가 급증한다.
        가로 4096 을 넘지 않게 배율을 낮춘다 — 배경이라 이 정도면 충분하다. */
-    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    /* 흐릿한 배경이라 1.5배를 넘는 해상도는 티가 안 나고 그리는 양만 는다 */
+    let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     if(w * dpr > 4096) dpr = Math.max(1, 4096 / w);
     it.W = w; it.H = h;
     it.cv.width  = Math.max(1, Math.round(w * dpr));
@@ -580,16 +611,16 @@ const NET = (function(){
     const T = (it.t += dt * sp), D = dt * sp;
 
     /* 1) 보케 — 초점이 나간 빛망울 */
+    const Q = LVQ[lvq];
+    const sBokeh = sprite('bokeh', [[0,'rgba(46,196,140,1)'],[0.55,'rgba(0,148,96,0.4)'],[1,'rgba(0,148,96,0)']]);
     for(const o of it.bokeh){
       o.x += o.vx * D; o.y += o.vy * D; wrap(it, o);
       const pulse = 0.75 + 0.25 * Math.sin(T * 0.45 + o.ph);
-      const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
-      g.addColorStop(0,    'rgba(46,196,140,' + (o.a * pulse).toFixed(3) + ')');
-      g.addColorStop(0.55, 'rgba(0,148,96,'   + (o.a * pulse * 0.4).toFixed(3) + ')');
-      g.addColorStop(1,    'rgba(0,148,96,0)');
-      ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.fill();
+      if(Q.glow) stamp(ctx, sBokeh, o.x, o.y, o.r, o.a * pulse);
     }
+    ctx.globalAlpha = 1;
+    /* 단계에 따라 앞쪽 점만 쓴다(점은 무작위로 흩어 만들었으므로 앞 절반도 고르게 퍼져 있다) */
+    const NN = Math.max(12, Math.round(it.nodes.length * Q.part));
 
     /* 2) 노드를 움직이고, 물결을 얹은 화면 좌표를 구한다.
           x 에 따라 위상이 달라지므로 망 전체가 옆으로 흐르는 물결이 된다. */
@@ -607,8 +638,8 @@ const NET = (function(){
     const L = it.LINK, L2 = L * L, NB = 8;
     const seg = it.seg || (it.seg = []);
     for(let i=0;i<NB;i++){ if(!seg[i]) seg[i] = []; seg[i].length = 0; }
-    for(let a=0;a<it.nodes.length;a++){
-      for(let b=a+1;b<it.nodes.length;b++){
+    for(let a=0;a<NN;a++){
+      for(let b=a+1;b<NN;b++){
         const A = it.nodes[a], B = it.nodes[b];
         const dx = A.sx - B.sx, dy = A.sy - B.sy;
         const d2 = dx*dx + dy*dy;
@@ -629,38 +660,43 @@ const NET = (function(){
     }
 
     /* 4) 노드 — 큰 것은 흐릿한 보케처럼, 작은 것은 또렷하게 */
-    for(const qn of it.nodes){
+    const sBig = sprite('big', [[0,'rgba(46,196,140,1)'],[1,'rgba(46,196,140,0)']]);
+    const sHalo = sprite('halo', [[0,'rgba(0,148,96,1)'],[1,'rgba(0,148,96,0)']]);
+    const sDot = sprite('dot', [[0,'rgba(0,84,58,1)'],[0.86,'rgba(0,84,58,1)'],[1,'rgba(0,84,58,0)']]);
+    for(let i=0;i<NN;i++){
+      const qn = it.nodes[i];
       const tw = 0.6 + 0.4 * Math.sin(T * 1.0 + qn.ph);
       if(qn.big){
-        const bg = ctx.createRadialGradient(qn.sx, qn.sy, 0, qn.sx, qn.sy, qn.r * 9);
-        bg.addColorStop(0, 'rgba(46,196,140,' + (0.26 * tw * it.k).toFixed(3) + ')');
-        bg.addColorStop(1, 'rgba(46,196,140,0)');
-        ctx.fillStyle = bg;
-        ctx.beginPath(); ctx.arc(qn.sx, qn.sy, qn.r * 9, 0, Math.PI*2); ctx.fill();
+        if(Q.glow) stamp(ctx, sBig, qn.sx, qn.sy, qn.r * 9, 0.26 * tw * it.k);
       } else {
-        const hg = ctx.createRadialGradient(qn.sx, qn.sy, 0, qn.sx, qn.sy, qn.r * 4.5);
-        hg.addColorStop(0, 'rgba(0,148,96,' + (0.22 * tw * it.k).toFixed(3) + ')');
-        hg.addColorStop(1, 'rgba(0,148,96,0)');
-        ctx.fillStyle = hg;
-        ctx.beginPath(); ctx.arc(qn.sx, qn.sy, qn.r * 4.5, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = 'rgba(0,84,58,' + (0.44 * tw * it.k).toFixed(3) + ')';
-        ctx.beginPath(); ctx.arc(qn.sx, qn.sy, qn.r, 0, Math.PI*2); ctx.fill();
+        if(Q.glow) stamp(ctx, sHalo, qn.sx, qn.sy, qn.r * 4.5, 0.22 * tw * it.k);
+        stamp(ctx, sDot, qn.sx, qn.sy, qn.r, 0.44 * tw * it.k);
       }
     }
+    ctx.globalAlpha = 1;
   }
 
   function loop(now){
     raf = 0;
-    const t = now / 1000;
-    const dt = last ? Math.min(0.05, t - last) : 0.016;
-    last = t;
     let any = false;
+    for(const it of items){ if(it.on){ any = true; break; } }
+    if(!any) return;
+    /* 초당 30번만 그린다. 건너뛴 틈만큼 dt 가 커지므로 흐르는 속도는 그대로다 */
+    if(last && now - last * 1000 < LVQ[lvq].ms - 3){ raf = requestAnimationFrame(loop); return; }
+    const t = now / 1000;
+    const dt = last ? Math.min(0.1, t - last) : 0.033;
+    last = t;
+    const c0 = performance.now();
     for(const it of items){
-      if(!it.on) continue;
-      any = true;
-      draw(it, t, dt);
+      if(it.on) draw(it, t, dt);
     }
-    if(any) raf = requestAnimationFrame(loop);
+    /* 20번 그린 평균이 14ms 를 넘으면 한 단계 가볍게 */
+    costAcc += performance.now() - c0; costN++;
+    if(costN >= 20){
+      if(costAcc / costN > 14 && lvq < LVQ.length - 1) lvq++;
+      costAcc = 0; costN = 0;
+    }
+    raf = requestAnimationFrame(loop);
   }
 
   function kick(){ if(!raf){ last = 0; raf = requestAnimationFrame(loop); } }
@@ -688,12 +724,14 @@ const NET = (function(){
     window.addEventListener('resize', function(){ resize(it); });
     /* 폰트·이미지가 늦게 들어오며 레이아웃이 또 바뀐다. load 이후 한 번 더 본다. */
     window.addEventListener('load', function(){ resize(it); setTimeout(function(){ resize(it); }, 600); });
-    /* 화면 밖 섹션은 그리지 않는다 — 배터리와 발열을 아낀다 */
+    /* 화면 밖 섹션은 그리지 않는다 — 배터리와 발열을 아낀다.
+       예전엔 화면 밖 140px 까지 켜 두어, 히어로 바로 아래 섹션이 첫 화면에서도 계속 그려졌다.
+       섹션 위아래 끝은 크림색 그라데이션에 덮여 안 보이므로, 화면 안으로 60px 들어왔을 때 켠다. */
     if(window.IntersectionObserver){
       new IntersectionObserver(function(es){
         it.on = !!(es[0] && es[0].isIntersecting);
         if(it.on) kick();
-      }, {threshold:0, rootMargin:"140px 0px"}).observe(host);
+      }, {threshold:0, rootMargin:"-60px 0px"}).observe(host);
     }
     kick();
   }
