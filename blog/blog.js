@@ -62,6 +62,11 @@
   'html[data-sba-blog] .ck-content figcaption{display:block;background:transparent!important;color:var(--b-muted)!important;font-size:13.5px!important;line-height:1.6!important;text-align:center!important;margin:14px 20px 0!important;padding:0!important;font-weight:400!important}',
   'html[data-sba-blog] .ck-content hr{border:0!important;height:1px!important;background:var(--b-line)!important;margin:3em 0!important}',
 
+  /* 글 맨 아래 '목록으로 돌아가기' — 식스샵 기본 글자색(#1a1a17)이 어두운 바탕에서 안 보였다(2026-09-16 제보) */
+  'html[data-sba-blog] [class*="BackToList"] button,html[data-sba-blog] [class*="BackToList"] a{color:var(--b-text)!important;opacity:1!important}',
+  'html[data-sba-blog] [class*="BackToList"] button *,html[data-sba-blog] [class*="BackToList"] a *{color:inherit!important;fill:currentColor!important;stroke:currentColor!important}',
+  'html[data-sba-blog="dark"] [class*="BackToList"] button:hover,html[data-sba-blog="dark"] [class*="BackToList"] a:hover{color:var(--b-em)!important}',
+
   /* PC */
   '@media (min-width:768px){',
   'html[data-sba-blog] [class*="Post_wrapper"]{padding-left:30px!important;padding-right:30px!important}',
