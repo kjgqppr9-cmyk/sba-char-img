@@ -1,6 +1,8 @@
 /* 스몰브랜드설계자 블로그 화면: 다크 모드(기본) + 일반 모드 토글 + 읽기 타이포 (2026-09-13)
    적용 범위: /boards/5619(블로그 목록), /posts/blog-*(블로그 글), 게시판 이름이 '블로그'인 글.
-   미리보기: 아무 글 주소 뒤에 ?sbablog=1 을 붙이면 강제로 켜진다. */
+   미리보기: 아무 글 주소 뒤에 ?sbablog=1 을 붙이면 강제로 켜진다.
+   2026-09-17 강의 후기 게시판(/boards/5670 = /boards/class-reviews, 게시판 이름 '강의 후기')도 같은 틀을 쓴다.
+   후기는 밝게 보여야 해서 일반 모드가 기본이고, 테두리 없이 떠 있는 뉴모피즘 카드(사이트 아래 블록과 같은 그림자 값)로 꾸민다. */
 (function () {
   if (window.__sbaBlog) return; window.__sbaBlog = 1;
   var KEY = 'sbaBlogTheme', ROOT = document.documentElement;
@@ -143,6 +145,40 @@
   'html[data-sba-blog] [class*="Board_wrapper"] [class*="IconButton"],html[data-sba-blog] [class*="Board_wrapper"] [class*="InputText_icon"]{color:var(--b-soft)!important}',
   /* 게시판 페이지 틀에 딸린 빈 게시판 블록("게시판 선택")은 블로그 화면에서 숨긴다 */
   'html[data-sba-blog] section.section-type-Custom-T02:has(.board-wrapper){display:none!important}',
+  /* ── 강의 후기 게시판 전용: 뉴모피즘(테두리 없이 떠 있는 면). 그림자 값은 사이트 하단 게시판 블록에서 실측(2026-09-17) ── */
+  'html[data-sba-rev]{--n-bg:#F2F0EB;--n-lo:#D4D0C5;--n-hi:#FDFDFB;--n-ilo:#D9D5CA;--n-card:linear-gradient(145deg,#F6F4EF,#ECE9E2)}',
+  'html[data-sba-rev][data-sba-blog="dark"]{--n-bg:#10241C;--n-lo:rgba(0,0,0,.46);--n-hi:rgba(255,255,255,.045);--n-ilo:rgba(0,0,0,.5);--n-card:linear-gradient(145deg,#15302A,#0D1F18)}',
+  'html[data-sba-rev]{--b-bg:var(--n-bg);--b-surface:var(--n-bg);--b-item:var(--n-bg);--b-track:var(--n-bg);--b-thumb:var(--n-bg)}',
+  'html[data-sba-rev] [class*="Board_wrapper"]{max-width:1080px!important}',
+  'html[data-sba-rev] [class*="Board_wrapper"]>h2{text-align:center!important;margin-bottom:6px!important}',
+  'html[data-sba-rev] .sba-mode{margin:18px 0 34px}',
+  'html[data-sba-rev] .sba-seg{background:var(--n-bg);box-shadow:inset 3px 3px 7px var(--n-ilo),inset -3px -3px 7px var(--n-hi);border-radius:14px;padding:5px}',
+  'html[data-sba-rev] .sba-seg::before{top:5px;bottom:5px;left:5px;width:calc(50% - 5px);border-radius:10px;background:var(--n-bg);box-shadow:3px 3px 7px var(--n-lo),-3px -3px 7px var(--n-hi),inset 0 0 0 1px rgba(217,174,75,.35)}',
+  'html[data-sba-rev] [class*="BoardList_wrapper"] [class*="BoardList_board-item"]{background:var(--n-card)!important;border:0!important;border-radius:26px!important;box-shadow:8px 8px 18px var(--n-lo),-8px -8px 18px var(--n-hi)!important}',
+  'html[data-sba-rev] [class*="BoardList_thumbnail-image"]{aspect-ratio:3/2!important;--aspect-ratio:3/2!important;border-radius:18px!important}',
+  'html[data-sba-rev] [class*="BoardList_thumbnail-image"] img{border-radius:18px!important}',
+  '@media (hover:hover){html[data-sba-rev] [class*="BoardList_board-item"]:hover{transform:translateY(-4px);box-shadow:12px 14px 26px var(--n-lo),-10px -10px 22px var(--n-hi),inset 0 0 0 1px rgba(217,174,75,.35)!important}}',
+  'html[data-sba-rev]:not([data-sba-view="list"]) [class*="BoardList_wrapper"]{gap:30px!important;padding:10px 6px 20px!important}',
+  'html[data-sba-rev]:not([data-sba-view="list"]) [class*="BoardList_board-item"]{padding:14px!important}',
+  'html[data-sba-rev]:not([data-sba-view="list"]) [class*="BoardList_thumbnail-image"],html[data-sba-rev]:not([data-sba-view="list"]) [class*="BoardList_thumbnail-image"] img{border-radius:18px!important}',
+  'html[data-sba-rev]:not([data-sba-view="list"]) [class*="BoardList_post-info-wrapper"]{padding:16px 8px 6px!important}',
+  '@media (min-width:768px){html[data-sba-rev]:not([data-sba-view="list"]) [class*="BoardList_wrapper"]{grid-template-columns:repeat(2,minmax(0,1fr))}html[data-sba-rev]:not([data-sba-view="list"]) [class*="BoardList_post-info-wrapper"]{padding:18px 10px 8px!important}}',
+  '@media (min-width:1024px){html[data-sba-rev]:not([data-sba-view="list"]) [class*="BoardList_wrapper"]{grid-template-columns:repeat(3,minmax(0,1fr))}}',
+  'html[data-sba-rev][data-sba-view="list"] [class*="BoardList_wrapper"]>li{margin:0 6px 22px!important}',
+  'html[data-sba-rev][data-sba-view="list"] [class*="BoardList_board-item"]{padding:14px!important;gap:24px!important}',
+  'html[data-sba-rev][data-sba-view="list"] [class*="BoardList_thumbnail-image"]{width:260px!important}',
+  'html[data-sba-rev][data-sba-view="list"] [class*="BoardList_post-info-wrapper"]{padding:6px 10px 6px 0!important}',
+  'html[data-sba-rev][data-sba-view="list"] [class*="BoardList_post-title-wrapper"] p{font-size:19px!important}',
+  '@media (max-width:767px){html[data-sba-rev][data-sba-view="list"] [class*="BoardList_board-item"]{gap:14px!important;padding:10px!important}html[data-sba-rev][data-sba-view="list"] [class*="BoardList_thumbnail-image"],html[data-sba-rev][data-sba-view="list"] [class*="BoardList_thumbnail-image"] img{width:132px!important;border-radius:14px!important}html[data-sba-rev][data-sba-view="list"] [class*="BoardList_thumbnail-image"] img{width:100%!important}html[data-sba-rev][data-sba-view="list"] [class*="BoardList_post-title-wrapper"] p{font-size:15px!important}}',
+  'html[data-sba-rev] [class*="Board_post-sub-wrapper"]{justify-content:space-between!important;align-items:center;gap:16px;margin-top:40px}',
+  'html[data-sba-rev] [class*="Board_post-sub-wrapper"] form{width:min(360px,100%)}',
+  'html[data-sba-rev] [class*="InputText_input-container"]{background:var(--n-bg)!important;border:0!important;box-shadow:inset 3px 3px 7px var(--n-ilo),inset -3px -3px 7px var(--n-hi)!important}',
+  'html[data-sba-rev] [class*="Board_post-sub-wrapper"]>button{flex:none;border:0!important;border-radius:999px!important;min-width:112px;height:46px;padding:0 26px!important;color:#fff!important;font-weight:700!important;background:linear-gradient(145deg,#008A55,#00613E)!important;box-shadow:6px 6px 14px var(--n-lo),-6px -6px 14px var(--n-hi),0 10px 24px rgba(0,98,65,.18),inset 0 0 0 1.5px rgba(217,174,75,.55)!important;transition:transform .2s ease,box-shadow .2s ease}',
+  'html[data-sba-rev] [class*="Board_post-sub-wrapper"]>button:hover{transform:translateY(-2px)}',
+  'html[data-sba-rev] [class*="Board_post-sub-wrapper"]>button:active{transform:translateY(1px)}',
+  'html[data-sba-rev] [class*="Board_wrapper"] [class*="Pagination"] button{background:var(--n-bg)!important;border:0!important;border-radius:50%!important;box-shadow:3px 3px 7px var(--n-lo),-3px -3px 7px var(--n-hi)!important;color:var(--b-soft)!important}',
+  'html[data-sba-rev] [class*="Board_wrapper"] [class*="Pagination"] button[aria-current],html[data-sba-rev] [class*="Board_wrapper"] [class*="Pagination"] button[class*="active"],html[data-sba-rev] [class*="Board_wrapper"] [class*="Pagination"] button[class*="selected"]{box-shadow:inset 3px 3px 7px var(--n-ilo),inset -3px -3px 7px var(--n-hi)!important;color:var(--b-em)!important;font-weight:700!important}',
+  '@media (min-width:768px){html[data-sba-rev] [class*="Post_post-wrapper"]{background:var(--n-card)!important;border-radius:28px!important;box-shadow:8px 8px 18px var(--n-lo),-8px -8px 18px var(--n-hi)!important;padding:44px 48px 36px!important}}',
   '@media (prefers-reduced-motion:reduce){html[data-sba-blog] body,.sba-seg::before,.sba-seg button,html[data-sba-blog] [class*="BoardList_board-item"],html[data-sba-blog] [class*="BoardList_thumbnail-image"] img{transition:none!important}}'
   ].join('\n');
 
@@ -153,6 +189,21 @@
   }
   function stored() { try { return localStorage.getItem(KEY) === 'light' ? 'light' : 'dark'; } catch (e) { return 'dark'; } }
   function save(v) { try { localStorage.setItem(KEY, v); } catch (e) {} }
+
+  /* 강의 후기 게시판 */
+  function isReviews() {
+    var p = location.pathname || '';
+    if (/^\/boards\/(5670|class-reviews)(\/|$)/.test(p)) return true;
+    if (/^\/posts\//.test(p)) {
+      var h = document.querySelector('[class*="Post_wrapper"] > h2');
+      if (h && h.textContent.trim() === '강의 후기') return true;
+    }
+    return false;
+  }
+  var RKEY = 'sbaRevTheme', RVKEY = 'sbaRevView';
+  function storedRev() { try { return localStorage.getItem(RKEY) === 'dark' ? 'dark' : 'light'; } catch (e) { return 'light'; } }
+  function storedRevView() { try { return localStorage.getItem(RVKEY) === 'list' ? 'list' : 'card'; } catch (e) { return 'card'; } }
+  function saveRev(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
   function isBlog() {
     var p = location.pathname || '';
@@ -187,12 +238,15 @@
     if (!host) return;
     for (var i = 0; i < host.children.length; i++) { if (host.children[i].classList.contains('sba-mode')) return; }
     var wrap = document.createElement('div'); wrap.className = 'sba-mode' + (post ? '' : ' has-view');
+    var rev = ROOT.hasAttribute('data-sba-rev');
     wrap.innerHTML = (post ? '' : seg('view', '보기 방식', ['card', '카드', '카드형으로 보기'], ['list', '목록', '목록형으로 보기'])) +
-      seg('theme', '화면 모드', ['dark', '다크', '다크 모드'], ['light', '일반', '일반 모드']);
+      (rev ? seg('theme', '화면 모드', ['light', '일반', '일반 모드'], ['dark', '다크', '다크 모드'])
+           : seg('theme', '화면 모드', ['dark', '다크', '다크 모드'], ['light', '일반', '일반 모드']));
     wrap.addEventListener('click', function (e) {
       var b = e.target.closest('button[data-v]'); if (!b) return;
       var kind = b.parentNode.getAttribute('data-kind'), v = b.getAttribute('data-v');
-      if (kind === 'view') saveView(v); else save(v);
+      if (ROOT.hasAttribute('data-sba-rev')) saveRev(kind === 'view' ? RVKEY : RKEY, v);
+      else if (kind === 'view') saveView(v); else save(v);
       apply();
     });
     var head = host.querySelector(':scope > h2');
@@ -267,15 +321,20 @@
   function apply() {
     if (busy) return; busy = true;
     try {
-      if (isBlog()) {
+      var rev = !isBlog() && isReviews();
+      if (rev || isBlog()) {
         injectCss();
-        var v = stored();
+        if (rev !== ROOT.hasAttribute('data-sba-rev')) {
+          if (rev) ROOT.setAttribute('data-sba-rev', '1'); else ROOT.removeAttribute('data-sba-rev');
+          document.querySelectorAll('.sba-mode').forEach(function (n) { n.remove(); });
+        }
+        var v = rev ? storedRev() : stored();
         if (ROOT.getAttribute('data-sba-blog') !== v) ROOT.setAttribute('data-sba-blog', v);
-        var vw = storedView();
+        var vw = rev ? storedRevView() : storedView();
         if (ROOT.getAttribute('data-sba-view') !== vw) ROOT.setAttribute('data-sba-view', vw);
         mountToggle(); syncToggle(); markTall(); decorate();
       } else if (ROOT.hasAttribute('data-sba-blog')) {
-        ROOT.removeAttribute('data-sba-blog'); ROOT.removeAttribute('data-sba-view');
+        ROOT.removeAttribute('data-sba-blog'); ROOT.removeAttribute('data-sba-view'); ROOT.removeAttribute('data-sba-rev');
         document.querySelectorAll('.sba-mode').forEach(function (n) { n.remove(); });
       }
     } finally { busy = false; }
