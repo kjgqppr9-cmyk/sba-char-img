@@ -290,7 +290,7 @@ const LECTURES = [
     sessions:[
       {date:"2026-10-23", n:1, title:"창업의 단계마다 AI 를 쓰는 법, 하루 실전"}
     ],
-    hours:7, capacity:null, enrolled:0,
+    hours:6, capacity:null, enrolled:0,
     rating:null, ratingCount:0,
     reviews:[],
     detail:`
@@ -1086,7 +1086,9 @@ function renderSched(dir){
       : "";
     h += '<button class="cd'+cls+wk+td+pk+'"'
        + (hit ? ' data-d="'+k+'" aria-label="'+d+'일 '+esc(hit[0].lec.title)+'"' : ' tabindex="-1"')
-       + '>'+d+'</button>';
+       + '>'+d+(hit && hit[0].lec.paid && hit[0].lec.status !== "done"
+              ? '<i class="pdshn" aria-hidden="true"></i><i class="pdx" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></i>'
+              : '')+'</button>';
   }
   const grid = q("#calGrid");
   grid.className = "calgrid" + (dir ? (dir > 0 ? " go-l" : " go-r") : "");
