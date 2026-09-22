@@ -969,7 +969,12 @@ function renderOpen(){
   const el = q("#openGrid");
   const open = LECTURES.filter(l=>l.status==="open");
   if(!open.length){
-    const next = LECTURES.filter(l=>l.status==="upcoming")[0];
+    /* 모집이 가장 먼저 열리는 강의를 고른다. 배열 순서로 [0] 을 쓰면 늦게 열리는 강의가 먼저 안내된다.
+       (2026-09-22 고침: 클로드 코드 2기(모집 10/12)가 옴니채널 2차(모집 9/28)보다 먼저 안내되고 있었다) */
+    const openKey = l => (l.apply && l.apply.from)
+      || (l.sessions && l.sessions[0] && l.sessions[0].date) || "9999-99-99";
+    const next = LECTURES.filter(l=>l.status==="upcoming" && l.kind!=="invite")
+      .slice().sort((a,b)=>openKey(a)<openKey(b)?-1:openKey(a)>openKey(b)?1:0)[0];
     el.innerHTML = `<div class="empty-card rv">
       <h3>지금은 모집 중인 강의가 없습니다</h3>
       <p>${next ? `다음은 <b>${esc(next.title)} ${esc(next.edition)}</b>입니다.<br>모집이 시작되면 알려드릴까요?`
