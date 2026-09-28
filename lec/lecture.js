@@ -540,14 +540,15 @@ const ST = {
   upcoming:{label:"모집예정", cls:"st-upcoming"},
   open    :{label:"모집중",   cls:"st-open"},
   invite  :{label:"초청 강의", cls:"st-invite"},
-  consult :{label:"컨설팅 · 심사", cls:"st-consult"},
+  consult :{label:"컨설팅", cls:"st-consult"},
   closed  :{label:"모집완료", cls:"st-closed"},
   running :{label:"강의중",   cls:"st-running"},
   done    :{label:"강의완료", cls:"st-done"}
 };
 const ORDER = ["open","running","invite","consult","closed","upcoming","done"];
-/* 별 모양 한 벌 — 달력 칸 · 범례가 같이 쓴다. 무게중심을 칸 가운데에 맞추려고 조금 아래로 내려 그렸다. */
-const STAR_D = "M50 7L63.8 34L93.7 38.8L72.3 60.3L77 90.2L50 76.5L23 90.2L27.7 60.3L6.3 38.8L36.2 34Z";
+/* 달력 칸의 별 — 별의 몸통 중심(다섯 꼭짓점이 둘러싼 오각형의 가운데)을 그림판 한가운데 (50,50) 에 둔다.
+   숫자는 이 점에 맞춘다. 윤곽 상자 가운데에 맞추면 별이 위가 뾰족해서 숫자가 아래로 처져 보인다. */
+const STAR_D = "M50 4L63.8 31L93.7 35.8L72.3 57.3L77 87.2L50 73.5L23 87.2L27.7 57.3L6.3 35.8L36.2 31Z";
 /* 컨설팅이 끝나면 색은 지난 강의처럼 물러나지만, 말은 '강의완료'가 아니라 '진행 완료'다. */
 const stOf = l => (l.kind === "consult" && l.status === "done") ? {label:"진행 완료", cls:"st-done"} : ST[l.status];
 const WD = ["일","월","화","수","목","금","토"];
@@ -1136,7 +1137,7 @@ function renderSched(dir){
     const pk = (k === calPick) ? " pick" : "";
     /* 강의일은 테두리 없는 둥근 사각형으로 채운다. 상태가 곧 색이고,
        초청 강의는 그 위에 금색 점을 하나 더 단다. */
-    /* 컨설팅 · 심사는 네모 대신 별이다. 색 규칙(앞으로 진초록, 지난 것 민트)은 그대로. */
+    /* 컨설팅은 네모 대신 별이다. 색 규칙(앞으로 진초록, 지난 것 민트)은 그대로. */
     const cs = !!hit && hit[0].lec.kind === "consult";
     const cls = hit
       ? " has d-" + hit[0].lec.status + (hit[0].lec.kind === "invite" ? " iv" : "") + (hit[0].lec.paid ? " pd" : "") + (cs ? " cs" : "")
@@ -1161,7 +1162,7 @@ function renderSched(dir){
           const ed = x.lec.edition ? ' ' + esc(x.lec.edition) : "";
           return '<li data-k="'+k+'" data-open="'+x.lec.id+'" role="button" tabindex="0">'
             + '<span class="dd">'+dt.getDate()+'일<em>('+WD[dt.getDay()]+')</em></span>'
-            + '<span class="bd"><span class="nm">'+(x.lec.paid ? '<i class="crown" aria-label="유료 강의"></i>' : '')+(x.lec.kind === "consult" ? '<i class="cstar" aria-label="컨설팅 · 심사"></i>' : '')+esc(x.lec.title)+ed
+            + '<span class="bd"><span class="nm">'+(x.lec.paid ? '<i class="crown" aria-label="유료 강의"></i>' : '')+(x.lec.kind === "consult" ? '<i class="cstar" aria-label="컨설팅"></i>' : '')+esc(x.lec.title)+ed
             + (x.lec.sessions.length > 1 ? '<i>'+x.ses.n+'회차</i>' : "") + '</span>'
             + '<span class="tt">'+esc(x.ses.title)+'</span></span>'
             + '<span class="st '+stOf(x.lec).cls+'">'+stOf(x.lec).label+'</span></li>';
