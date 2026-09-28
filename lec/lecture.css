@@ -243,6 +243,11 @@
 /* 초청 강의 — 신청받는 강의와 같은 초록이지만 금색 점을 하나 더 단다. */
 .slp .st-invite{background:var(--green);color:#fff}
 .slp .st-invite::after{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--gold)}
+/* 컨설팅 · 심사 — 흰 바탕에 금빛 테두리, 앞에 작은 금별 */
+.slp{--star:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 7L63.8 34L93.7 38.8L72.3 60.3L77 90.2L50 76.5L23 90.2L27.7 60.3L6.3 38.8L36.2 34Z' stroke='%23000' stroke-width='8' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.slp .st-consult{background:#fff;color:var(--house);border:1.5px solid var(--gold)}
+.slp .st-consult::before{content:"";flex:none;width:11px;height:11px;background:var(--gold);
+  -webkit-mask:var(--star) center/contain no-repeat;mask:var(--star) center/contain no-repeat}
 .slp .host{font-size:13px;color:var(--ink2);font-weight:600}
 
 /* ══ 강의 달력 ═════════════════════════════════════════════
@@ -356,6 +361,33 @@
   -webkit-mask:var(--crown) center/contain no-repeat;mask:var(--crown) center/contain no-repeat}
 .slp .mlist .nm .crown{width:32px!important;height:23px!important;vertical-align:-6px!important;margin-right:8px!important;background:url("crown-cute.webp") center/contain no-repeat!important;filter:drop-shadow(0 1px 2px rgba(120,80,10,.3))}
 @media (prefers-reduced-motion:reduce){.slp .cd.has.pd::after,.slp .pdshn::before,.slp .pdx i{animation:none!important}.slp .pdx{display:none}}
+/* ══ 컨설팅 · 심사 칸 (2026-09-28 대표님): 네모는 강의, 별은 컨설팅.
+   색은 다른 칸과 같은 규칙(앞으로 = 진초록, 지난 것 = 민트)이고 모양만 별이다.
+   숫자는 가만히 두고 별만 천천히 흔들린다 — transform 만 움직여 가볍다. */
+.slp .cd.has.cs{background:transparent;color:#fff;box-shadow:none}
+.slp .cd.cs .cst{position:absolute;left:-8%;top:-8%;width:116%;height:116%;overflow:visible;pointer-events:none;
+  transform-origin:50% 55%;animation:csSway 5.2s ease-in-out infinite}
+.slp .cd.cs .cst path{fill:var(--green);stroke:var(--gold);stroke-width:7;stroke-linejoin:round;paint-order:stroke;
+  transition:fill .22s var(--ease),stroke .22s var(--ease)}
+.slp .cd.cs .csn{position:relative;z-index:1;margin-top:4px}
+@keyframes csSway{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+.slp .cd.has.cs.d-done{background:transparent;color:#1F5140}
+.slp .cd.cs.d-done .cst{animation:none}
+.slp .cd.cs.d-done .cst path{fill:var(--mint);stroke:#BBD8CB}
+.slp .cd.has.cs:hover{transform:scale(1.12)}
+.slp .cd.has.cs:hover .cst{animation-duration:1.4s}
+.slp .cd.cs.today{box-shadow:none}
+.slp .cd.cs.today .cst path{stroke-width:13}
+.slp .cd.cs.pick,.slp .cd.cs.pick.today{outline:none;box-shadow:none}
+.slp .cd.cs.pick .cst{filter:drop-shadow(0 5px 8px rgba(0,0,0,.24))}
+.slp .cd.cs.pick .cst path{stroke:var(--house)}
+.slp .calfoot em.cs{width:18px;height:18px;border-radius:0;background:none}
+.slp .calfoot em.cs svg{display:block;width:100%;height:100%;overflow:visible}
+.slp .calfoot em.cs path{fill:var(--green);stroke:var(--gold);stroke-width:9;stroke-linejoin:round;paint-order:stroke}
+.slp .mlist .nm .cstar{display:inline-block;width:15px;height:15px;vertical-align:-2px;margin-right:6px;background:var(--gold);
+  -webkit-mask:var(--star) center/contain no-repeat;mask:var(--star) center/contain no-repeat}
+.slp .lc.b-consult{border-left-color:var(--gold)}
+@media (prefers-reduced-motion:reduce){.slp .cd.cs .cst{animation:none}}
 .slp .cd.has:hover{transform:scale(1.08)}
 .slp .cd.has:active{transform:scale(.97)}
 .slp .cd.has:focus-visible{outline:3px solid var(--gold);outline-offset:2px}

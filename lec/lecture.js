@@ -15,6 +15,9 @@ function q(sel){ const h = hostEl(); return h ? h.querySelector(sel) : null; }
    kind:"invite" 는 초청 강의입니다. 신청을 받지 않으므로
    '모집 중' 칸에 뜨지 않고, 달력에서는 금색 점이 하나 더 붙습니다.
 
+   kind:"consult" 는 컨설팅 · 멘토링 · 심사처럼 강의가 아닌 일정입니다.
+   달력 칸이 네모 대신 별이 되고, 신청을 받지 않습니다. time 에 적은 시각이 상세에 나갑니다.
+
    pitch 를 적어 두면 '모집 중' 카드 안에 소개가 그대로 펼쳐집니다.
    info 는 일시·시간·장소 — 신청 버튼 바로 위 큰 글씨로 나갑니다.
    sessions 의 tag 는 회차 주제, do 는 그 시간에 손으로 만드는 것입니다.
@@ -282,6 +285,48 @@ const LECTURES = [
 `
   },
   {
+    id:"sju-camp", title:"2026 상지대학교 창업캠프", edition:"",
+    status:"auto", kind:"consult",
+    host:"상지대학교 창업지원팀 · 벤처창업본부 · 창업보육센터 주관",
+    summary:"상지대학교 학생과 강원 지역 청년 예비창업자가 모이는 하루 창업캠프에 멘토이자 심사위원으로 참여합니다. "
+        + "오후에 마케팅 · 판로개척 분야 멘토링을 맡고, 이어서 창업아이디어 피칭대회를 심사합니다. 홈페이지에서 따로 신청받지 않습니다.",
+    sessions:[
+      {date:"2026-10-01", n:1, title:"마케팅 · 판로개척 멘토링과 창업아이디어 피칭 심사"}
+    ],
+    time:"오후 1시 ~ 4시",
+    hours:3, capacity:null, enrolled:0,
+    rating:null, ratingCount:0,
+    reviews:[],
+    detail:`
+## 멘토 · 심사위원으로 참여합니다
+상지대학교 창업지원팀 · 앵커사업단 벤처창업본부 · 창업보육센터가 함께 여는 **2026 상지대학교 창업캠프**에 창업보육센터 초빙 멘토로 참여합니다.
+분야별 전문가 네 명 가운데 **마케팅 및 판로개척**을 맡습니다.
+
+## 오후 세 시간
+| 시간 | 하는 일 |
+| --- | --- |
+| 1시 ~ 3시 | **창업 멘토링** — 마케팅 · 판로개척 자문, 피칭 준비 코칭 |
+| 3시 ~ 4시 | **창업아이디어 피칭대회 심사** — 팀당 5분 발표를 네 명의 심사위원이 채점 |
+
+## 심사에서 보는 것
+네 가지를 25점씩, 100점으로 봅니다.
+- 창업아이템 개발 동기와 창의성
+- 사업성과 실현 가능성
+- 시장성과 수익성
+- 팀 역량과 발표 태도
+
+## 한눈에
+| | |
+| --- | --- |
+| **일시** | 10월 1일(목) 오후 1시 ~ 4시 |
+| **장소** | 호텔 인터불고 소연회장 아테나룸 |
+| **대상** | 상지대학교 학생 · 강원 지역 청년 예비창업자 |
+| **역할** | 멘토(마케팅 · 판로개척) · 심사위원 |
+
+참가 신청은 상지대학교에서 받습니다. 이 홈페이지에서는 신청받지 않습니다.
+`
+  },
+  {
     id:"yonsei-club", title:"창업하는 사람을 위한 AI 활용 실전", edition:"",
     status:"auto", kind:"invite",
     host:"연세대학교 창업보육센터 · 창업동아리 초청 특강",
@@ -495,11 +540,16 @@ const ST = {
   upcoming:{label:"모집예정", cls:"st-upcoming"},
   open    :{label:"모집중",   cls:"st-open"},
   invite  :{label:"초청 강의", cls:"st-invite"},
+  consult :{label:"컨설팅 · 심사", cls:"st-consult"},
   closed  :{label:"모집완료", cls:"st-closed"},
   running :{label:"강의중",   cls:"st-running"},
   done    :{label:"강의완료", cls:"st-done"}
 };
-const ORDER = ["open","running","invite","closed","upcoming","done"];
+const ORDER = ["open","running","invite","consult","closed","upcoming","done"];
+/* 별 모양 한 벌 — 달력 칸 · 범례가 같이 쓴다. 무게중심을 칸 가운데에 맞추려고 조금 아래로 내려 그렸다. */
+const STAR_D = "M50 7L63.8 34L93.7 38.8L72.3 60.3L77 90.2L50 76.5L23 90.2L27.7 60.3L6.3 38.8L36.2 34Z";
+/* 컨설팅이 끝나면 색은 지난 강의처럼 물러나지만, 말은 '강의완료'가 아니라 '진행 완료'다. */
+const stOf = l => (l.kind === "consult" && l.status === "done") ? {label:"진행 완료", cls:"st-done"} : ST[l.status];
 const WD = ["일","월","화","수","목","금","토"];
 /* 주소 뒤에 ?d=2026-09-14 를 붙이면 그 날인 척 그린다. */
 const TODAY = (function(){
@@ -523,7 +573,7 @@ function autoStatus(l){
   const t = ymd(TODAY);
   const first = l.sessions[0], last = l.sessions[l.sessions.length-1];
   /* 초청 강의는 모집 단계가 없다. 끝나기 전까지 계속 '초청 강의'다. */
-  if(l.kind === "invite") return (last && t > last.date) ? "done" : "invite";
+  if(l.kind === "invite" || l.kind === "consult") return (last && t > last.date) ? "done" : l.kind;
   if(l.apply && t <  l.apply.from) return "upcoming";
   if(l.apply && t <= l.apply.to)   return "open";
   if(first   && t <  first.date)   return "closed";
@@ -1052,8 +1102,8 @@ function applyPick(){
 function renderSched(dir){
   if(!MONTHS.length) return;
   calInit();
-  /* '다음 개강'은 신청할 수 있는 강의만 센다 — 초청 강의는 빼야 한다. */
-  const up = LECTURES.filter(l => l.status !== "done" && l.kind !== "invite")
+  /* '다음 개강'은 신청할 수 있는 강의만 센다 — 초청 강의 · 컨설팅은 빼야 한다. */
+  const up = LECTURES.filter(l => l.status !== "done" && !l.kind)
     .sort((a,b)=> a.sessions[0].date < b.sessions[0].date ? -1 : 1)[0];
   q("#schSub").innerHTML = up
     ? '색이 찍힌 날이 강의일입니다. <br class="m">다음 개강은 <b>' + fmtw(up.sessions[0].date) + '</b>입니다.'
@@ -1086,12 +1136,15 @@ function renderSched(dir){
     const pk = (k === calPick) ? " pick" : "";
     /* 강의일은 테두리 없는 둥근 사각형으로 채운다. 상태가 곧 색이고,
        초청 강의는 그 위에 금색 점을 하나 더 단다. */
+    /* 컨설팅 · 심사는 네모 대신 별이다. 색 규칙(앞으로 진초록, 지난 것 민트)은 그대로. */
+    const cs = !!hit && hit[0].lec.kind === "consult";
     const cls = hit
-      ? " has d-" + hit[0].lec.status + (hit[0].lec.kind === "invite" ? " iv" : "") + (hit[0].lec.paid ? " pd" : "")
+      ? " has d-" + hit[0].lec.status + (hit[0].lec.kind === "invite" ? " iv" : "") + (hit[0].lec.paid ? " pd" : "") + (cs ? " cs" : "")
       : "";
     h += '<button class="cd'+cls+wk+td+pk+'"'
        + (hit ? ' data-d="'+k+'" aria-label="'+d+'일 '+esc(hit[0].lec.title)+'"' : ' tabindex="-1"')
-       + '>'+d+(hit && hit[0].lec.paid && hit[0].lec.status !== "done"
+       + '>'+(cs ? '<svg class="cst" viewBox="0 0 100 100" aria-hidden="true"><path d="'+STAR_D+'"/></svg><span class="csn">'+d+'</span>' : d)
+       +(hit && hit[0].lec.paid && hit[0].lec.status !== "done"
               ? '<i class="pdshn" aria-hidden="true"></i><i class="pdx" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></i>'
               : '')+'</button>';
   }
@@ -1108,10 +1161,10 @@ function renderSched(dir){
           const ed = x.lec.edition ? ' ' + esc(x.lec.edition) : "";
           return '<li data-k="'+k+'" data-open="'+x.lec.id+'" role="button" tabindex="0">'
             + '<span class="dd">'+dt.getDate()+'일<em>('+WD[dt.getDay()]+')</em></span>'
-            + '<span class="bd"><span class="nm">'+(x.lec.paid ? '<i class="crown" aria-label="유료 강의"></i>' : '')+esc(x.lec.title)+ed
+            + '<span class="bd"><span class="nm">'+(x.lec.paid ? '<i class="crown" aria-label="유료 강의"></i>' : '')+(x.lec.kind === "consult" ? '<i class="cstar" aria-label="컨설팅 · 심사"></i>' : '')+esc(x.lec.title)+ed
             + (x.lec.sessions.length > 1 ? '<i>'+x.ses.n+'회차</i>' : "") + '</span>'
             + '<span class="tt">'+esc(x.ses.title)+'</span></span>'
-            + '<span class="st '+ST[x.lec.status].cls+'">'+ST[x.lec.status].label+'</span></li>';
+            + '<span class="st '+stOf(x.lec).cls+'">'+stOf(x.lec).label+'</span></li>';
         }).join("");
       }).join("") + '</ul>'
     : '<div class="none">이 달에는 강의가 없습니다.</div>');
@@ -1152,7 +1205,7 @@ function renderList(){
                     : `${fmtw(first.date)} ~ ${fmtw(lastS.date)}`) : "일정 준비 중";
     return `<button class="lc rv b-${l.status}" data-open="${l.id}">
       <div class="lc-top">
-        <span class="st ${ST[l.status].cls}">${ST[l.status].label}</span>
+        <span class="st ${stOf(l).cls}">${stOf(l).label}</span>
         <span class="host">${esc(l.host)}</span>
       </div>
       <h3>${ccWrap(esc(l.title))}${l.edition?` <span style="color:var(--accent)">${esc(l.edition)}</span>`:""}</h3>
@@ -1223,15 +1276,16 @@ function openLec(id, push){
     <div class="ov-hd">
       <button class="ov-x" data-close aria-label="닫기">✕</button>
       <div class="lc-top" style="margin:0">
-        <span class="st ${ST[l.status].cls}">${ST[l.status].label}</span>
+        <span class="st ${stOf(l).cls}">${stOf(l).label}</span>
         <span class="host">${esc(l.host)}</span>
       </div>
       <h3>${ccWrap(esc(l.title))}${l.edition?` <span style="color:var(--accent)">${esc(l.edition)}</span>`:""}</h3>
     </div>
     <div class="ov-bd">
       <div class="ov-facts">
-        <dl class="ovf"><dt>교육 일정</dt><dd>${period}</dd></dl>
-        <dl class="ovf"><dt>총 시간</dt><dd>${l.sessions.length||"—"}회차 · ${l.hours}시간</dd></dl>
+        <dl class="ovf"><dt>${l.kind === "consult" ? "일정" : "교육 일정"}</dt><dd>${period}</dd></dl>
+        <dl class="ovf"><dt>${l.kind === "consult" ? "시간" : "총 시간"}</dt><dd>${l.kind === "consult" && l.time
+          ? `${esc(l.time)} · ${l.hours}시간` : `${l.sessions.length||"—"}회차 · ${l.hours}시간`}</dd></dl>
         ${l.apply ? `<dl class="ovf"><dt>모집 기간</dt><dd style="font-size:14px">${fmtw(l.apply.from)} ~ ${fmtw(l.apply.to)}</dd></dl>` : ""}
         ${l.capacity ? `<dl class="ovf"><dt>정원</dt><dd>${l.capacity}명${l.enrolled?` <span style="font-size:13px;color:var(--ink2)">(수강 ${l.enrolled})</span>`:""}</dd></dl>`
                      : (l.enrolled ? `<dl class="ovf"><dt>${headLabel}</dt><dd>${l.enrolled}명</dd></dl>` : "")}
