@@ -367,7 +367,8 @@
    숫자 글자(획)의 가운데는 줄 상자 가운데보다 .05em 위다(Pretendard 800 실측) — 그만큼 별도 올린다.
    흔들기(회전)는 별이 기울어 숫자가 한쪽으로 쏠려 보여서 뺐다(대표님). 대신 제자리에서 숨 쉬듯 커졌다 작아진다. */
 .slp .cd.has.cs{background:transparent;color:#fff;box-shadow:none}
-.slp .cd.cs .cst{position:absolute;left:-8%;top:calc(-8% - .05em);width:116%;height:116%;overflow:visible;pointer-events:none;
+/* ⚠ 식스샵 공통 CSS 에 svg{max-width:100%} 가 있어, 풀지 않으면 별이 칸 폭으로 줄고 왼쪽으로 4.8px 밀린다(라이브에서만 보임). */
+.slp .cd.cs .cst{position:absolute;left:-8%;top:calc(-8% - .05em);width:116%;height:116%;max-width:none;max-height:none;overflow:visible;pointer-events:none;
   transform-origin:50% 50%;animation:csBreath 3.2s ease-in-out infinite}
 .slp .cd.cs .cst path{fill:var(--green);stroke:var(--gold);stroke-width:7;stroke-linejoin:round;paint-order:stroke;
   transition:fill .22s var(--ease),stroke .22s var(--ease)}
