@@ -594,3 +594,11 @@
 .slp .cc .ccm{display:inline-block;width:.84em;height:.84em;vertical-align:-.06em;margin-right:.14em;fill:#D97757;filter:drop-shadow(0 0 8px rgba(217,119,87,.45));animation:slpMark 4.6s ease-in-out infinite;transform-origin:50% 50%}
 @keyframes slpMark{0%,100%{transform:rotate(-8deg) scale(1)}50%{transform:rotate(8deg) scale(1.07)}}
 @media (prefers-reduced-motion:reduce){.slp .cc .ccm{animation:none}}
+
+/* ══ 멘토링 칸 (2026-10-01 대표님): 컨설팅은 별, 멘토링은 초록 동그라미. 색 규칙은 같다(앞으로 진초록, 지난 것 민트). */
+.slp .cd.has.mt{border-radius:50%;background:var(--green);color:#fff}
+.slp .cd.has.mt.d-done{border-radius:50%;background:var(--mint);color:#1F5140}
+.slp .calfoot em.mt{border-radius:50%;background:var(--green)}
+.slp .mlist .nm .cdot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:6px;background:var(--green)}
+.slp .st-mentor{background:#fff;color:var(--house);border:1.5px solid var(--green)}
+.slp .st-mentor::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--green)}

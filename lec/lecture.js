@@ -17,6 +17,7 @@ function q(sel){ const h = hostEl(); return h ? h.querySelector(sel) : null; }
 
    kind:"consult" 는 컨설팅 · 멘토링 · 심사처럼 강의가 아닌 일정입니다.
    달력 칸이 네모 대신 별이 되고, 신청을 받지 않습니다. time 에 적은 시각이 상세에 나갑니다.
+   mentor:true 를 같이 적으면 '멘토링'입니다 — 달력 칸이 초록 동그라미, 이름표가 '멘토링'(2026-10-01 대표님).
 
    pitch 를 적어 두면 '모집 중' 카드 안에 소개가 그대로 펼쳐집니다.
    info 는 일시·시간·장소 — 신청 버튼 바로 위 큰 글씨로 나갑니다.
@@ -286,7 +287,7 @@ const LECTURES = [
   },
   {
     id:"sju-camp", title:"2026 상지대학교 창업캠프", edition:"",
-    status:"auto", kind:"consult",
+    status:"auto", kind:"consult", mentor:true,
     host:"상지대학교 창업지원팀 · 벤처창업본부 · 창업보육센터 주관",
     summary:"상지대학교 학생과 강원 지역 청년 예비창업자가 모이는 하루 창업캠프에 멘토이자 심사위원으로 참여합니다. "
         + "오후에 마케팅 · 판로개척 분야 멘토링을 맡고, 이어서 창업아이디어 피칭대회를 심사합니다. 홈페이지에서 따로 신청받지 않습니다.",
@@ -355,6 +356,42 @@ const LECTURES = [
 | **일시** | 10월 8일(목) 오후 2시 ~ 4시 |
 | **대상** | 웜코리아 주식회사 |
 | **형식** | 기업 컨설팅(2시간) |
+
+## 기업 · 기관 컨설팅을 원하시면
+회사 단위로 따로 요청하실 수 있습니다. 컨설팅 페이지에서 상담을 신청해 주세요.
+`
+  },
+  {
+    id:"k-energy", title:"케이에너지시스템 AI 영상 마케팅 컨설팅", edition:"",
+    status:"auto", kind:"consult",
+    host:"케이에너지시스템 김응석 대표 요청 · 기업 컨설팅",
+    summary:"케이에너지시스템 김응석 대표님의 요청으로 진행하는 컨설팅입니다. "
+        + "AI 로 홍보 영상을 만드는 법에서 그치지 않고, 그 영상으로 회사를 어떻게 알리고 고객을 모을지 마케팅 흐름까지 함께 잡습니다. 홈페이지에서 따로 신청받지 않습니다.",
+    sessions:[
+      {date:"2026-10-14", n:1, title:"AI 영상 제작과 영상으로 홍보 · 마케팅하는 법"}
+    ],
+    time:"오후 1시 ~ 3시",
+    hours:2, capacity:null, enrolled:0,
+    rating:null, ratingCount:0,
+    reviews:[],
+    detail:`
+## 기업 요청 컨설팅입니다
+**케이에너지시스템 김응석 대표님**의 요청으로 진행하는 컨설팅입니다.
+홈페이지에서 신청받는 강의가 아니라, 기업의 요청을 받아 진행하는 자리입니다.
+
+## 영상 만들기보다 '영상으로 알리기'
+주제는 **AI 영상 만들기**지만, 실제로는 **마케팅 컨설팅**에 더 가깝습니다.
+영상을 한 편 만드는 것보다, 그 영상이 **누구에게 · 어디서 · 무엇을 말해야** 회사 홍보와 문의로 이어지는지가 더 중요하기 때문입니다.
+- **무엇을 알릴지 정하기** — 우리 회사의 강점과 고객이 궁금해하는 것을 한 줄 메시지로
+- **AI 로 영상 만들기** — 대본 · 장면 · 음성을 AI 로 빠르게 만드는 실제 방법
+- **어디에 어떻게 쓸지** — 채널별로 영상을 올리고 홍보 · 마케팅에 활용하는 흐름
+
+## 한눈에
+| | |
+| --- | --- |
+| **일시** | 10월 14일(수) 오후 1시 ~ 3시 |
+| **대상** | 케이에너지시스템 |
+| **형식** | 기업 컨설팅(2시간) · AI 영상 마케팅 |
 
 ## 기업 · 기관 컨설팅을 원하시면
 회사 단위로 따로 요청하실 수 있습니다. 컨설팅 페이지에서 상담을 신청해 주세요.
@@ -584,7 +621,8 @@ const ORDER = ["open","running","invite","consult","closed","upcoming","done"];
    숫자는 이 점에 맞춘다. 윤곽 상자 가운데에 맞추면 별이 위가 뾰족해서 숫자가 아래로 처져 보인다. */
 const STAR_D = "M50 4L63.8 31L93.7 35.8L72.3 57.3L77 87.2L50 73.5L23 87.2L27.7 57.3L6.3 35.8L36.2 31Z";
 /* 컨설팅이 끝나면 색은 지난 강의처럼 물러나지만, 말은 '강의완료'가 아니라 '진행 완료'다. */
-const stOf = l => (l.kind === "consult" && l.status === "done") ? {label:"진행 완료", cls:"st-done"} : ST[l.status];
+const stOf = l => (l.kind === "consult" && l.status === "done") ? {label:"진행 완료", cls:"st-done"}
+               : (l.mentor && l.status === "consult") ? {label:"멘토링", cls:"st-mentor"} : ST[l.status];
 const WD = ["일","월","화","수","목","금","토"];
 /* 주소 뒤에 ?d=2026-09-14 를 붙이면 그 날인 척 그린다. */
 const TODAY = (function(){
@@ -1172,9 +1210,11 @@ function renderSched(dir){
     /* 강의일은 테두리 없는 둥근 사각형으로 채운다. 상태가 곧 색이고,
        초청 강의는 그 위에 금색 점을 하나 더 단다. */
     /* 컨설팅은 네모 대신 별이다. 색 규칙(앞으로 진초록, 지난 것 민트)은 그대로. */
-    const cs = !!hit && hit[0].lec.kind === "consult";
+    /* 멘토링(mentor:true)은 별 대신 초록 동그라미 */
+    const mt = !!hit && hit[0].lec.kind === "consult" && !!hit[0].lec.mentor;
+    const cs = !!hit && hit[0].lec.kind === "consult" && !mt;
     const cls = hit
-      ? " has d-" + hit[0].lec.status + (hit[0].lec.kind === "invite" ? " iv" : "") + (hit[0].lec.paid ? " pd" : "") + (cs ? " cs" : "")
+      ? " has d-" + hit[0].lec.status + (hit[0].lec.kind === "invite" ? " iv" : "") + (hit[0].lec.paid ? " pd" : "") + (cs ? " cs" : "") + (mt ? " mt" : "")
       : "";
     h += '<button class="cd'+cls+wk+td+pk+'"'
        + (hit ? ' data-d="'+k+'" aria-label="'+d+'일 '+esc(hit[0].lec.title)+'"' : ' tabindex="-1"')
@@ -1196,7 +1236,7 @@ function renderSched(dir){
           const ed = x.lec.edition ? ' ' + esc(x.lec.edition) : "";
           return '<li data-k="'+k+'" data-open="'+x.lec.id+'" role="button" tabindex="0">'
             + '<span class="dd">'+dt.getDate()+'일<em>('+WD[dt.getDay()]+')</em></span>'
-            + '<span class="bd"><span class="nm">'+(x.lec.paid ? '<i class="crown" aria-label="유료 강의"></i>' : '')+(x.lec.kind === "consult" ? '<i class="cstar" aria-label="컨설팅"></i>' : '')+esc(x.lec.title)+ed
+            + '<span class="bd"><span class="nm">'+(x.lec.paid ? '<i class="crown" aria-label="유료 강의"></i>' : '')+(x.lec.kind === "consult" ? (x.lec.mentor ? '<i class="cdot" aria-label="멘토링"></i>' : '<i class="cstar" aria-label="컨설팅"></i>') : '')+esc(x.lec.title)+ed
             + (x.lec.sessions.length > 1 ? '<i>'+x.ses.n+'회차</i>' : "") + '</span>'
             + '<span class="tt">'+esc(x.ses.title)+'</span></span>'
             + '<span class="st '+stOf(x.lec).cls+'">'+stOf(x.lec).label+'</span></li>';
@@ -1225,7 +1265,7 @@ function renderList(){
   const counts = {}; LECTURES.forEach(l=>counts[l.status]=(counts[l.status]||0)+1);
   f.innerHTML = `<button class="chip${filter==="all"?" on":""}" data-f="all">전체<small>${LECTURES.length}</small></button>`
     + ORDER.filter(s=>counts[s]).map(s=>
-        `<button class="chip${filter===s?" on":""}" data-f="${s}">${ST[s].label}<small>${counts[s]}</small></button>`).join("");
+        `<button class="chip${filter===s?" on":""}" data-f="${s}">${s === "consult" ? "컨설팅 · 멘토링" : ST[s].label}<small>${counts[s]}</small></button>`).join("");
   const all = LECTURES.filter(l=>filter==="all"||l.status===filter)
     .sort((a,b)=>ORDER.indexOf(a.status)-ORDER.indexOf(b.status));
   const list = expanded ? all : all.slice(0, PAGE_SIZE);
