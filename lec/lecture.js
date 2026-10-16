@@ -471,7 +471,7 @@ const LECTURES = [
 `
   },
   {
-    id:"sju-culture", title:"생성형 AI 시대, 콘텐츠 실무와 창업", edition:"",
+    id:"sju-culture", title:"AI 시대, 콘텐츠 실무와 창업", edition:"",
     status:"auto", kind:"invite",
     host:"상지대학교 문화콘텐츠학과 초청 특강",
     summary:"상지대학교 문화콘텐츠학과 학생들을 대상으로 하는 초청 특강입니다. "
