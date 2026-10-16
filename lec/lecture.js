@@ -507,7 +507,7 @@ const LECTURES = [
 `
   },
   {
-    id:"halla-media", title:"AI 시대의 소셜미디어 콘텐츠와 광고 제작", edition:"",
+    id:"halla-media", title:"AI와 일하는 콘텐츠 크리에이터", edition:"",
     status:"auto", kind:"invite",
     host:"한라대학교 미디어광고콘텐츠학과 초청 특강",
     summary:"한라대학교 미디어광고콘텐츠학과 1 · 2학년 학생들을 위한 초청 특강입니다. "
