@@ -554,7 +554,7 @@ const LECTURES = [
       {src:"https://cdn.jsdelivr.net/gh/kjgqppr9-cmyk/sba-char-img@d1a12e9/cc1-voice2c.jpg", alt:"왜 작은 사업체 사장님들한테 클로드가 최고인지 알게 됐습니다 — 중년 남성 대표"},
       {src:"https://cdn.jsdelivr.net/gh/kjgqppr9-cmyk/sba-char-img@d1a12e9/cc1-voice3c.jpg", alt:"클로드로 부업해서 돈 벌었다는 게 이제 이해됩니다 — 30대 디자인 프리랜서"}
     ],
-    apply:{from:"2026-10-11", to:"2026-10-17"},
+    apply:{from:"2026-10-11", to:"2026-10-23"},
     pitch:{
       kicker:"프라이빗 유료 과정 · 정원 10명<i class=\"pcd\"> · </i><br class=\"m\">수강료 10만&nbsp;원 · 노트북 지참",
       head:"300만 원의 디자이너, <br class=\"m\">400만 원의 마케터,<br> 500만 원의 개발자를 <br class=\"m\">채용하는 시간",
