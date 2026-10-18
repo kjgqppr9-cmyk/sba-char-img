@@ -1668,7 +1668,7 @@ function hexdWrapPoints(){
     const st=pt.querySelector('strong'); if(!st) return;
     const sp=document.createElement('span'); sp.className='hexd-point-desc';
     let n=st.nextSibling;
-    while(n){ const nx=n.nextSibling; if(n.nodeName==='BR') sp.appendChild(document.createTextNode(' ')); else sp.appendChild(n); n=nx; }
+    while(n){ const nx=n.nextSibling; if(n.nodeName==='BR'){ sp.appendChild(document.createTextNode(' ')); n.remove(); } else sp.appendChild(n); n=nx; }
     sp.textContent=sp.textContent.replace(/\s+/g,' ').trim();
     pt.appendChild(sp);
   });
