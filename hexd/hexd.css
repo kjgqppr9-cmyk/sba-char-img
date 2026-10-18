@@ -513,3 +513,5 @@ div[data-block-id="6a3220721cfd844d4bfb8d5b"] .board-item .content{font-size:12.
 }
 @media(max-width:340px){.hexd .hexd-intro .hexd-chip{font-size:13px!important;padding:6px 4px!important}.hexd .hexd-intro .hexd-point{grid-template-columns:84px minmax(0,1fr);padding:12px!important}}
 .hexd .hexd-intro .hexd-point>br{display:none}
+.hexd .hexd-intro .hexd-point-desc br{display:none}
+@container hexd-intro (min-width:520px){.hexd .hexd-intro .hexd-point-desc br{display:inline}}

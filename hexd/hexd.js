@@ -1668,8 +1668,8 @@ function hexdWrapPoints(){
     const st=pt.querySelector('strong'); if(!st) return;
     const sp=document.createElement('span'); sp.className='hexd-point-desc';
     let n=st.nextSibling;
-    while(n){ const nx=n.nextSibling; if(n.nodeName==='BR'){ sp.appendChild(document.createTextNode(' ')); n.remove(); } else sp.appendChild(n); n=nx; }
-    sp.textContent=sp.textContent.replace(/\s+/g,' ').trim();
+    while(n){ const nx=n.nextSibling; if(n.nodeName==='BR'){ sp.appendChild(document.createTextNode(' ')); sp.appendChild(n); } else sp.appendChild(n); n=nx; }
+    sp.childNodes.forEach(function(c){ if(c.nodeType===3) c.nodeValue=c.nodeValue.replace(/\s+/g,' '); });
     pt.appendChild(sp);
   });
 }
