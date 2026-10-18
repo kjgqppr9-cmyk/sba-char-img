@@ -489,3 +489,26 @@ div[data-block-id="6a3220721cfd844d4bfb8d5b"] .board-item .title{font-size:14.5p
 div[data-block-id="6a3220721cfd844d4bfb8d5b"] .board-item .content{font-size:12.5px!important}
 }
 @media(prefers-reduced-motion:reduce){div[data-block-id="6a3220721cfd844d4bfb8d5b"] .board-item{transition:none}div[data-block-id="6a3220721cfd844d4bfb8d5b"] .board-item:hover{transform:none}}
+
+/* v4.5 (2026-10-19): 첫 화면 정렬 — 칩·특징을 한 기둥(최대 560px)에, 칩 3×2 → 6×1 같은 폭, 특징은 좁으면 한 카드 3행·넓으면 3열 같은 크기 (솔 검토 반영) */
+.hexd .hexd-intro{container-name:hexd-intro;container-type:inline-size;min-width:0}
+.hexd .hexd-intro .hexd-axis-chips,.hexd .hexd-intro .hexd-points{width:100%;max-width:560px;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box}
+.hexd .hexd-intro .hexd-axis-chips{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px!important;margin-bottom:20px!important}
+.hexd .hexd-intro .hexd-chip{display:flex;align-items:center;justify-content:center;min-width:0;min-height:38px;padding:6px 8px!important;box-sizing:border-box;border:1px solid rgba(0,98,65,.22)!important;border-radius:10px!important;background:rgba(0,98,65,.05)!important;box-shadow:none!important;color:#006241!important;font-size:14px!important;font-weight:700!important;line-height:1.3;letter-spacing:0;white-space:nowrap;cursor:default}
+.hexd .hexd-intro .hexd-points{display:grid!important;grid-template-columns:minmax(0,1fr);gap:0!important;margin-bottom:22px!important;border:1px solid rgba(255,255,255,.7);border-radius:18px;background:#f2f0eb;box-shadow:6px 6px 14px #d4d0c5,-6px -6px 14px #fdfdfb}
+.hexd .hexd-intro .hexd-point{display:grid!important;grid-template-columns:96px minmax(0,1fr);align-items:center;gap:12px;width:100%;max-width:none!important;min-width:0;min-height:64px;padding:12px 16px!important;box-sizing:border-box;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;text-align:left!important;font-size:14px!important;line-height:1.5;color:#374151!important}
+.hexd .hexd-intro .hexd-point+.hexd-point{border-top:1px solid rgba(0,0,0,.08)!important}
+.hexd .hexd-intro .hexd-point strong{display:block;margin:0!important;font-size:14.5px!important;line-height:1.35;word-break:keep-all}
+.hexd .hexd-intro .hexd-point-desc{display:block;min-width:0;word-break:keep-all;overflow-wrap:anywhere}
+.hexd .hexd-intro .hexd-start-btn{width:100%;max-width:560px;box-sizing:border-box}
+@container hexd-intro (min-width:520px){
+  .hexd .hexd-intro .hexd-points{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px!important;border:0;border-radius:0;background:transparent;box-shadow:none}
+  .hexd .hexd-intro .hexd-point{display:flex!important;flex-direction:column;justify-content:center;align-items:stretch;gap:6px;min-height:118px;padding:16px 12px!important;border-radius:14px!important;background:#f2f0eb!important;box-shadow:5px 5px 11px #d4d0c5,-5px -5px 11px #fdfdfb!important;text-align:center!important}
+  .hexd .hexd-intro .hexd-point+.hexd-point{border-top:0!important}
+  .hexd .hexd-intro .hexd-point strong{font-size:15px!important}
+  .hexd .hexd-intro .hexd-start-btn{width:auto;min-width:280px;max-width:360px}
+}
+@container hexd-intro (min-width:600px){
+  .hexd .hexd-intro .hexd-axis-chips{grid-template-columns:repeat(6,minmax(0,1fr))}
+}
+@media(max-width:340px){.hexd .hexd-intro .hexd-chip{font-size:13px!important;padding:6px 4px!important}.hexd .hexd-intro .hexd-point{grid-template-columns:84px minmax(0,1fr);padding:12px!important}}

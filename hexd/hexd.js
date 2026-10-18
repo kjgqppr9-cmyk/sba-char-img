@@ -1661,7 +1661,19 @@ function hexdReviewInit(){
     try{ new MutationObserver(function(){ hexdEnhanceReviews(); }).observe(bb,{childList:true,subtree:true}); }catch(e){}
   })();
 }
-window.__sbaHexdRun = function(bm){ hexdReviewInit(); window.__sbaHexdUser=pickUserName(bm); mount(); if(bm) bm.onContextChange = function(){ window.__sbaHexdUser=pickUserName(bm); mount(); }; };
+/* v4.5: 첫 화면 특징 상자 설명을 span 으로 감싸고 <br> 은 공백으로(좁은 화면 가로형 행) */
+function hexdWrapPoints(){
+  document.querySelectorAll('.hexd .hexd-point').forEach(function(pt){
+    if(pt.querySelector('.hexd-point-desc')) return;
+    const st=pt.querySelector('strong'); if(!st) return;
+    const sp=document.createElement('span'); sp.className='hexd-point-desc';
+    let n=st.nextSibling;
+    while(n){ const nx=n.nextSibling; if(n.nodeName==='BR') sp.appendChild(document.createTextNode(' ')); else sp.appendChild(n); n=nx; }
+    sp.textContent=sp.textContent.replace(/\s+/g,' ').trim();
+    pt.appendChild(sp);
+  });
+}
+window.__sbaHexdRun = function(bm){ hexdReviewInit(); hexdWrapPoints(); window.__sbaHexdUser=pickUserName(bm); mount(); if(bm) bm.onContextChange = function(){ window.__sbaHexdUser=pickUserName(bm); mount(); }; };
 })();
 
 /* ══ 결과 카드 저장·공유 (테마 body 에서 이동, v2 수정) ══ */
