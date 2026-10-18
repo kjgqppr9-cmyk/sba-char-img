@@ -703,9 +703,21 @@ function show(root, id){
   /* v4.3: 다른 화면(또는 다른 사전질문)으로 넘어가면 그 화면 맨 위로 올린다. 같은 화면 다시 그리기(선택 클릭)는 그대로 */
   const key = id+(id==='s-pre'?':'+_preIdx:'');
   const prev=_lastShowKey; _lastShowKey=key;
-  if(el && prev!==key) hexdScrollTo(el.getBoundingClientRect().top + (window.pageYOffset||document.documentElement.scrollTop||0) - 8);
+  if(el && prev!==key) hexdScrollTo(el.getBoundingClientRect().top + (window.pageYOffset||document.documentElement.scrollTop||0) - hexdHeaderH() - 8);
   if(/^s-ax-/.test(id)) refreshAxisBars(root);
+  hexdSyncTop();
 }
+/* 사이트 머리 메뉴가 위에 붙어 따라오면(휴대폰 63px) 그 높이만큼 진행률 띠를 내린다 */
+function hexdHeaderH(){
+  const h=document.querySelector('section.global-top'); if(!h) return 0;
+  const cs=getComputedStyle(h); if(cs.position!=='sticky'&&cs.position!=='fixed') return 0;
+  const r=h.getBoundingClientRect(); return r.bottom>0 ? Math.round(Math.min(r.bottom, r.height)) : 0;
+}
+var _hxTopRaf=0;
+function hexdSyncTop(){ _hxTopRaf=0; const root=document.querySelector('.hexd'); if(root) root.style.setProperty('--hx-top', hexdHeaderH()+'px'); }
+function hexdQueueTop(){ if(!_hxTopRaf) _hxTopRaf=requestAnimationFrame(hexdSyncTop); }
+window.addEventListener('scroll', hexdQueueTop, {passive:true});
+window.addEventListener('resize', hexdQueueTop);
 function hexdReduce(){ try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } }
 function hexdScrollTo(y){
   y=Math.max(0,Math.round(y)); const cur=window.pageYOffset||document.documentElement.scrollTop||0;

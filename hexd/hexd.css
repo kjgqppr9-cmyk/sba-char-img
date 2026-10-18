@@ -428,7 +428,7 @@
 .hexd .hexd-growth-body p:last-child{margin:0}
 
 /* v4.3 (2026-10-19): 위 고정 진행률(6영역 칸 + 전체) · 아래 고정 버튼 줄 · 답하면 다음 문항으로 · 빠진 문항 알림 */
-.hexd .hexd-sticky-prog{position:sticky;top:0;z-index:30;margin:0 -20px 22px!important;padding:12px 20px 10px;background:rgba(242,240,235,.95)!important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid rgba(0,98,65,.10)}
+.hexd .hexd-sticky-prog{position:sticky;top:var(--hx-top,0px);z-index:30;margin:0 -20px 22px!important;padding:12px 20px 10px;background:rgba(242,240,235,.95)!important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid rgba(0,98,65,.10)}
 .hexd .hexd-sticky-prog .hexd-prog-label{margin-bottom:9px!important;align-items:baseline;gap:10px}
 .hexd .hx-area{color:#4b5563}
 .hexd .hx-area b{color:#006241;font-weight:800}
