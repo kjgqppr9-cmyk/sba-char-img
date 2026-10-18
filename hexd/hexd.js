@@ -697,13 +697,15 @@ function mount(){
 
 var _lastShowKey='s-intro';
 function show(root, id){
+  if(typeof hexdCancelAuto==='function') hexdCancelAuto();
   root.querySelectorAll('.hexd-screen').forEach(s=>s.classList.remove('active'));
   const el = root.querySelector('#'+id);
   if(el) el.classList.add('active');
   /* v4.3: 다른 화면(또는 다른 사전질문)으로 넘어가면 그 화면 맨 위로 올린다. 같은 화면 다시 그리기(선택 클릭)는 그대로 */
   const key = id+(id==='s-pre'?':'+_preIdx:'');
   const prev=_lastShowKey; _lastShowKey=key;
-  if(el && prev!==key) hexdScrollTo(el.getBoundingClientRect().top + (window.pageYOffset||document.documentElement.scrollTop||0) - hexdHeaderH() - 8);
+  if(el && prev!==key){ const ty=el.getBoundingClientRect().top + (window.pageYOffset||document.documentElement.scrollTop||0) - hexdHeaderH() - 8;
+    if(/^s-(ax-|pre|concern|result)/.test(id) && /^s-(ax-|pre|concern)/.test(prev)) hexdJump(Math.max(0,Math.round(ty))); else hexdScrollTo(ty); }
   if(/^s-ax-/.test(id)) refreshAxisBars(root);
   hexdSyncTop();
 }
@@ -714,7 +716,10 @@ function hexdHeaderH(){
   const r=h.getBoundingClientRect(); return r.bottom>0 ? Math.round(Math.min(r.bottom, r.height)) : 0;
 }
 var _hxTopRaf=0;
-function hexdSyncTop(){ _hxTopRaf=0; const root=document.querySelector('.hexd'); if(root) root.style.setProperty('--hx-top', hexdHeaderH()+'px'); }
+function hexdSyncTop(){ _hxTopRaf=0; const root=document.querySelector('.hexd'); if(!root) return; const hh=hexdHeaderH(); root.style.setProperty('--hx-top', hh+'px');
+  const scr=root.querySelector('.hexd-screen.active'); if(!scr) return; const sr=scr.getBoundingClientRect();
+  const pb=scr.querySelector('.hexd-sticky-prog'); if(pb){ const d=hh-sr.top; pb.classList.toggle('is-stuck', pb.classList.contains('is-stuck') ? d>2 : d>8); }
+  const nv=scr.querySelector('.hexd-sticky-nav'); if(nv){ const d=sr.bottom-window.innerHeight; nv.classList.toggle('is-stuck', nv.classList.contains('is-stuck') ? d>2 : d>8); } }
 function hexdQueueTop(){ if(!_hxTopRaf) _hxTopRaf=requestAnimationFrame(hexdSyncTop); }
 window.addEventListener('scroll', hexdQueueTop, {passive:true});
 window.addEventListener('resize', hexdQueueTop);
@@ -722,7 +727,7 @@ function hexdReduce(){ try{ return window.matchMedia('(prefers-reduced-motion: r
 function hexdScrollTo(y){
   y=Math.max(0,Math.round(y)); const cur=window.pageYOffset||document.documentElement.scrollTop||0;
   if(Math.abs(y-cur)<4) return;
-  try{ window.scrollTo({top:y, behavior:hexdReduce()?'auto':'smooth'}); }catch(e){ window.scrollTo(0,y); }
+  hexdAnimScroll(y, Math.min(520, 260+Math.abs(y-cur)*0.15));
 }
 function hexdCenter(el){ if(!el) return; try{ el.scrollIntoView({block:'center', behavior:hexdReduce()?'auto':'smooth'}); }catch(e){ el.scrollIntoView(); } }
 
@@ -740,7 +745,7 @@ function initBlock(root){
   if(startBtn) startBtn.addEventListener('click',()=>{
     clearProgress();
     const rb0=root.querySelector('#resumeBox'); if(rb0) rb0.remove();
-    _answers={}; _pre=emptyPreSurvey(); _preIdx=0;
+    _answers={}; _pre=emptyPreSurvey(); _preIdx=0; _hxPreLast=-1;
     renderPre(root);
   });
 
@@ -779,6 +784,8 @@ function optBtn(o, sel, attr){
     +'<span><div class="lbl">'+o.label+'</div>'+(o.hint?'<div class="hint">'+o.hint+'</div>':'')+'</span>'
     +'</button>';
 }
+function hexdKeepFocus(div){ const a=document.activeElement; if(!a||!div.contains(a)) return null; const k=['data-opt','data-extra','data-sub'].find(n=>a.hasAttribute&&a.hasAttribute(n)); return k?[k,a.getAttribute(k)]:(a.id?['id',a.id]:null); }
+function hexdRestoreFocus(div, f){ if(!f) return; let el=null; try{ el=f[0]==='id'?div.querySelector('#'+f[1]):div.querySelector('['+f[0]+'="'+f[1]+'"]'); }catch(e){} if(el) try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); } }
 function renderPre(root){
   const div = root.querySelector('#s-pre');
   if(!div) return;
@@ -811,6 +818,7 @@ function renderPre(root){
   const selCount = isMulti&&q.maxSelect ? ' · '+(selected||[]).length+'/'+q.maxSelect : '';
   const isLast = preStep(1)<0;
 
+  const _kf=hexdKeepFocus(div);
   div.innerHTML =
     '<div class="hexd-progress">'
     +'<div class="hexd-prog-label"><span>사전질문 '+pos+'/'+total+'</span><span></span></div>'
@@ -827,6 +835,7 @@ function renderPre(root){
     +'<button type="button" class="hexd-pre-btn primary" id="pre-next"'+(canNext?'':' disabled')+'>'+(isLast?'본 진단 시작 →':'다음 →')+'</button>'
     +'</div></div>';
 
+  if(_hxPreLast!==_preIdx){ const pc=div.querySelector('.hexd-pre-card'); if(pc&&_hxPreLast>=0) pc.classList.add('hx-qin'); _hxPreLast=_preIdx; } else hexdRestoreFocus(div, _kf);
   div.querySelectorAll('[data-opt]').forEach(btn=>{
     btn.addEventListener('click',()=>{
       const optId=btn.dataset.opt;
@@ -866,6 +875,7 @@ function renderConcern(root){
   let div=root.querySelector('#s-concern');
   if(!div){ div=document.createElement('div'); div.className='hexd-screen'; div.id='s-concern'; root.querySelector('.hexd-wrap').insertBefore(div, root.querySelector('#s-result')); }
   const q=CONCERN_QUESTION; const sel=_pre.concerns||[];
+  const _kf=hexdKeepFocus(div);
   div.innerHTML =
     '<div class="hexd-pre-card">'
     +'<div class="hexd-pre-q-num">거의 다 왔어요</div>'
@@ -883,6 +893,7 @@ function renderConcern(root){
       _pre.concerns=arr; saveProgress('main'); renderConcern(root);
     });
   });
+  hexdRestoreFocus(div, _kf);
   div.querySelector('#concern-skip').addEventListener('click',()=>{ _pre.concerns=[]; showResult(root); });
   div.querySelector('#concern-next').addEventListener('click',()=>{ if((_pre.concerns||[]).length) showResult(root); });
   show(root,'s-concern');
@@ -950,7 +961,7 @@ function enterMain(root){
       btn.addEventListener('click',()=>{
         const qid=btn.dataset.q; const v=+btn.dataset.v;
         const wasNew=_answers[qid]==null;
-        _answers[qid]=v;
+        _answers[qid]=v; div.__lastQ=qid;
         saveProgress('main');
         // 같은 문항의 다른 버튼 sel 해제
         div.querySelectorAll('.hexd-scale-btn[data-q="'+qid+'"]')
@@ -958,7 +969,7 @@ function enterMain(root){
         // ★ 진행 카운트: 이 axis screen에 렌더된 data-q 집합 기준
         updateAxisProgress(div, i, qs);
         /* v4.3: 처음 고른 답이면 다음 안 고른 문항으로 내려간다(고쳐 고를 때는 그대로) */
-        if(wasNew) setTimeout(function(){ hexdFocusNext(div, i, qs, qid); }, 280);
+        if(wasNew) hexdQueueAuto(function(){ hexdFocusNext(div, i, qs, qid); }); else hexdCancelAuto();
       });
     });
 
@@ -968,7 +979,7 @@ function enterMain(root){
       const missing = qs.find(q=>_answers[q.id]==null);
       if(missing){ /* v4.3: 빠진 문항으로 데려가 테두리로 알린다 */
         const b=hexdBlock(div, missing.id);
-        if(b){ b.classList.remove('missing'); void b.offsetWidth; b.classList.add('missing'); hexdCenter(b); }
+        if(b){ b.classList.add('missing'); hexdEnsureVisible(b, true); }
         return;
       }
       if(i<5){ show(root,'s-ax-'+(i+1)); }
@@ -990,9 +1001,9 @@ function updateAxisProgress(div, i, qs){
   const nextBtn = div.querySelector('#next-'+i);
   if(nextBtn) nextBtn.classList.toggle('ready', done===total);
   /* 카드 상태: 답한 카드는 흐리게, 지금 답할 카드(첫 빈 문항)는 테두리 */
-  let curSet=false;
+  const tgt=hexdNextTarget(qs, div.__lastQ);
   qs.forEach(function(q){ const b=hexdBlock(div,q.id); if(!b) return; const has=_answers[q.id]!=null;
-    b.classList.toggle('done', has); b.classList.toggle('current', !has && !curSet); if(!has) curSet=true; if(has) b.classList.remove('missing'); });
+    b.classList.toggle('done', has); b.classList.toggle('current', q===tgt); if(has) b.classList.remove('missing'); });
   const root=div.closest('.hexd'); if(root) refreshAxisBars(root);
 }
 function hexdBlock(div, qid){ let s=String(qid); try{ if(window.CSS&&CSS.escape) s=CSS.escape(s); }catch(e){} return div.querySelector('.hexd-q-block[data-qid="'+s+'"]'); }
@@ -1009,10 +1020,10 @@ function refreshAxisBars(root){
 /* 답한 뒤 다음 빈 문항으로. 영역을 다 채우면 아래 버튼을 한 번 반짝 */
 function hexdFocusNext(div, i, qs, qid){
   if(!div.classList.contains('active')) return;
-  const at=qs.findIndex(q=>q.id===qid);
-  let nx=null; for(let k=at+1;k<qs.length;k++){ if(_answers[qs[k].id]==null){ nx=qs[k]; break; } }
-  if(!nx) nx=qs.find(q=>_answers[q.id]==null);
-  if(nx){ hexdCenter(hexdBlock(div,nx.id)); return; }
+  const nx=hexdNextTarget(qs, qid);
+  if(nx){ const nb=hexdBlock(div,nx.id); hexdEnsureVisible(nb);
+    if(_hxKbd && nb){ const t=nb.querySelector('.hexd-q-text'); if(t){ t.setAttribute('tabindex','-1'); _hxFocusT=setTimeout(function(){ _hxFocusT=0; try{ t.focus({preventScroll:true}); }catch(e){} }, hexdReduce()?0:300); } }
+    return; }
   const nb=div.querySelector('#next-'+i); if(nb){ nb.classList.remove('pulse'); void nb.offsetWidth; nb.classList.add('pulse'); }
 }
 
@@ -1115,22 +1126,26 @@ function makeBlueprint(scores, lowestIdx){
   /* 화면용: host 크기에 맞춰 dpr 반영, 보일 때만 그린다 */
   function mount(host,cv){
     var ctx=cv.getContext('2d'); if(!ctx) return false;
-    var W=0,H=0,dpr=1,raf=null,alive=false,t0=null;
+    var W=0,H=0,dpr=1,raf=null,alive=false,t0=null,dead=false,io=null;
+    if(typeof window.__sbaHexdBpKill==='function'){ try{ window.__sbaHexdBpKill(); }catch(e){} }
     var still=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     function size(){ dpr=Math.min(2,window.devicePixelRatio||1); W=host.clientWidth; H=host.clientHeight; cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); cv.style.width=W+'px'; cv.style.height=H+'px'; }
     function paint(tt,st){ ctx.setTransform(dpr,0,0,dpr,0,0); draw(ctx,W,H,tt,st); }
-    function frame(now){ raf=null; if(!alive) return; if(W!==host.clientWidth||H!==host.clientHeight) size(); if(t0===null) t0=now; paint((now-t0)/1000); raf=requestAnimationFrame(frame); }
+    function frame(now){ raf=null; if(!alive||dead) return; if(W!==host.clientWidth||H!==host.clientHeight) size(); if(t0===null) t0=now; paint((now-t0)/1000); raf=requestAnimationFrame(frame); }
     size();
     if(still){
       /* 정지 모드: 크기가 잡힐 때까지 기다렸다가 완성 상태를 한 번 그린다 (숨겨진 화면에서 붙은 경우 대비) */
-      var tries=0; (function once(){ if(host.clientWidth>0&&host.clientHeight>0){ size(); paint(20,true); } else if(++tries<60){ requestAnimationFrame(once); } })();
-      addEventListener('resize', function(){ size(); paint(20,true); });
-      if(window.ResizeObserver){ new ResizeObserver(function(){ if(host.clientWidth!==W||host.clientHeight!==H){ size(); paint(20,true); } }).observe(host); }
+      var tries=0, wr=0; (function once(){ wr=0; if(dead) return; if(host.clientWidth>0&&host.clientHeight>0){ size(); paint(20,true); } else if(++tries<60){ wr=requestAnimationFrame(once); } })();
+      var onR=function(){ if(!dead){ size(); paint(20,true); } }; addEventListener('resize', onR);
+      var ro=null; if(window.ResizeObserver){ ro=new ResizeObserver(function(){ if(!dead&&(host.clientWidth!==W||host.clientHeight!==H)){ size(); paint(20,true); } }); ro.observe(host); }
+      window.__sbaHexdBpKill=function(){ dead=true; if(wr) cancelAnimationFrame(wr); removeEventListener('resize', onR); if(ro) ro.disconnect(); };
       return true;
     }
-    if(window.IntersectionObserver){ new IntersectionObserver(function(es){ alive=!!(es[0]&&es[0].isIntersecting); if(alive&&!raf) raf=requestAnimationFrame(frame); },{threshold:0}).observe(host); }
+    if(window.IntersectionObserver){ io=new IntersectionObserver(function(es){ alive=!!(es[0]&&es[0].isIntersecting); if(alive&&!raf&&!dead) raf=requestAnimationFrame(frame); },{threshold:0}); io.observe(host); }
     else { alive=true; raf=requestAnimationFrame(frame); }
-    document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible'&&alive&&!raf) raf=requestAnimationFrame(frame); });
+    function vis(){ if(document.visibilityState==='visible'&&alive&&!raf&&!dead) raf=requestAnimationFrame(frame); }
+    document.addEventListener('visibilitychange',vis);
+    window.__sbaHexdBpKill=function(){ dead=true; if(raf) cancelAnimationFrame(raf); raf=null; if(io) io.disconnect(); document.removeEventListener('visibilitychange',vis); };
     return true;
   }
   return {draw:draw, drawStatic:drawStatic, mount:mount};
@@ -1139,6 +1154,7 @@ var _bp=null; /* 현재 결과의 도면 (공유 카드에서 재사용) */
 function mountResultRadar(root, scores, lowestIdx){
   var host=root.querySelector('#radarStage'), cv=root.querySelector('#radarChart'); if(!host||!cv) return;
   var fresh=cv.cloneNode(false); cv.parentNode.replaceChild(fresh,cv); /* 이전 rAF 루프와 분리 */
+  window.__hxBpArgs=[root, scores, lowestIdx];
   _bp=makeBlueprint(scores.map(function(s){ return {label:labelOf(s.axisId), score:s.score}; }), lowestIdx);
   _bp.mount(host,fresh);
   window.__sbaHexdBlueprint=_bp;
@@ -1555,6 +1571,7 @@ function showResult(root, opts){
 
   show(root,'s-result');
   mountResultRadar(root, scores, lowestIdx); /* 화면이 보인 뒤에 붙여야 크기가 잡힌다 */
+  hexdArmReveal(root);
 
   /* 익명 저장 (결과 화면이 뜰 때 1회) */
   if(!opts.replay){
@@ -1633,7 +1650,7 @@ function hexdEnhanceReviews(){
   const nicks=hexdReviewNicks();
   bb.querySelectorAll('.board-item').forEach(function(it){
     if(it.getAttribute('data-hx')==='1') return;
-    it.setAttribute('data-hx','1');
+    it.setAttribute('data-hx','1'); hexdObserveReveal(it);
     const ct=it.querySelector('.content'); const box=it.querySelector('.board-post-contents-wrapper');
     if(!ct||!box) return;
     let txt=(ct.textContent||'').replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();
@@ -1673,7 +1690,116 @@ function hexdWrapPoints(){
     pt.appendChild(sp);
   });
 }
-window.__sbaHexdRun = function(bm){ hexdReviewInit(); hexdWrapPoints(); window.__sbaHexdUser=pickUserName(bm); mount(); if(bm) bm.onContextChange = function(){ window.__sbaHexdUser=pickUserName(bm); mount(); }; };
+/* ── v5 모션(솔 5회 왕복 1회차): 자동 이동 예약·보이면 건너뜀·나타남·강조 밑줄·첫 화면 강조 ── */
+var _hxAuto=0, _hxPreLast=-1, _hxIO=null;
+var _hxScrollRaf=0;
+function hexdStopScroll(){ if(_hxScrollRaf){ cancelAnimationFrame(_hxScrollRaf); _hxScrollRaf=0; } }
+function hexdJump(y){ try{ window.scrollTo({top:y, behavior:'instant'}); }catch(e){ window.scrollTo(0,y); } }
+/* 취소 가능한 부드러운 이동(사용자가 손대면 바로 멈춤) */
+function hexdAnimScroll(y, dur){
+  hexdStopScroll(); y=Math.max(0,Math.round(y));
+  const y0=window.pageYOffset||document.documentElement.scrollTop||0, dy=y-y0; if(Math.abs(dy)<4) return;
+  if(hexdReduce()||!dur){ hexdJump(y); return; }
+  const t0=performance.now();
+  (function step(now){ const k=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-k,3); hexdJump(y0+dy*e); _hxScrollRaf=k<1?requestAnimationFrame(step):0; })(t0);
+}
+var _hxFocusT=0;
+function hexdCancelAuto(){ if(_hxAuto){ clearTimeout(_hxAuto); _hxAuto=0; } if(_hxFocusT){ clearTimeout(_hxFocusT); _hxFocusT=0; } hexdStopScroll(); }
+function hexdNextTarget(qs, lastQ){
+  const at=lastQ?qs.findIndex(q=>q.id===lastQ):-1;
+  for(let k=at+1;k<qs.length;k++){ if(_answers[qs[k].id]==null) return qs[k]; }
+  return qs.find(q=>_answers[q.id]==null)||null;
+}
+function hexdQueueAuto(fn){ hexdCancelAuto(); _hxAuto=setTimeout(function(){ _hxAuto=0; fn(); },280); }
+/* 위·아래 띠 사이(16px 여유)에 다 보이면 그대로, 아니면 그 사이 가운데로. 띠 사이보다 크면 위에 맞춘다 */
+function hexdEnsureVisible(el, force){
+  if(!el) return; const scr=el.closest('.hexd-screen');
+  const pb=scr&&scr.querySelector('.hexd-sticky-prog'), nv=scr&&scr.querySelector('.hexd-sticky-nav');
+  const T=(pb?pb.getBoundingClientRect().bottom:hexdHeaderH())+16, B=Math.min(window.innerHeight,(nv?nv.getBoundingClientRect().top:window.innerHeight))-16;
+  const r=el.getBoundingClientRect(); if(!force && r.top>=T && r.bottom<=B) return;
+  const cur=window.pageYOffset||document.documentElement.scrollTop||0;
+  const y = r.height > (B-T) ? cur+r.top-T : cur+r.top+r.height/2-(T+B)/2;
+  hexdAnimScroll(y, 260);
+}
+function hexdRevealIO(){
+  if(_hxIO||!window.IntersectionObserver) return _hxIO;
+  _hxIO=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ _hxIO.unobserve(e.target); hexdRevealNow(e.target); } }); },{rootMargin:'0px 0px -24px 0px', threshold:0.12});
+  return _hxIO;
+}
+function hexdRevealNow(el){ if(el.classList.contains('hx-rv')) el.classList.replace('hx-rv','hx-in'); else el.classList.add('hx-in'); }
+function hexdObserveReveal(el){
+  if(!el||el.__hxRv) return; const r=el.getBoundingClientRect();
+  let io=null; try{ io=hexdRevealIO(); }catch(e){ io=null; }
+  el.__hxRv=1;
+  if(!io || hexdReduce() || (r.top<window.innerHeight && r.bottom>0)){ requestAnimationFrame(function(){ requestAnimationFrame(function(){ el.classList.add('hx-in'); }); }); return; }
+  try{ el.classList.add('hx-rv'); io.observe(el); }catch(e){ el.classList.remove('hx-rv'); el.classList.add('hx-in'); }
+}
+var _hxSeenRec={}, _hxLastScroll=0;
+function hexdArmReveal(root){
+  const revisit=(_hxIdle.code===_rcode && !!_rcode);
+  root.querySelectorAll('#s-result .hexd-rcard').forEach(function(c){
+    if(revisit){ c.__hxRv=1; c.classList.remove('hx-rv'); c.classList.add('hx-in'); c.querySelectorAll('.hexd-growth-body b, .hexd-gap-task b, .hexd-st p b').forEach(function(b,k){ if(k<2) b.classList.add('hx-hl'); }); return; }
+    c.__hxRv=0; c.classList.remove('hx-in','hx-rv'); if(_hxIO) _hxIO.unobserve(c);
+    c.querySelectorAll('.hexd-growth-body b, .hexd-gap-task b, .hexd-st p b').forEach(function(b,k){ if(k<2){ b.classList.add('hx-hl'); b.style.setProperty('--i', k); } });
+    hexdObserveReveal(c);
+  });
+  const sh=root.querySelector('#s-result .hexd-sheet'); if(sh){ sh.__hxRv=0; sh.classList.remove('hx-in','hx-rv'); hexdObserveReveal(sh); }
+  if(_hxIdle.code!==_rcode){ _hxIdle.runs={}; _hxIdle.code=_rcode; }
+  const st=root.querySelector('#s-result .hexd-stamp'); if(st) hexdWhenSeen(st, 'stamp');
+  const tk=root.querySelector('#s-result .hexd-gap-task'); if(tk) hexdWhenSeen(tk, 'task');
+}
+/* 대상이 절반 이상 보이고 0.5초 머물면 한 번 실행 */
+function hexdWhenSeen(el, name){
+  const key=(_rcode||'-')+':'+name; el.classList.remove('hx-glow');
+  if(_hxSeenRec[key]||!window.IntersectionObserver||hexdReduce()) return;
+  if(el.__hxIO) el.__hxIO.disconnect();
+  let tm=0, ok=false;
+  function fire(){ tm=0; if(!ok||!el.isConnected) return; if(Date.now()-_hxLastScroll<500||document.hidden){ tm=setTimeout(fire,200); return; }
+    _hxSeenRec[key]=1; io.disconnect(); el.classList.add('hx-glow'); setTimeout(function(){ el.classList.remove('hx-glow'); },900); }
+  const io=new IntersectionObserver(function(es){ const e=es[0]; ok=!!(e&&e.intersectionRatio>=.5); if(ok){ if(!tm) tm=setTimeout(fire,500); } else if(tm){ clearTimeout(tm); tm=0; } },{threshold:[0,.5,1]});
+  el.__hxIO=io; io.observe(el);
+}
+/* 가만히 있을 때만 살짝: 화면당 한 곳, 기기별 간격·횟수 상한, 조작하면 그 자리에서 멈춤 */
+var _hxIdle={last:Date.now(), lastRun:0, runs:{}};
+var _hxKbd=false;
+function hexdPoke(e){ _hxIdle.last=Date.now(); if(e&&e.type==='scroll') _hxLastScroll=_hxIdle.last; if(e&&e.type){ if(e.type==='keydown') _hxKbd=true; else if(e.type==='pointerdown'||e.type==='touchstart') _hxKbd=false; }
+  document.querySelectorAll('.hx-sheen-go,.hx-again,.hx-nudge').forEach(function(el){ el.classList.remove('hx-sheen-go','hx-again','hx-nudge'); }); }
+function hexdVisibleRatio(el){ if(!el) return 0; const r=el.getBoundingClientRect(); if(!r.height) return 0; const vis=Math.min(r.bottom,window.innerHeight)-Math.max(r.top,0); return Math.max(0,vis)/r.height; }
+function hexdIdleTick(){
+  if(document.hidden||hexdReduce()) return;
+  const root=document.querySelector('.hexd'); if(!root) return;
+  const act=root.querySelector('.hexd-screen.active'); if(!act) return;
+  const now=Date.now(), w=window.innerWidth, gap=w<=520?9000:w<1024?8000:7000, max=w<=520?2:3;
+  if(now-_hxIdle.lastRun<gap) return;
+  let key=null, el=null, cls=null, need=4000, ratio=.6;
+  if(act.id==='s-intro'){ key='intro'; const rb=root.querySelector('#resumeBtn'); el=rb||root.querySelector('#startBtn');
+    cls=(rb||(_hxIdle.runs.intro||0)%2===1)?'hx-sheen-go':'hx-nudge'; }
+  else if(act.id==='s-result'){
+    const stage=root.querySelector('#radarStage'); if(hexdVisibleRatio(stage)>0) return; /* 도면이 보이면 도면이 한 자리를 차지 */
+    key='again'; el=root.querySelector('#s-result .hexd-gr .hx-hl'); cls='hx-again'; need=3000; ratio=1;
+  }
+  if(!el||now-_hxIdle.last<need||(_hxIdle.runs[key]||0)>=max||hexdVisibleRatio(el)<ratio) return;
+  _hxIdle.runs[key]=(_hxIdle.runs[key]||0)+1; _hxIdle.lastRun=now;
+  el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls);
+  setTimeout(function(){ el.classList.remove(cls); }, 1000);
+}
+function hexdMotionInit(){
+  const root=document.querySelector('.hexd'); if(!root||root.__hxMo) return; root.__hxMo=1;
+  const sub=root.querySelector('.hexd-intro .hexd-sub'); if(sub && !sub.querySelector('.hx-mark')) sub.innerHTML=sub.innerHTML.replace('강점과 빈자리','<span class="hx-mark">강점과 빈자리</span>');
+  const sb=root.querySelector('#startBtn'); if(sb && !sb.querySelector('.hx-arr')) sb.innerHTML=sb.innerHTML.replace('\u2192','<span class="hx-arr">\u2192</span>');
+  ['wheel','touchstart','touchmove','pointercancel','pointerdown'].forEach(function(ev){ window.addEventListener(ev, hexdCancelAuto, {passive:true, capture:true}); });
+  if(!(window.CSS&&CSS.registerProperty)) root.classList.add('hx-noprop');
+  window.addEventListener('keydown', function(e){ if(/^(ArrowUp|ArrowDown|PageUp|PageDown|Home|End| |Tab|Escape)$/.test(e.key)) hexdCancelAuto(); });
+  document.addEventListener('visibilitychange', function(){ if(document.hidden) hexdCancelAuto(); });
+  ['scroll','pointerdown','keydown','touchstart'].forEach(function(ev){ window.addEventListener(ev, hexdPoke, {passive:true}); });
+  root.querySelectorAll('#startBtn').forEach(function(b){ if(!b.querySelector('.hx-sheen')){ const i=document.createElement('i'); i.className='hx-sheen'; i.setAttribute('aria-hidden','true'); b.appendChild(i); } });
+  try{ new MutationObserver(function(){ const rb=root.querySelector('#resumeBtn'); if(rb&&!rb.querySelector('.hx-sheen')){ const i=document.createElement('i'); i.className='hx-sheen'; i.setAttribute('aria-hidden','true'); rb.appendChild(i); } }).observe(root,{childList:true,subtree:true}); }catch(e){}
+  setInterval(hexdIdleTick, 1000);
+  try{ window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', function(m){
+    if(m.matches){ hexdCancelAuto(); hexdPoke(); document.querySelectorAll('.hx-rv').forEach(function(el){ el.classList.replace('hx-rv','hx-in'); }); }
+    const a=window.__hxBpArgs; if(a && a[0].querySelector('#s-result.active')) mountResultRadar(a[0], a[1], a[2]); }); }catch(e){}
+}
+window.__sbaHexdRun = function(bm){ hexdReviewInit(); hexdWrapPoints(); hexdMotionInit(); window.__sbaHexdUser=pickUserName(bm); mount(); if(bm) bm.onContextChange = function(){ window.__sbaHexdUser=pickUserName(bm); mount(); }; };
 })();
 
 /* ══ 결과 카드 저장·공유 (테마 body 에서 이동, v2 수정) ══ */

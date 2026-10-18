@@ -466,7 +466,7 @@ div[data-block-id="6a3220721cfd844d4bfb8d5b"] .board-list-wrapper{display:flex!i
 div[data-block-id="6a3220721cfd844d4bfb8d5b"] .board-list-wrapper>li{list-style:none!important;margin:0!important;padding:0!important;border:0!important}
 div[data-block-id="6a3220721cfd844d4bfb8d5b"] .board-list-wrapper>li>.divider{display:none!important}
 div[data-block-id="6a3220721cfd844d4bfb8d5b"] .board-item{display:flex!important;align-items:center!important;gap:16px!important;padding:14px 16px 14px 14px!important;background:#f6f4ef!important;border:1px solid rgba(255,255,255,.7)!important;border-radius:20px!important;box-shadow:5px 5px 12px #d8d4c9,-5px -5px 12px #fdfdfb!important;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}
-div[data-block-id="6a3220721cfd844d4bfb8d5b"] .board-item:hover{transform:translateY(-2px);box-shadow:7px 9px 18px #d2cdc1,-5px -5px 12px #fdfdfb!important}
+@media(hover:hover) and (pointer:fine){div[data-block-id="6a3220721cfd844d4bfb8d5b"] .board-item:hover{transform:translateY(-1px);box-shadow:7px 9px 18px #d2cdc1,-5px -5px 12px #fdfdfb!important}}
 div[data-block-id="6a3220721cfd844d4bfb8d5b"] .board-thumbnail-image{position:relative!important;flex:0 0 84px!important;width:84px!important;height:84px!important;margin:0!important;padding:9px 9px 6px!important;box-sizing:border-box!important;border-radius:18px!important;overflow:hidden!important;display:flex!important;align-items:flex-end!important;justify-content:center!important;background:radial-gradient(120% 90% at 50% 30%,#fffdf8 0%,#f5efe2 58%,#ebe1cb 100%)!important;box-shadow:inset 0 0 0 1px rgba(176,126,34,.32),inset 0 -10px 18px rgba(176,126,34,.06)!important}
 div[data-block-id="6a3220721cfd844d4bfb8d5b"] .board-thumbnail-image::after{content:"";position:absolute;left:24%;right:24%;bottom:7px;height:7px;border-radius:50%;background:radial-gradient(closest-side,rgba(60,48,20,.22),rgba(60,48,20,0));pointer-events:none}
 div[data-block-id="6a3220721cfd844d4bfb8d5b"] .board-thumbnail-image img{position:relative;z-index:1;width:100%!important;height:100%!important;object-fit:contain!important;object-position:50% 100%!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;filter:drop-shadow(0 2px 2px rgba(40,30,10,.10))}
@@ -515,3 +515,114 @@ div[data-block-id="6a3220721cfd844d4bfb8d5b"] .board-item .content{font-size:12.
 .hexd .hexd-intro .hexd-point>br{display:none}
 .hexd .hexd-intro .hexd-point-desc br{display:none}
 @container hexd-intro (min-width:520px){.hexd .hexd-intro .hexd-point-desc br{display:inline}}
+
+/* ══ v5 모션·반응성 (2026-10-19, 솔 5회 왕복) — 이징 E=cubic-bezier(.22,.61,.36,1) · S=cubic-bezier(.4,0,.2,1) ══ */
+/* 화면 전환: 짧고 얕게 */
+.hexd .hexd-screen.active{animation:hexdScreenIn2 .3s cubic-bezier(.22,.61,.36,1)}
+@keyframes hexdScreenIn2{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.hexd .hexd-pre-card.hx-qin{animation:hexdQIn .18s cubic-bezier(.22,.61,.36,1)}
+@keyframes hexdQIn{from{transform:translateY(4px)}to{transform:none}}
+
+/* 공통 눌림·호버·포커스 (실제로 누르는 것만) */
+.hexd button,.hexd .hexd-opt,.hexd .hexd-scale-btn{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.hexd .hexd-scale-btn,.hexd .hexd-opt{transition:box-shadow .14s cubic-bezier(.4,0,.2,1),background-color .14s,color .14s}
+.hexd :is(.hexd-start-btn,.hexd-pre-btn.primary,.hexd-cta,.hexd-resume-go):not(:disabled):active,
+.hexd .hexd-sticky-nav .hexd-next-btn.ready:active{transform:translateY(1px)!important;box-shadow:inset 4px 4px 9px #005c39,inset -4px -4px 9px #008f5b!important;transition:transform 80ms cubic-bezier(.4,0,.2,1),box-shadow 80ms!important}
+.hexd :is(.hexd-pre-btn.ghost,.hexd-prev-btn,.hexd-cta2,.hexd-chipb,.hexd-code-open):active{transform:translateY(1px)!important;box-shadow:inset 3px 3px 7px #d4d0c5,inset -3px -3px 7px #fdfdfb!important;transition:transform 80ms,box-shadow 80ms!important}
+.hexd .hexd-opt:not(.sel):active,.hexd .hexd-scale-btn:not(.sel):active{box-shadow:inset 3px 3px 7px #d4d0c5,inset -3px -3px 7px #fdfdfb!important;transition:box-shadow 80ms!important}
+@media(hover:hover) and (pointer:fine){
+  .hexd :is(.hexd-start-btn,.hexd-pre-btn.primary:not(:disabled),.hexd-cta,.hexd-cta2,.hexd-prev-btn,.hexd-pre-btn.ghost,.hexd-chipb):hover{transform:translateY(-1px)}
+  .hexd .hexd-scale-btn:not(.sel):not(:active):hover,.hexd .hexd-opt:not(.sel):not(:active):hover{box-shadow:0 0 0 1.5px rgba(0,117,74,.35),5px 5px 11px #d4d0c5,-5px -5px 11px #fdfdfb!important}
+}
+.hexd button:focus-visible,.hexd .hexd-opt:focus-visible,.hexd .hexd-scale-btn:focus-visible{outline:2px solid #006241!important;outline-offset:3px!important}
+.hexd .hexd-sheet :focus-visible{outline-color:#7FE0BE!important}
+
+/* 본진단: 답한 카드는 덜 흐리게, 빠진 문항은 깜빡임 대신 고정 테두리 + 작은 안내 */
+.hexd .hexd-q-block{position:relative}
+.hexd .hexd-q-block.done{opacity:.78}
+.hexd .hexd-q-block.missing{animation:none!important;outline-color:rgba(204,120,92,.85);transition:outline-color .18s cubic-bezier(.4,0,.2,1)}
+.hexd .hexd-q-block.missing::after{content:"아직 답하지 않았어요";position:absolute;top:-11px;right:16px;z-index:2;font-size:11.5px;font-weight:700;line-height:1.2;color:#fff;background:#C0694C;padding:4px 9px;border-radius:999px;pointer-events:none}
+.hexd .hexd-next-btn.pulse{animation:hexdReady .5s cubic-bezier(.4,0,.2,1) 1!important}
+@keyframes hexdReady{0%{outline:2px solid rgba(217,174,75,0);outline-offset:0}40%{outline:2px solid rgba(217,174,75,.8);outline-offset:4px}100%{outline:2px solid rgba(217,174,75,0);outline-offset:9px}}
+/* 고정 띠: 본문이 밑으로 지나갈 때만 그림자 */
+.hexd .hexd-sticky-prog,.hexd .hexd-sticky-nav{transition:box-shadow .16s cubic-bezier(.4,0,.2,1)}
+.hexd .hexd-sticky-prog.is-stuck{box-shadow:0 8px 14px -8px rgba(45,40,25,.22)}
+.hexd .hexd-sticky-nav.is-stuck{box-shadow:0 -8px 14px -8px rgba(45,40,25,.18)}
+
+/* 첫 화면: 핵심 문구 금빛 밑줄 한 번 · 시작 화살표 살짝 세 번 */
+.hexd .hx-mark{color:#1f2937;font-weight:700;background-image:linear-gradient(transparent 60%,rgba(217,174,75,.40) 60%,rgba(217,174,75,.40) 90%,transparent 90%);background-repeat:no-repeat;background-size:0% 100%;animation:hexdMark .8s cubic-bezier(.22,.61,.36,1) .45s forwards}
+@keyframes hexdMark{to{background-size:100% 100%}}
+.hexd .hx-arr{display:inline-block}
+.hexd .hx-nudge .hx-arr{animation:hexdNudge .8s cubic-bezier(.4,0,.2,1) 2}
+@keyframes hexdNudge{0%,50%,100%{transform:none}25%{transform:translateX(3px)}}
+@media(max-width:520px){@keyframes hexdNudge{0%,50%,100%{transform:none}25%{transform:translateX(2px)}}}
+
+/* 결과·후기: 화면 아래 카드는 들어올 때 한 번 나타남 (처음 보이는 것은 그대로) */
+.hexd,div[data-block-id="6a3220721cfd844d4bfb8d5b"]{--hx-rise:4px}
+@media(min-width:521px){.hexd,div[data-block-id="6a3220721cfd844d4bfb8d5b"]{--hx-rise:6px}}
+.hexd .hx-rv,div[data-block-id="6a3220721cfd844d4bfb8d5b"] .hx-rv{opacity:.6;transform:translateY(calc(var(--hx-rise) * 1.5))}
+.hexd .hx-in,div[data-block-id="6a3220721cfd844d4bfb8d5b"] .hx-in{opacity:1;transform:none;transition:opacity .3s cubic-bezier(.22,.61,.36,1),transform .3s cubic-bezier(.22,.61,.36,1),box-shadow .2s ease}
+@media(prefers-reduced-motion:no-preference){.hexd .hexd-rcard.hx-rv .fill{width:0!important}}
+/* 강조 구절: 카드가 보이면 금빛 형광 밑줄이 차례로 */
+@property --hla{syntax:'<number>';inherits:false;initial-value:.32}
+.hexd .hx-hl{--hla:.32;background-image:linear-gradient(transparent 62%,rgba(217,174,75,var(--hla)) 62%,rgba(217,174,75,var(--hla)) 92%,transparent 92%);background-repeat:no-repeat;background-size:0% 100%;-webkit-box-decoration-break:clone;box-decoration-break:clone;transition:background-size .7s cubic-bezier(.22,.61,.36,1);transition-delay:calc(.3s + var(--i,0) * .12s)}
+.hexd .hx-in .hx-hl{background-size:100% 100%}
+
+@media(prefers-reduced-motion:reduce){
+  .hexd .hx-rv,div[data-block-id="6a3220721cfd844d4bfb8d5b"] .hx-rv{opacity:1!important;transform:none!important}
+  .hexd .hx-mark,.hexd .hx-arr,.hexd .hexd-pre-card.hx-qin,.hexd .hexd-next-btn.pulse,.hexd .hexd-screen.active{animation:none!important}
+  .hexd .hx-mark{background-size:100% 100%}
+  .hexd .hx-hl{transition:none;background-size:100% 100%}
+}
+/* ── v5 2회차: 호버는 마우스에서만 -1px(선택지는 고정), 터치 끈적임 제거, 복귀 140ms ── */
+.hexd :is(.hexd-start-btn,.hexd-pre-btn.primary,.hexd-next-btn.ready,.hexd-btn-primary,.hexd-opt,.hexd-scale-btn,.hexd-share-btn,.hexd-resume-go,.hexd-cta,.hexd-cta2,.hexd-chipb,.hexd-prev-btn,.hexd-pre-btn.ghost):hover:not(:active){transform:none!important}
+@media(hover:hover) and (pointer:fine){
+  .hexd :is(.hexd-start-btn,.hexd-pre-btn.primary:not(:disabled),.hexd-next-btn.ready,.hexd-btn-primary,.hexd-resume-go,.hexd-cta,.hexd-cta2,.hexd-chipb,.hexd-prev-btn,.hexd-pre-btn.ghost,.hexd-share-btn):hover:not(:active){transform:translateY(-1px)!important}
+}
+@media not all and (hover:hover){ .hexd .hexd-q-block.done:hover{opacity:.78} }
+.hexd :is(.hexd-start-btn,.hexd-pre-btn,.hexd-next-btn,.hexd-cta,.hexd-cta2,.hexd-chipb,.hexd-prev-btn,.hexd-resume-go){transition:transform .14s cubic-bezier(.4,0,.2,1),box-shadow .14s cubic-bezier(.4,0,.2,1),opacity .2s ease!important}
+.hexd :is(.hexd-start-btn,.hexd-pre-btn.primary,.hexd-cta,.hexd-resume-go):not(:disabled):active,
+.hexd .hexd-sticky-nav .hexd-next-btn.ready:active{transition-duration:80ms!important}
+
+/* 첫 화면: 시작 버튼 은은한 빛띠(가만히 있을 때만, JS 가 hx-sheen-go 를 붙임) */
+.hexd #startBtn,.hexd #resumeBtn{position:relative;overflow:hidden;isolation:isolate}
+.hexd .hx-sheen{position:absolute;top:0;bottom:0;left:0;width:48px;pointer-events:none;background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.18) 50%,rgba(255,255,255,0) 100%);transform:translateX(-80px) skewX(-12deg);opacity:0;z-index:1}
+@media(max-width:520px){.hexd .hx-sheen{background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.13) 50%,rgba(255,255,255,0) 100%)}}
+.hexd .hx-sheen-go .hx-sheen{animation:hexdSheen .65s cubic-bezier(.22,.61,.36,1)}
+@keyframes hexdSheen{0%{opacity:1;transform:translateX(-80px) skewX(-12deg)}100%{opacity:1;transform:translateX(420px) skewX(-12deg)}}
+/* 첫 화면: 장점 제목 아래 짧은 금빛 선이 차례로 */
+.hexd .hexd-intro .hexd-point strong::after{content:"";display:block;width:22px;height:2px;margin:6px 0 0;border-radius:2px;background:#D9AE4B;opacity:0;transform:scaleX(.5);transform-origin:left;animation:hexdTick .32s cubic-bezier(.22,.61,.36,1) forwards}
+.hexd .hexd-intro .hexd-point:nth-child(1) strong::after{animation-delay:.55s}
+.hexd .hexd-intro .hexd-point:nth-child(2) strong::after{animation-delay:.71s}
+.hexd .hexd-intro .hexd-point:nth-child(3) strong::after{animation-delay:.87s}
+@keyframes hexdTick{to{opacity:.6;transform:none}}
+@container hexd-intro (min-width:520px){.hexd .hexd-intro .hexd-point strong::after{margin:7px auto 0;transform-origin:center}}
+
+/* 결과: 유형 도장 한 번 빛남 · 실천 과제 상자 한 번 금빛 테두리 · 성장 핵심 문장 다시 짚기 */
+.hexd .hexd-stamp.hx-glow{animation:hexdStamp .6s cubic-bezier(.4,0,.2,1) 1}
+@keyframes hexdStamp{0%,100%{filter:drop-shadow(0 0 0 rgba(242,201,121,0))}45%{filter:drop-shadow(0 0 9px rgba(242,201,121,.6))}}
+.hexd .hexd-gap-task.hx-glow{animation:hexdTask .7s cubic-bezier(.4,0,.2,1) 1}
+@keyframes hexdTask{0%,100%{outline:2px solid rgba(217,174,75,0);outline-offset:2px}45%{outline:2px solid rgba(217,174,75,.65);outline-offset:4px}}
+.hexd .hx-hl.hx-again{animation:hexdAgain .9s cubic-bezier(.4,0,.2,1)}
+@keyframes hexdAgain{0%,100%{--hla:.32}45%{--hla:.52}}
+.hexd.hx-noprop .hx-hl.hx-again{animation:none}
+
+@media(prefers-reduced-motion:reduce){
+  .hexd .hx-in,div[data-block-id="6a3220721cfd844d4bfb8d5b"] .hx-in{transition:none!important}
+  .hexd .hexd-intro .hexd-point strong::after{animation:none;opacity:.6;transform:none}
+  .hexd .hexd-stamp.hx-glow,.hexd .hexd-gap-task.hx-glow,.hexd .hx-hl.hx-again,.hexd .hx-sheen-go .hx-sheen{animation:none!important}
+}
+/* v5 3회차: 동작 줄이기 — 막대·버튼 이동 전환까지 끔, 질문 글 포커스 표시 */
+.hexd .hexd-q-text:focus{outline:none}
+.hexd .hexd-q-text:focus-visible{outline:2px solid #006241;outline-offset:3px;border-radius:4px}
+@media(prefers-reduced-motion:reduce){
+  .hexd .hexd-row .fill,.hexd .hexd-seg s,.hexd .hexd-prog-fill{transition:none!important}
+  .hexd :is(.hexd-start-btn,.hexd-pre-btn,.hexd-next-btn,.hexd-cta,.hexd-cta2,.hexd-chipb,.hexd-prev-btn,.hexd-resume-go,.hexd-opt,.hexd-scale-btn){transform:none!important;transition:box-shadow .01s!important}
+}
+/* v5 4회차: 영역 화면은 이동 없이 옅게 켜짐(바로 맨 위로 이동하므로), 동작 줄이기에서 모든 이동 0 */
+.hexd .hexd-screen.active[id^="s-ax-"]{animation:hexdFadeIn .16s ease}
+@keyframes hexdFadeIn{from{opacity:.55}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){
+  .hexd.hexd :is(.hexd-start-btn,.hexd-pre-btn,.hexd-next-btn,.hexd-cta,.hexd-cta2,.hexd-chipb,.hexd-prev-btn,.hexd-resume-go,.hexd-opt,.hexd-scale-btn,.hexd-btn-primary,.hexd-share-btn):is(:hover,:active){transform:none!important}
+  .hexd .hx-nudge .hx-arr{animation:none!important}
+}
