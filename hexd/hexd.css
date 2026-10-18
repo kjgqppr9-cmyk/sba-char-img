@@ -426,3 +426,37 @@
 .hexd .ln{display:block;text-wrap:balance;word-break:keep-all;overflow-wrap:anywhere}
 .hexd .hexd-growth-body p{margin:0 0 30px}
 .hexd .hexd-growth-body p:last-child{margin:0}
+
+/* v4.3 (2026-10-19): 위 고정 진행률(6영역 칸 + 전체) · 아래 고정 버튼 줄 · 답하면 다음 문항으로 · 빠진 문항 알림 */
+.hexd .hexd-sticky-prog{position:sticky;top:0;z-index:30;margin:0 -20px 22px!important;padding:12px 20px 10px;background:rgba(242,240,235,.95)!important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid rgba(0,98,65,.10)}
+.hexd .hexd-sticky-prog .hexd-prog-label{margin-bottom:9px!important;align-items:baseline;gap:10px}
+.hexd .hx-area{color:#4b5563}
+.hexd .hx-area b{color:#006241;font-weight:800}
+.hexd .hx-area em{font-style:normal;color:#00754A;font-weight:800;margin-left:4px;font-variant-numeric:tabular-nums}
+.hexd .hx-total{font-variant-numeric:tabular-nums;color:#4b5563;white-space:nowrap}
+.hexd .hexd-segs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.hexd .hexd-seg i{display:block;height:8px;border-radius:6px;background:#e3dfd4;overflow:hidden;box-shadow:inset 1px 1px 2px rgba(0,0,0,.10)}
+.hexd .hexd-seg s{display:block;height:100%;width:0;background:#00754A;border-radius:6px;transition:width .35s ease;text-decoration:none}
+.hexd .hexd-seg span{display:block;margin-top:4px;font-size:11px;line-height:1.2;color:#9ca3af;text-align:center;white-space:nowrap}
+.hexd .hexd-seg.cur i{box-shadow:0 0 0 2px rgba(0,117,74,.28)}
+.hexd .hexd-seg.cur span{color:#006241;font-weight:800}
+.hexd .hexd-seg.done span{color:#00754A}
+.hexd .hexd-seg.done span::after{content:" \2713"}
+.hexd .hexd-sticky-nav{position:sticky;bottom:0;z-index:30;display:flex!important;align-items:center;justify-content:space-between!important;gap:10px;margin:22px -20px 0!important;padding:12px 20px calc(12px + env(safe-area-inset-bottom, 0px));background:rgba(242,240,235,.95);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:1px solid rgba(0,98,65,.10)}
+.hexd .hexd-prev-sp{width:72px;flex:none}
+.hexd .hexd-prev-btn{flex:none;background:transparent;border:1px solid rgba(0,98,65,.28);color:#006241;font-size:14px;font-weight:700;padding:11px 16px;border-radius:50px;cursor:pointer;font-family:inherit}
+.hexd .hexd-prev-btn:focus-visible,.hexd .hexd-sticky-nav .hexd-next-btn:focus-visible{outline:3px solid rgba(0,117,74,.4);outline-offset:2px}
+.hexd .hexd-left{flex:1;min-width:0;text-align:center;font-size:13px;color:#6b7280;font-variant-numeric:tabular-nums}
+.hexd .hexd-left.ok{color:#00754A;font-weight:700}
+.hexd .hexd-sticky-nav .hexd-next-btn{flex:none;pointer-events:auto!important;padding:12px 22px;white-space:nowrap;box-shadow:0 4px 12px rgba(0,98,65,.22)!important}
+.hexd .hexd-sticky-nav .hexd-next-btn:not(.ready){opacity:.45!important;box-shadow:none!important}
+.hexd .hexd-next-btn.pulse{animation:hexdPulse .8s ease 2}
+@keyframes hexdPulse{0%,100%{transform:scale(1)}45%{transform:scale(1.07)}}
+.hexd .hexd-q-block{transition:opacity .25s ease;outline:3px solid transparent;outline-offset:3px}
+.hexd .hexd-q-block.done{opacity:.6}
+.hexd .hexd-q-block.done:hover,.hexd .hexd-q-block.done:focus-within{opacity:1}
+.hexd .hexd-q-block.current{outline-color:rgba(0,117,74,.30)}
+.hexd .hexd-q-block.missing{animation:hexdMissing 1.4s ease}
+@keyframes hexdMissing{0%,100%{outline-color:rgba(204,120,92,0)}15%,55%{outline-color:rgba(204,120,92,.85)}35%,75%{outline-color:rgba(204,120,92,.35)}}
+@media(max-width:520px){.hexd .hexd-sticky-prog{padding:10px 20px 8px}.hexd .hexd-sticky-prog .hexd-prog-label{font-size:12px!important}.hexd .hexd-sticky-nav .hexd-next-btn{padding:12px 18px;font-size:14px}.hexd .hexd-prev-btn{padding:11px 13px;font-size:13px}.hexd .hexd-prev-sp{width:0}.hexd .hexd-left{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.hexd .hexd-next-btn.pulse,.hexd .hexd-q-block.missing{animation:none}.hexd .hexd-q-block.missing{outline-color:rgba(204,120,92,.85)}}

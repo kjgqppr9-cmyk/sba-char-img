@@ -695,11 +695,24 @@ function mount(){
   initBlock(root);
 }
 
+var _lastShowKey='s-intro';
 function show(root, id){
   root.querySelectorAll('.hexd-screen').forEach(s=>s.classList.remove('active'));
   const el = root.querySelector('#'+id);
   if(el) el.classList.add('active');
+  /* v4.3: 다른 화면(또는 다른 사전질문)으로 넘어가면 그 화면 맨 위로 올린다. 같은 화면 다시 그리기(선택 클릭)는 그대로 */
+  const key = id+(id==='s-pre'?':'+_preIdx:'');
+  const prev=_lastShowKey; _lastShowKey=key;
+  if(el && prev!==key) hexdScrollTo(el.getBoundingClientRect().top + (window.pageYOffset||document.documentElement.scrollTop||0) - 8);
+  if(/^s-ax-/.test(id)) refreshAxisBars(root);
 }
+function hexdReduce(){ try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } }
+function hexdScrollTo(y){
+  y=Math.max(0,Math.round(y)); const cur=window.pageYOffset||document.documentElement.scrollTop||0;
+  if(Math.abs(y-cur)<4) return;
+  try{ window.scrollTo({top:y, behavior:hexdReduce()?'auto':'smooth'}); }catch(e){ window.scrollTo(0,y); }
+}
+function hexdCenter(el){ if(!el) return; try{ el.scrollIntoView({block:'center', behavior:hexdReduce()?'auto':'smooth'}); }catch(e){ el.scrollIntoView(); } }
 
 /* ── 초기화: 사전질문 화면 삽입 + 인트로 버튼 바인딩 ── */
 function initBlock(root){
@@ -879,25 +892,29 @@ function enterMain(root){
     div.className='hexd-screen'; div.id='s-ax-'+i;
 
     div.innerHTML =
-      '<div class="hexd-progress">'
-      +'<div class="hexd-prog-label"><span>영역 '+(i+1)+'/6 &mdash; '+ax.label+'</span>'
-      +'<span id="prog-'+i+'">0/'+qs.length+'</span></div>'
-      +'<div class="hexd-prog-bar"><div class="hexd-prog-fill" id="fill-'+i+'" style="width:0%"></div></div>'
+      '<div class="hexd-progress hexd-sticky-prog">'
+      +'<div class="hexd-prog-label"><span class="hx-area">영역 '+(i+1)+'/6 &middot; <b>'+ax.label+'</b> <em id="prog-'+i+'">0/'+qs.length+'</em></span>'
+      +'<span class="hx-total">전체 0/60 &middot; 0%</span></div>'
+      +'<div class="hexd-segs">'+AXES.map(function(a,k){ return '<div class="hexd-seg'+(k===i?' cur':'')+'"><i><s style="width:0%"></s></i><span>'+String(a.label).replace('관리','')+'</span></div>'; }).join('')+'</div>'
       +'</div>'
       +'<div class="hexd-axis-title">'+ax.label+' 영역</div>'
       +'<div class="hexd-axis-desc">'+(AXIS_DESC[ax.id]||'')+'</div>'
       +'<div id="qs-'+i+'"></div>'
-      +'<div class="hexd-nav">'
+      +'<div class="hexd-nav hexd-sticky-nav">'
+      +(i>0?'<button type="button" class="hexd-prev-btn" id="prev-'+i+'">&larr; 이전</button>':'<span class="hexd-prev-sp"></span>')
+      +'<span class="hexd-left" id="left-'+i+'">'+qs.length+'문항 남았어요</span>'
       +'<button class="hexd-next-btn" id="next-'+i+'">'+(i<5?'다음 영역 &rarr;':'거의 다 왔어요 &rarr;')+'</button>'
       +'</div>';
 
     wrap.insertBefore(div, resultEl);
+    const pv=div.querySelector('#prev-'+i); if(pv) pv.addEventListener('click',()=>show(root,'s-ax-'+(i-1)));
 
     // 문항 렌더
     const container = div.querySelector('#qs-'+i);
     qs.forEach((q,qi)=>{
       const block = document.createElement('div');
-      block.className='hexd-q-block';
+      block.className='hexd-q-block'+(qi===0?' current':'');
+      block.setAttribute('data-qid', q.id);
       const isVariant = !!q._varKey;
       const scaleHTML = LIKERT_LABELS.map(L=>
         '<button class="hexd-scale-btn" data-q="'+q.id+'" data-v="'+L.value+'">'
@@ -920,6 +937,7 @@ function enterMain(root){
     div.querySelectorAll('.hexd-scale-btn').forEach(btn=>{
       btn.addEventListener('click',()=>{
         const qid=btn.dataset.q; const v=+btn.dataset.v;
+        const wasNew=_answers[qid]==null;
         _answers[qid]=v;
         saveProgress('main');
         // 같은 문항의 다른 버튼 sel 해제
@@ -927,14 +945,20 @@ function enterMain(root){
           .forEach(b=>b.classList.toggle('sel',+b.dataset.v===v));
         // ★ 진행 카운트: 이 axis screen에 렌더된 data-q 집합 기준
         updateAxisProgress(div, i, qs);
+        /* v4.3: 처음 고른 답이면 다음 안 고른 문항으로 내려간다(고쳐 고를 때는 그대로) */
+        if(wasNew) setTimeout(function(){ hexdFocusNext(div, i, qs, qid); }, 280);
       });
     });
 
     // 다음 버튼
     div.querySelector('#next-'+i).addEventListener('click',()=>{
       // ★ 완료 조건: 렌더된 qs의 모든 id가 _answers에 있어야 함
-      const allAnswered = qs.every(q=>_answers[q.id]!=null);
-      if(!allAnswered) return;
+      const missing = qs.find(q=>_answers[q.id]==null);
+      if(missing){ /* v4.3: 빠진 문항으로 데려가 테두리로 알린다 */
+        const b=hexdBlock(div, missing.id);
+        if(b){ b.classList.remove('missing'); void b.offsetWidth; b.classList.add('missing'); hexdCenter(b); }
+        return;
+      }
       if(i<5){ show(root,'s-ax-'+(i+1)); }
       else { saveProgress('concern'); renderConcern(root); }
     });
@@ -947,12 +971,37 @@ function enterMain(root){
 function updateAxisProgress(div, i, qs){
   const done = qs.filter(q=>_answers[q.id]!=null).length;
   const total = qs.length;
-  const fill = div.querySelector('#fill-'+i);
   const label = div.querySelector('#prog-'+i);
-  if(fill) fill.style.width=Math.round(done/total*100)+'%';
   if(label) label.textContent=done+'/'+total;
+  const left = div.querySelector('#left-'+i);
+  if(left){ left.textContent = done===total ? '모두 답했어요' : (total-done)+'문항 남았어요'; left.classList.toggle('ok', done===total); }
   const nextBtn = div.querySelector('#next-'+i);
   if(nextBtn) nextBtn.classList.toggle('ready', done===total);
+  /* 카드 상태: 답한 카드는 흐리게, 지금 답할 카드(첫 빈 문항)는 테두리 */
+  let curSet=false;
+  qs.forEach(function(q){ const b=hexdBlock(div,q.id); if(!b) return; const has=_answers[q.id]!=null;
+    b.classList.toggle('done', has); b.classList.toggle('current', !has && !curSet); if(!has) curSet=true; if(has) b.classList.remove('missing'); });
+  const root=div.closest('.hexd'); if(root) refreshAxisBars(root);
+}
+function hexdBlock(div, qid){ let s=String(qid); try{ if(window.CSS&&CSS.escape) s=CSS.escape(s); }catch(e){} return div.querySelector('.hexd-q-block[data-qid="'+s+'"]'); }
+/* 위 고정 진행률: 6영역 칸(영역별 채움) + 전체 n/60 */
+function refreshAxisBars(root){
+  const per=AXES.map(function(ax){ const qs=buildAxisQuestions(ax.id,_pre); return [qs.filter(q=>_answers[q.id]!=null).length, qs.length]; });
+  let d=0,t=0; per.forEach(function(p){ d+=p[0]; t+=p[1]; });
+  const pct=t?Math.round(d/t*100):0;
+  root.querySelectorAll('.hexd-screen[id^="s-ax-"]').forEach(function(div){
+    const tt=div.querySelector('.hx-total'); if(tt) tt.textContent='전체 '+d+'/'+t+' · '+pct+'%';
+    div.querySelectorAll('.hexd-seg').forEach(function(seg,k){ const p=per[k]||[0,1]; const s=seg.querySelector('s'); if(s) s.style.width=Math.round(p[0]/p[1]*100)+'%'; seg.classList.toggle('done', p[0]===p[1]); });
+  });
+}
+/* 답한 뒤 다음 빈 문항으로. 영역을 다 채우면 아래 버튼을 한 번 반짝 */
+function hexdFocusNext(div, i, qs, qid){
+  if(!div.classList.contains('active')) return;
+  const at=qs.findIndex(q=>q.id===qid);
+  let nx=null; for(let k=at+1;k<qs.length;k++){ if(_answers[qs[k].id]==null){ nx=qs[k]; break; } }
+  if(!nx) nx=qs.find(q=>_answers[q.id]==null);
+  if(nx){ hexdCenter(hexdBlock(div,nx.id)); return; }
+  const nb=div.querySelector('#next-'+i); if(nb){ nb.classList.remove('pulse'); void nb.offsetWidth; nb.classList.add('pulse'); }
 }
 
 /* ── 결과 레이더 = 메인 히어로 「설계 도면」 엔진(2D 캔버스, 그림자·그라데이션 없음 → 웨일 안전)을 실제 점수로 그린다.
