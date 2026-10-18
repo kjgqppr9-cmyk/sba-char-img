@@ -1619,7 +1619,49 @@ function pickUserName(bm){
   }catch(e){}
   return '';
 }
-window.__sbaHexdRun = function(bm){ window.__sbaHexdUser=pickUserName(bm); mount(); if(bm) bm.onContextChange = function(){ window.__sbaHexdUser=pickUserName(bm); mount(); }; };
+/* ── v4.4: 아래 '사업가 유형 테스트 후기' 목록 다듬기 — 진단유형 칩 분리 · 미리보기 정리 · 버튼 이름 '후기 남기기' ── */
+const RV_BLOCK='6a3220721cfd844d4bfb8d5b';
+function hexdReviewNicks(){
+  const list=Object.keys(TYPE_30).map(k=>({code:k, nick:TYPE_30[k].nickname}));
+  list.push({code:'MASTER', nick:TYPE_MASTER.nickname}, {code:'BALANCED', nick:TYPE_BALANCED.nickname});
+  return list.sort((a,b)=>b.nick.length-a.nick.length);
+}
+function hexdEnhanceReviews(){
+  const bb=document.querySelector('div.app-block[data-block-id="'+RV_BLOCK+'"]'); if(!bb) return false;
+  const wb=bb.querySelector('button[data-action="write"]');
+  if(wb && wb.textContent.trim()!=='후기 남기기') wb.textContent='후기 남기기';
+  const nicks=hexdReviewNicks();
+  bb.querySelectorAll('.board-item').forEach(function(it){
+    if(it.getAttribute('data-hx')==='1') return;
+    it.setAttribute('data-hx','1');
+    const ct=it.querySelector('.content'); const box=it.querySelector('.board-post-contents-wrapper');
+    if(!ct||!box) return;
+    let txt=(ct.textContent||'').replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();
+    const m=txt.match(/^\[진단유형\]\s*([A-Z]+(?:-[A-Z]+)?)\s*/);
+    if(!m) return;
+    let code=m[1], rest=txt.slice(m[0].length), nick='';
+    const hit=nicks.find(n=>rest.indexOf(n.nick)===0);
+    if(hit){ nick=hit.nick; rest=rest.slice(nick.length); }
+    rest=rest.replace(/^[\s·:|,\-]+/,'').trim();
+    const chip=document.createElement('div'); chip.className='hx-rv-type';
+    const b=document.createElement('b'); b.textContent=code==='MASTER'?'M':code==='BALANCED'?'B':code; chip.appendChild(b);
+    if(nick){ const s=document.createElement('span'); s.textContent=nick; chip.appendChild(s); }
+    box.insertBefore(chip, box.firstChild);
+    if(rest){ ct.textContent=rest; } else { ct.style.display='none'; }
+  });
+  return true;
+}
+function hexdReviewInit(){
+  if(window.__hxRvInit) return; window.__hxRvInit=1;
+  let tries=0;
+  (function wait(){
+    const bb=document.querySelector('div.app-block[data-block-id="'+RV_BLOCK+'"]');
+    if(!bb){ if(++tries<60) setTimeout(wait,500); return; }
+    hexdEnhanceReviews();
+    try{ new MutationObserver(function(){ hexdEnhanceReviews(); }).observe(bb,{childList:true,subtree:true}); }catch(e){}
+  })();
+}
+window.__sbaHexdRun = function(bm){ hexdReviewInit(); window.__sbaHexdUser=pickUserName(bm); mount(); if(bm) bm.onContextChange = function(){ window.__sbaHexdUser=pickUserName(bm); mount(); }; };
 })();
 
 /* ══ 결과 카드 저장·공유 (테마 body 에서 이동, v2 수정) ══ */
