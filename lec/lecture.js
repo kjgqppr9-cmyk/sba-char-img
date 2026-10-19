@@ -507,6 +507,42 @@ const LECTURES = [
 `
   },
   {
+    id:"honeydew", title:"하니듀 브랜딩 · 마케팅 컨설팅", edition:"",
+    status:"auto", kind:"consult",
+    host:"하니듀(여성 전용 탈모 샴푸) 장서현 대표 요청 · 기업 컨설팅",
+    summary:"상지대학교 한의학과를 졸업한 장서현 대표님이 운영하는 여성 전용 탈모 샴푸 브랜드 하니듀의 요청으로 진행하는 컨설팅입니다. "
+        + "브랜드가 무엇을 약속하는지 정리하고, 그 메시지를 고객에게 전하는 마케팅 흐름을 함께 잡습니다. 홈페이지에서 따로 신청받지 않습니다.",
+    sessions:[
+      {date:"2026-10-27", n:1, title:"브랜딩과 마케팅 방향 잡기"}
+    ],
+    time:"오후 1시",
+    hours:null, capacity:null, enrolled:0,
+    rating:null, ratingCount:0,
+    reviews:[],
+    detail:`
+## 기업 요청 컨설팅입니다
+**하니듀 장서현 대표님**의 요청으로 진행하는 컨설팅입니다.
+홈페이지에서 신청받는 강의가 아니라, 기업의 요청을 받아 진행하는 자리입니다.
+
+## 하니듀는
+상지대학교 한의학과를 졸업한 장서현 대표님이 만드는 **여성 전용 탈모 샴푸** 브랜드입니다.
+
+## 함께 다룰 것
+- **브랜딩** — 하니듀가 고객에게 약속하는 것을 한 줄 메시지로
+- **마케팅** — 그 메시지를 어떤 채널에서 어떻게 전해 구매로 잇는지
+
+## 한눈에
+| | |
+| --- | --- |
+| **일시** | 10월 27일(화) 오후 1시 |
+| **대상** | 하니듀 |
+| **형식** | 기업 컨설팅 · 브랜딩 · 마케팅 |
+
+## 기업 · 기관 컨설팅을 원하시면
+회사 단위로 따로 요청하실 수 있습니다. 컨설팅 페이지에서 상담을 신청해 주세요.
+`
+  },
+  {
     id:"sju-husslab", title:"AI로 만드는 사업계획서 · 발표자료", edition:"",
     status:"auto", kind:"invite",
     host:"상지대학교 HUSS사업단 「Social Impact Startup Lab」 초청 특강",
@@ -1398,7 +1434,7 @@ function renderList(){
       <div class="lc-sum">${esc(l.summary)}</div>
       <div class="lc-meta">
         <span>📅 ${period}</span>
-        <span>⏱ ${l.hours}시간</span>
+        ${l.hours?`<span>⏱ ${l.hours}시간</span>`:""}
         ${headcount(l)}
         ${l.rating?`<span class="stars">${stars(l.rating)} <b style="color:var(--ink)">${l.rating.toFixed(1)}</b></span>`:""}
       </div></button>`;
@@ -1471,7 +1507,7 @@ function openLec(id, push){
       <div class="ov-facts">
         <dl class="ovf"><dt>${l.kind === "consult" ? "일정" : "교육 일정"}</dt><dd>${period}</dd></dl>
         <dl class="ovf"><dt>${l.kind === "consult" ? "시간" : "총 시간"}</dt><dd>${l.kind === "consult" && l.time
-          ? `${esc(l.time)} · ${l.hours}시간` : `${l.sessions.length||"—"}회차 · ${l.hours}시간`}</dd></dl>
+          ? `${esc(l.time)}${l.hours?` · ${l.hours}시간`:""}` : `${l.sessions.length||"—"}회차 · ${l.hours}시간`}</dd></dl>
         ${l.apply ? `<dl class="ovf"><dt>모집 기간</dt><dd style="font-size:14px">${fmtw(l.apply.from)} ~ ${fmtw(l.apply.to)}</dd></dl>` : ""}
         ${l.capacity ? `<dl class="ovf"><dt>정원</dt><dd>${l.capacity}명${l.enrolled?` <span style="font-size:13px;color:var(--ink2)">(수강 ${l.enrolled})</span>`:""}</dd></dl>`
                      : (l.enrolled ? `<dl class="ovf"><dt>${headLabel}</dt><dd>${l.enrolled}명</dd></dl>` : "")}
