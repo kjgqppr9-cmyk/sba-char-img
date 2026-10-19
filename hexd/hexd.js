@@ -785,6 +785,7 @@ function optBtn(o, sel, attr){
     +'</button>';
 }
 function hexdKeepFocus(div){ const a=document.activeElement; if(!a||!div.contains(a)) return null; const k=['data-opt','data-extra','data-sub'].find(n=>a.hasAttribute&&a.hasAttribute(n)); return k?[k,a.getAttribute(k)]:(a.id?['id',a.id]:null); }
+function hexdPopMark(div){ const p=window.__hxPop; window.__hxPop=null; if(!p) return; let el=null; try{ el=div.querySelector('['+p[0]+'="'+p[1]+'"]'); }catch(e){} if(el&&el.classList.contains('sel')) el.classList.add('hx-pop'); }
 function hexdRestoreFocus(div, f){ if(!f) return; let el=null; try{ el=f[0]==='id'?div.querySelector('#'+f[1]):div.querySelector('['+f[0]+'="'+f[1]+'"]'); }catch(e){} if(el) try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); } }
 function renderPre(root){
   const div = root.querySelector('#s-pre');
@@ -835,7 +836,7 @@ function renderPre(root){
     +'<button type="button" class="hexd-pre-btn primary" id="pre-next"'+(canNext?'':' disabled')+'>'+(isLast?'본 진단 시작 →':'다음 →')+'</button>'
     +'</div></div>';
 
-  if(_hxPreLast!==_preIdx){ const pc=div.querySelector('.hexd-pre-card'); if(pc&&_hxPreLast>=0) pc.classList.add('hx-qin'); _hxPreLast=_preIdx; } else hexdRestoreFocus(div, _kf);
+  if(_hxPreLast!==_preIdx){ const pc=div.querySelector('.hexd-pre-card'); if(pc&&_hxPreLast>=0) pc.classList.add('hx-qin'); _hxPreLast=_preIdx; window.__hxPop=null; } else { hexdRestoreFocus(div, _kf); hexdPopMark(div); }
   div.querySelectorAll('[data-opt]').forEach(btn=>{
     btn.addEventListener('click',()=>{
       const optId=btn.dataset.opt;
@@ -893,7 +894,7 @@ function renderConcern(root){
       _pre.concerns=arr; saveProgress('main'); renderConcern(root);
     });
   });
-  hexdRestoreFocus(div, _kf);
+  hexdRestoreFocus(div, _kf); hexdPopMark(div);
   div.querySelector('#concern-skip').addEventListener('click',()=>{ _pre.concerns=[]; showResult(root); });
   div.querySelector('#concern-next').addEventListener('click',()=>{ if((_pre.concerns||[]).length) showResult(root); });
   show(root,'s-concern');
@@ -2123,7 +2124,7 @@ window.__sbaHexdRun = function(bm){ hexdReviewInit(); hexdWrapPoints(); hexdMoti
 /* ══ 효과음 (테마 body 에서 이동) ══ */
 (function(){
   if(window.__hexdSfx) return; window.__hexdSfx=1;
-  var BASE='https://cdn.jsdelivr.net/gh/kjgqppr9-cmyk/sba-char-img@0e90d2c/sfx/';
+  var BASE='https://fastly.jsdelivr.net/gh/kjgqppr9-cmyk/sba-char-img@0e90d2c/sfx/';
   var FILES=['01_do_C4.wav','02_re_D4.wav','03_mi_E4.wav','04_fa_F4.wav','05_sol_G4.wav','06_la_A4.wav','07_si_B4.wav'];
   var pool={};
   function mk(i){ var a=new Audio(BASE+FILES[i-1]); a.preload='auto'; a.volume=0.5; return a; }
@@ -2136,5 +2137,11 @@ window.__sbaHexdRun = function(bm){ hexdReviewInit(); hexdWrapPoints(); hexdMoti
     if(sb){ var ne=sb.querySelector('.num'); var n=ne?parseInt((ne.textContent||'').trim(),10):0; play(n); return; }
     var nx=t.closest('.hexd-next-btn, .hexd-pre-btn.primary');
     if(nx){ var blocked=nx.disabled||nx.getAttribute('aria-disabled')==='true'||(nx.classList.contains('hexd-next-btn')&&!nx.classList.contains('ready')); if(!blocked) play(4); return; }
+    /* v5.1: 시작·이어하기 = 솔, 선택지 = 미, 이전·처음부터·건너뛰기 = 레, 결과 화면 버튼 = 파 */
+    if(t.closest('.hexd #startBtn, .hexd #resumeBtn, .hexd .hexd-resume-go')){ play(5); return; }
+    var op=t.closest('.hexd .hexd-opt');
+    if(op){ var k=['data-opt','data-extra','data-sub'].find(function(n){ return op.hasAttribute(n); }); if(k) window.__hxPop=[k, op.getAttribute(k)]; play(3); return; }
+    if(t.closest('.hexd .hexd-pre-btn.ghost, .hexd .hexd-prev-btn, .hexd .hexd-resume-new, .hexd #concern-skip')){ play(2); return; }
+    if(t.closest('.hexd .hexd-cta, .hexd .hexd-cta2, .hexd .hexd-chipb')){ play(4); return; }
   },true);
 })();
