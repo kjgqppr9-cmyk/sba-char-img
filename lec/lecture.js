@@ -1648,4 +1648,34 @@ if(!boot()){
 setTimeout(wireNet, 800);
 setTimeout(wireNet, 2500);
 if(typeof bm !== "undefined") bm.onContextChange = function(){ boot(); };
+
+/* ── 신청 폼(다른 블록) 한글 입력 보정 — 2026-10-21 대표님: 카카오톡 안 브라우저에서 한글이 안 써짐 ──
+   ① 폼 상자의 등장 효과(transform · opacity)를 꺼서 웹뷰 입력기가 흔들리지 않게 한다
+   ② 카카오톡 안에서 열렸으면 '크롬 · 사파리로 열기' 안내를 폼 위에 보여 준다 */
+function fixApplyForm(){
+  const box = document.querySelector("#sba-apply .af-box");
+  if(!box) return false;
+  if(!document.getElementById("sba-af-ime")){
+    const st = document.createElement("style");
+    st.id = "sba-af-ime";
+    st.textContent = "#sba-apply .af-box{opacity:1!important;transform:none!important;transition:none!important;will-change:auto!important}"
+      + "#sba-apply input,#sba-apply textarea{word-break:normal!important;-webkit-user-select:text!important;user-select:text!important}"
+      + ".af-kakao{background:#FFF8E1;border:2px solid #F2D27A;border-radius:16px;padding:14px 16px;margin:0 0 16px;font-size:14px;line-height:1.7;color:#5b4a12;text-align:center}"
+      + ".af-kakao a{display:inline-block;margin-top:8px;background:#006241;color:#fff;font-weight:800;border-radius:999px;padding:9px 18px;text-decoration:none}";
+    document.head.appendChild(st);
+  }
+  box.classList.remove("af-rv");
+  if(/KAKAOTALK/i.test(navigator.userAgent || "") && !document.querySelector("#sba-apply .af-kakao")){
+    const n = document.createElement("div");
+    n.className = "af-kakao";
+    n.innerHTML = "카카오톡 안에서는 <b>한글 입력이 안 될 수 있습니다.</b><br>아래 버튼으로 크롬 · 사파리에서 열어 작성해 주세요."
+      + "<br><a href=\"kakaotalk://web/openExternal?url=" + encodeURIComponent(location.href.split("#")[0] + "#sba-apply") + "\">크롬 · 사파리로 열기</a>";
+    box.parentNode.insertBefore(n, box);
+  }
+  return true;
+}
+if(!fixApplyForm()){
+  let ft = 0;
+  const ftimer = setInterval(()=>{ if(fixApplyForm() || ++ft > 200) clearInterval(ftimer); }, 100);
+}
 };
