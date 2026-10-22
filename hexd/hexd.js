@@ -101,7 +101,7 @@ const INDUSTRY_OPTIONS = [
   {id:"retail",icon:"🛒",label:"유통·리테일",hint:"남의 상품을 파는 사업"},
   {id:"brokerage",icon:"🏠",label:"중개·주선업",hint:"부동산·보험·차량·결혼중개 등"},
   {id:"digital",icon:"💻",label:"디지털 상품·SaaS",hint:"앱·소프트웨어·온라인 도구"},
-  {id:"content-ip",icon:"🎬",label:"콘텐츠·IP",hint:"영상·음악·캐릭터·저술"},
+  {id:"content-ip",icon:"🎬",label:"콘텐츠·IP·기획자",hint:"영상·음악·캐릭터·저술·행사 기획 등 기획"},
   {id:"edu-consult",icon:"🎓",label:"교육·컨설팅·코칭",hint:"강의·자문·1:1 코칭"},
   {id:"creative-production",icon:"🎨",label:"크리에이티브 제작",hint:"디자인·영상 제작 의뢰"},
   {id:"other",icon:"✏️",label:"기타",hint:"위에 없는 사업"},
