@@ -1,7 +1,7 @@
 게시판: 강의 후기 (boardId 5670, /boards/class-reviews) — 카테고리에 '컨설팅'이 있으면 그것, 없으면 가장 가까운 것
 게시 상태: 공개
 제목: 4년 만에 다시 AI 앞에 앉은 디자인 회사 — 공공디자인 기업 플랜휴 AI 컨설팅
-본문: https://cdn.jsdelivr.net/gh/kjgqppr9-cmyk/sba-char-img@137b919/blog/rev2/post.html  (CKEditor setData)
+본문: https://cdn.jsdelivr.net/gh/kjgqppr9-cmyk/sba-char-img@df3f7cf/blog/rev2/post.html  (CKEditor setData)
 썸네일(목록) + SEO 대표 이미지: C:\Users\KDW\sba-char-img\blog\rev2\r00-thumbnail.jpg
 
 [SEO]
@@ -10,3 +10,8 @@ SEO 제목: 공공디자인 AI 컨설팅 후기 — 원주 플랜휴 | 스몰브
 설명: 공공디자인 AI 컨설팅 후기. 원주 공공디자인 기업 플랜휴와 4년 만에 다시 AI를 살펴봤습니다. 카카오톡 자동 발송, 블로그 초안, 가이드라인에 맞춘 설계, AI가 직접 다루는 포토샵까지 현장에서 확인한 내용과 디자인 회사의 AI 도입 순서를 정리했습니다.
 키워드: 공공디자인 AI, 원주 AI 컨설팅, 디자인 회사 AI 도입, 강원 AX 컨설팅, 포토샵 AI 자동화, 플랜휴, 스몰브랜드설계자
 하위 주소: review-planhue-ai-consulting
+
+발행: 게시글 77300 · https://sba1.co.kr/posts/review-planhue-ai-consulting · 카테고리 특강(컨설팅 없음) · 2026-10-15
+네이버판(다른 글): https://blog.naver.com/sba_lab/224442389097
+
+[10/15 이동] 강의 후기 77300 삭제 → 블로그 게시판(5619) 77301 · 카테고리 생산관리 · https://sba1.co.kr/posts/blog-planhue-ai-consulting (대표님: 강의 후기 게시판은 아직 비활성)
