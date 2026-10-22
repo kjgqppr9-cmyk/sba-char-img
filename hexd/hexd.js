@@ -93,22 +93,22 @@ const QUESTIONS_BY_AXIS = {
 
 /* ── 사전질문 옵션 (v2 · 2026-09-11 검수 문서 4절) ─────────────── */
 const INDUSTRY_OPTIONS = [
-  {id:"physical",icon:"📦",label:"제조·물리 상품",hint:"직접 만들어 파는 실물, 공장형"},
+  {id:"physical",icon:"📦",label:"제조·물리 상품",hint:"직접 만들어 파는 실물(식품·생활용품·의료기기 등)"},
   {id:"handmade",icon:"🔨",label:"수공예·핸드메이드·공방",hint:"1인·소규모 직접 제작"},
-  {id:"service-offline",icon:"🛎️",label:"대면 서비스",hint:"미용·수리·상담 등"},
-  {id:"wellness",icon:"💆",label:"건강·뷰티·웰니스",hint:"필라테스·요가·피부·헬스"},
-  {id:"fnb",icon:"🍽️",label:"F&B",hint:"식당·카페·제과"},
-  {id:"retail",icon:"🛒",label:"유통·리테일",hint:"남의 상품을 파는 사업"},
+  {id:"service-offline",icon:"🛎️",label:"대면 서비스",hint:"미용·수리·청소·키즈카페·상담 등"},
+  {id:"wellness",icon:"💆",label:"건강·미용·운동",hint:"필라테스·요가·피부·헬스"},
+  {id:"fnb",icon:"🍽️",label:"음식점·카페",hint:"식당·카페·제과"},
+  {id:"retail",icon:"🛒",label:"도소매·유통",hint:"남의 상품을 파는 사업"},
   {id:"brokerage",icon:"🏠",label:"중개·주선업",hint:"부동산·보험·차량·결혼중개 등"},
-  {id:"digital",icon:"💻",label:"디지털 상품·SaaS",hint:"앱·소프트웨어·온라인 도구"},
-  {id:"content-ip",icon:"🎬",label:"콘텐츠·IP·기획자",hint:"영상·음악·캐릭터·저술·행사 기획 등 기획"},
+  {id:"digital",icon:"💻",label:"앱·소프트웨어",hint:"SaaS·온라인 도구·디지털 상품"},
+  {id:"content-ip",icon:"🎬",label:"콘텐츠·IP·행사 기획",hint:"영상·음악·캐릭터·저술·행사 기획 등 기획·권리 활용"},
   {id:"edu-consult",icon:"🎓",label:"교육·컨설팅·코칭",hint:"강의·자문·1:1 코칭"},
-  {id:"creative-production",icon:"🎨",label:"크리에이티브 제작",hint:"디자인·영상 제작 의뢰"},
+  {id:"creative-production",icon:"🎨",label:"디자인·영상 제작 대행",hint:"의뢰받아 디자인·영상·사진을 만들어 납품"},
   {id:"other",icon:"✏️",label:"기타",hint:"위에 없는 사업"},
 ];
 const CUSTOMER_OPTIONS = [
   {id:"b2c",icon:"👤",label:"일반 소비자",hint:"B2C"},
-  {id:"b2b",icon:"🏢",label:"기업 고객",hint:"B2B"},
+  {id:"b2b",icon:"🏢",label:"기업·소상공인·민간기관",hint:"B2B"},
   {id:"b2g",icon:"🏛️",label:"정부·공공기관",hint:"B2G"},
 ];
 const CHANNEL_OPTIONS = [
@@ -123,9 +123,9 @@ const CHANNEL_OPTIONS = [
 ];
 const YEAR_OPTIONS = [
   {id:"pre-launch",icon:"🌱",label:"준비 중",hint:"아직 첫 판매 전"},
-  {id:"year-0-1",icon:"🌿",label:"첫 판매 후 1년 미만"},
-  {id:"year-1-3",icon:"🌳",label:"1~3년"},
-  {id:"year-4-7",icon:"🌲",label:"4~7년"},
+  {id:"year-0-1",icon:"🌿",label:"1년 미만"},
+  {id:"year-1-3",icon:"🌳",label:"1년 이상~4년 미만"},
+  {id:"year-4-7",icon:"🌲",label:"4년 이상~8년 미만"},
   {id:"year-8-plus",icon:"🏛️",label:"8년 이상"},
 ];
 const REVENUE_OPTIONS = [
@@ -142,13 +142,13 @@ const HEADCOUNT_OPTIONS = [
   {id:"large",icon:"🏢",label:"21명 이상"},
 ];
 const OUTSOURCE_OPTIONS = [
-  {id:"yes",icon:"🤝",label:"있음",hint:"정기적으로 맡기는 외주·협력자"},
+  {id:"yes",icon:"🤝",label:"있음",hint:"정기적으로 맡기는 외부 사람·업체"},
   {id:"no",icon:"🙋",label:"없음",hint:"거의 혼자 다 합니다"},
 ];
 const HIREPLAN_OPTIONS = [
-  {id:"stay",icon:"🧍",label:"지금대로"},
+  {id:"stay",icon:"🧍",label:"지금 인원 유지"},
   {id:"maybe-hire",icon:"🤔",label:"필요하면 채용"},
-  {id:"hiring-soon",icon:"📅",label:"1년 안에 채용 예정"},
+  {id:"hiring-soon",icon:"📅",label:"채용할 계획"},
   {id:"hiring-active",icon:"✅",label:"이미 채용 중"},
   {id:"downsize",icon:"➖",label:"줄일 계획"},
 ];
@@ -167,16 +167,16 @@ const CONCERN_OPTIONS = [
 ];
 /* 화면 순서. showIf 가 false 면 건너뛴다(채용 계획은 혼자·2~4명에게만). sub 는 특정 답에 붙는 추가 질문(혼자 → 외주 유무). */
 const PRE_QUESTIONS = [
-  {id:"industry",title:"이번 진단의 기준이 될 <b>주력 상품·서비스</b>는 무엇인가요?",subtitle:"하나만 골라 주세요. 보조로 하는 것이 있으면 아래에서 1개 더.",type:"single",options:INDUSTRY_OPTIONS,field:"industry",
+  {id:"industry",title:"이번 진단의 기준이 될 <b>주력 상품·서비스</b>는 무엇인가요?",subtitle:"하나만 골라 주세요. 보조로 하는 것이 있으면 아래에서 1개 더.<br>아직 판매 전이면 계획 기준으로 답해 주세요.",type:"single",options:INDUSTRY_OPTIONS,field:"industry",
    extra:{title:"보조로 하는 것이 있다면 (선택)",field:"industry2",options:INDUSTRY_OPTIONS,optional:true}},
-  {id:"customer",title:"그 상품·서비스의 <b>주 고객</b>은 누구인가요?",type:"single",options:CUSTOMER_OPTIONS,field:"primaryCustomer"},
+  {id:"customer",title:"주로 <b>돈을 내거나 계약하는 상대</b>는 누구인가요?",subtitle:"섞여 있으면 최근 3개월 매출이 가장 큰 쪽 하나",type:"single",options:CUSTOMER_OPTIONS,field:"primaryCustomer"},
   {id:"channel",title:"주로 <b>어디서</b> 파시나요?",subtitle:"해당하는 곳 모두",type:"multi",options:CHANNEL_OPTIONS,field:"channels"},
-  {id:"year",title:"사업하신 지 얼마나 되셨나요?",type:"single",options:YEAR_OPTIONS,field:"yearsInBiz"},
+  {id:"year",title:"사업하신 지 얼마나 되셨나요?",subtitle:"첫 판매일 기준",type:"single",options:YEAR_OPTIONS,field:"yearsInBiz"},
   {id:"revenue",title:"돈은 주로 <b>어떤 방식</b>으로 들어오나요?",subtitle:"가장 큰 것 하나",type:"single",options:REVENUE_OPTIONS,field:"revenueModel"},
-  {id:"headcount",title:"지금 <b>몇 명</b>이 함께 일하세요?",subtitle:"대표님 포함",type:"single",options:HEADCOUNT_OPTIONS,field:"headcount",
-   sub:{when:"solo",title:"정기적으로 맡기는 외주·협력자가 있나요?",field:"hasOutsourcing",options:OUTSOURCE_OPTIONS}},
-  {id:"hireplan",title:"앞으로 인원 계획은요?",type:"single",options:HIREPLAN_OPTIONS,field:"hirePlan",showIf:(a)=>!a.headcount||a.headcount==="solo"||a.headcount==="small"},
-  {id:"debt",title:"사업 관련 <b>대출·빚</b>이 있나요?",subtitle:"문항을 맞추는 데만 쓰고 저장하지 않아요",type:"single",options:DEBT_OPTIONS,field:"debt"},
+  {id:"headcount",title:"지금 <b>몇 명</b>이 함께 일하세요?",subtitle:"대표님 포함 · 공동대표·함께 일하는 가족·정기 아르바이트까지 셉니다(외부 업체 제외)",type:"single",options:HEADCOUNT_OPTIONS,field:"headcount",
+   sub:{when:"solo",title:"일부 업무를 정기적으로 맡기는 외부 사람·업체가 있나요?",field:"hasOutsourcing",options:OUTSOURCE_OPTIONS}},
+  {id:"hireplan",title:"<b>앞으로 1년간</b> 인원 계획은요?",type:"single",options:HIREPLAN_OPTIONS,field:"hirePlan",showIf:(a)=>!a.headcount||a.headcount==="solo"||a.headcount==="small"},
+  {id:"debt",title:"사업 관련 <b>대출·빚</b>이 있나요?",subtitle:"문항을 맞추는 데만 쓰고, 서버에는 보내지 않아요",type:"single",options:DEBT_OPTIONS,field:"debt"},
 ];
 /* 본 진단이 끝난 뒤 한 번 더: 점수·유형에는 영향 없음, 과제 우선순위와 안내에만 사용 */
 const CONCERN_QUESTION = {id:"concern",title:"마지막으로, 지금 <b>먼저 해결하고 싶은 영역</b>은 어디인가요?",subtitle:"최대 2개 · 결과의 '먼저 살펴볼 곳'을 고르는 데 참고합니다",type:"multi",maxSelect:2,options:CONCERN_OPTIONS,field:"concerns"};
@@ -1429,7 +1429,20 @@ const CDB_URL="https://cdb.sixshop.io/public/hexd-results", CDB_MY_URL="https://
 /* 식스샵 회원 토큰: 블록 런타임(blockMaker)이 쓰는 것과 같은 자리(localStorage "sixshop-user-info".token) */
 function customerToken(){ try{ const u=JSON.parse(localStorage.getItem('sixshop-user-info')||'null'); return (u&&u.token)?String(u.token):''; }catch(e){ return ''; } }
 function cdbHeaders(tok){ const h={'Content-Type':'application/json','ss-store-id':CDB_STORE}; if(tok) h['Authorization']='Bearer '+tok; return h; }
+/* 대출·빚 답은 서버에 보내지 않는다: pre.debt 를 지우고, 그 답으로 바뀐 문항(…:debt-yes)도 원래 문항 id·문구로 되돌린다 (답 값은 그대로) */
+function withoutDebt(p){
+  const DV=':debt-yes', fix=id=>(typeof id==='string'&&id.endsWith(DV))?id.slice(0,-DV.length):id;
+  const baseText=id=>{ const q=QUESTIONS.find(x=>x.id===id); return q?q.text:''; };
+  const pre=Object.assign({},p.pre||{}); delete pre.debt;
+  const answers={}; Object.keys(p.answers||{}).forEach(k=>{ answers[fix(k)]=p.answers[k]; });
+  let shown=p.shown; if(shown&&typeof shown==='object'){ shown={}; Object.keys(p.shown).forEach(ax=>{ shown[ax]=(p.shown[ax]||[]).map(q=>(q&&fix(q.id)!==q.id)?Object.assign({},q,{id:fix(q.id),text:baseText(fix(q.id))}):q); }); }
+  const gItems=(p.gap&&p.gap.items)||[];
+  const gap=p.gap?Object.assign({},p.gap,{items:gItems.map(fix)}):p.gap;
+  const gapItems=(p.gapItems||[]).map((x,i)=>(gItems[i]&&fix(gItems[i])!==gItems[i])?Object.assign({},x,{text:baseText(fix(gItems[i]))}):x);
+  return Object.assign({},p,{pre,answers,shown,gap,gapItems});
+}
 function serverDoc(p){
+  p=withoutDebt(p);
   const sc={}; (p.scores||[]).forEach(s=>{ sc[s.axisId]=s.score; });
   const gapItems=(p.gapItems||[]).map(x=>'"'+x.text+'" — '+x.word).join('\n');
   const summary=['사전: '+JSON.stringify(p.pre||{}),'먼저 살펴볼 곳: '+(p.gapLabel||'')+' '+(p.gapScore!=null?p.gapScore+'점':''),'낮게 답한 문항:\n'+gapItems,'과제: '+(p.gap&&p.gap.task||''),'고민 영역: '+((p.concerns||[]).join(', ')||'없음'),'동률: '+JSON.stringify(p.tie||[])].join('\n\n');
@@ -1453,7 +1466,7 @@ function saveToServer(p){
 function persistResult(p){
   try{ const all=JSON.parse(localStorage.getItem(RESULTS_KEY)||'{}'); all[p.code]=p; const keys=Object.keys(all).sort((a,b)=>(all[b].t||0)-(all[a].t||0)); keys.slice(20).forEach(k=>{ delete all[k]; }); localStorage.setItem(RESULTS_KEY, JSON.stringify(all)); }catch(e){}
   saveToServer(p);
-  try{ if(typeof window.SBA_HEXD_SAVE==='function') window.SBA_HEXD_SAVE(p); }catch(e){}
+  try{ if(typeof window.SBA_HEXD_SAVE==='function') window.SBA_HEXD_SAVE(withoutDebt(p)); }catch(e){}
 }
 function loadResultByCode(code){ try{ const all=JSON.parse(localStorage.getItem(RESULTS_KEY)||'{}'); return all[String(code||'').toUpperCase()]||null; }catch(e){ return null; } }
 function fetchMyLastResult(cb){
