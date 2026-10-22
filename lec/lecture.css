@@ -19,6 +19,13 @@
    그림자로 바깥을 칠하고 clip-path 로 넘침을 자른다. */
 .slp .now,.slp .list-sec{box-shadow:0 0 0 100vmax var(--cream);clip-path:inset(0 -100vmax)}
 .slp .sch-sec{background:#fff;box-shadow:0 0 0 100vmax #fff;clip-path:inset(0 -100vmax)}
+/* 가로 넘침 막기 (2026-10-22 대표님: 휴대폰에서 옆으로 밀리고 오른쪽에 크림색 띠).
+   원인: 아래 빛무리(::before)는 화면 끝까지 늘린 상자에 sbaDrift(이동 1.6% + 확대 1.12배)를 건다.
+   확대되는 순간 상자가 화면 밖으로 최대 30px(휴대폰)·110px(PC) 삐져나가 페이지 폭을 늘린다.
+   clip-path 는 그림만 자르고 스크롤 폭은 못 줄인다. 그래서 화면 폭과 똑같은 식스샵 섹션에서 가로만 자른다.
+   잘리는 부분은 원래 화면 밖이라 보이는 그림은 그대로다. clip 은 스크롤 상자를 만들지 않아 세로 스크롤·sticky 도 그대로.
+   hidden 은 clip 을 모르는 옛 브라우저용. 사진 가로 넘김(.oc-photos)은 자기 안에서 따로 스크롤하므로 영향 없다. */
+section:has(.slp){overflow-x:hidden;overflow-x:clip}
 
 /* ══ 섹션 배경 모션 ═══════════════════════════════════════════
    ① 천천히 도는 빛무리 ② 캔버스(.netfx) — 모집 중·전체 강의는
