@@ -972,6 +972,20 @@ const ymd = d => d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());
 const parse = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
 const fmt = s => { const d=parse(s); return (d.getMonth()+1)+"월 "+d.getDate()+"일"; };
 const fmtw = s => fmt(s)+"("+WD[parse(s).getDay()]+")";
+/* 회차 시작 시각 "HH:MM" — 회차 time·start → 회차 제목 속 범위 → 강의 time → info.time → 상세 '시간'·'일시'·'교육 기간' 줄 순. 모르면 "". 범위면 앞쪽만. */
+function hhmm(txt){
+  const m = String(txt||"").replace(/<[^>]*>/g," ")
+    .match(/(오전|오후|낮|저녁|밤|아침)?\s*(\d{1,2})(?::(\d{2})|시(?!간)(?:\s*(\d{1,2})분)?)/);
+  if(!m) return "";
+  let h = +m[2]; const mi = +(m[3]||m[4]||0);
+  if(/오후|저녁|밤/.test(m[1]||"") && h < 12) h += 12;
+  return h > 23 || mi > 59 ? "" : p2(h)+":"+p2(mi);
+}
+function startTime(l, s){
+  const row = k => { const r = String(l.detail||"").match(new RegExp("\\|\\s*\\*\\*"+k+"\\*\\*\\s*\\|([^|\\n]*)")); return r ? r[1] : ""; };
+  return hhmm(s.time) || hhmm(s.start) || hhmm(s.title) || hhmm(l.time) || hhmm(l.info && l.info.time) || hhmm(row("시간")) || hhmm(row("일시"))
+      || hhmm((String(l.detail||"").match(/교육 기간[^\n]*/) || [""])[0]);
+}
 const days = (a,b) => Math.round((parse(b)-a)/86400000);
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const stars = r => "★".repeat(Math.round(r)) + "☆".repeat(5-Math.round(r));
@@ -1570,7 +1584,7 @@ function renderSched(dir){
           const dt = parse(k);
           const ed = x.lec.edition ? ' ' + esc(x.lec.edition) : "";
           return '<li data-k="'+k+'" data-open="'+x.lec.id+'" role="button" tabindex="0">'
-            + '<span class="dd">'+dt.getDate()+'일<em>('+WD[dt.getDay()]+')</em></span>'
+            + '<span class="dd">'+dt.getDate()+'일<em>('+WD[dt.getDay()]+')'+(function(t){ return t ? ' <b style="font-weight:700;font-size:12px">'+t+'</b>' : ""; })(startTime(x.lec, x.ses))+'</em></span>'
             + '<span class="bd"><span class="nm">'+(x.lec.paid ? '<i class="crown" aria-label="유료 강의"></i>' : '')+(x.lec.kind === "consult" ? (x.lec.mentor ? '<i class="cdot" aria-label="멘토링"></i>' : '<i class="cstar" aria-label="컨설팅"></i>') : '')+esc(x.lec.title)+ed
             + (x.lec.sessions.length > 1 ? '<i>'+x.ses.n+'회차</i>' : "") + '</span>'
             + '<span class="tt">'+esc(x.ses.title)+'</span></span>'
