@@ -1503,7 +1503,7 @@ function renderOpen(){
       <div class="oc-sum">${l.summaryHtml || esc(l.summary)}</div>
       <div class="oc-facts">
         ${first?`<span>개강 <b>${fmtw(first.date)}</b></span>`:""}
-        <span>총 <b>${l.sessions.length||"—"}회차 · ${l.hours}시간</b></span>
+        <span>총 <b>${l.sessions.length||"—"}회차${l.hours?` · ${l.hours}시간`:""}</b></span>
         ${l.apply?`<span>모집 <b>${fmtw(l.apply.from)} ~ ${fmtw(l.apply.to)}</b></span>`:""}
       </div>
       <div class="oc-pitch">
@@ -1744,7 +1744,7 @@ function openLec(id, push){
       <div class="ov-facts">
         <dl class="ovf"><dt>${l.kind === "consult" ? "일정" : "교육 일정"}</dt><dd>${period}</dd></dl>
         <dl class="ovf"><dt>${l.kind === "consult" ? "시간" : "총 시간"}</dt><dd>${l.kind === "consult" && l.time
-          ? `${esc(l.time)}${l.hours?` · ${l.hours}시간`:""}` : `${l.sessions.length||"—"}회차 · ${l.hours}시간`}</dd></dl>
+          ? `${esc(l.time)}${l.hours?` · ${l.hours}시간`:""}` : `${l.sessions.length||"—"}회차${l.hours?` · ${l.hours}시간`:""}`}</dd></dl>
         ${l.apply ? `<dl class="ovf"><dt>모집 기간</dt><dd style="font-size:14px">${fmtw(l.apply.from)} ~ ${fmtw(l.apply.to)}</dd></dl>` : ""}
         ${l.capacity ? `<dl class="ovf"><dt>정원</dt><dd>${l.capacity}명${l.enrolled?` <span style="font-size:13px;color:var(--ink2)">(수강 ${l.enrolled})</span>`:""}</dd></dl>`
                      : (l.enrolled ? `<dl class="ovf"><dt>${headLabel}</dt><dd>${l.enrolled}명</dd></dl>` : "")}
